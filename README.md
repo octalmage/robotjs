@@ -3,6 +3,11 @@ autonode
 
 Node.js GUI Automation.
 
+##Building##
+```
+node-gyp configure build
+```
+
 ##Examples##
 Get the mouse location and move it. 
 
