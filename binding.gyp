@@ -17,7 +17,7 @@
 	            }
 	          ]
 	        ],
-	      "sources": ["autonode.cc", "deadbeef_rand.c", "mouse.c", "screen.c"]
+	      "sources": ["src/autonode.cc", "src/deadbeef_rand.c", "src/mouse.c", "src/screen.c"]
     }
   ]
 }
