@@ -10,7 +10,10 @@
 #else
 	#include <stdbool.h>
 #endif
-
+#ifdef __cplusplus
+extern "C" 
+{
+#endif
 #if defined(IS_MACOSX)
 
 	#include <ApplicationServices/ApplicationServices.h>
@@ -71,3 +74,7 @@ void toggleMouse(bool down, MMMouseButton button);
 void clickMouse(MMMouseButton button);
 
 #endif /* MOUSE_H */
+
+#ifdef __cplusplus
+}
+#endif
