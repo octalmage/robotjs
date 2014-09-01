@@ -5,7 +5,7 @@ Node.js GUI Automation.
 
 ##Installing##
 ```
-npm install nodejs
+npm install autojs
 ```
 
 ##Examples##
