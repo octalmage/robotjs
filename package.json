@@ -1,0 +1,30 @@
+{
+  "name": "autojs",
+  "version": "0.0.1",
+  "description": "Node.js GUI Automation.",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "install": "node-gyp rebuild"
+  },
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/octalmage/autojs.git"
+  },
+  "keywords": [
+    "Automation",
+    "GUI",
+    "mouse",
+    "keyboard",
+    "screenshot",
+    "image",
+    "pixel"
+  ],
+  "author": "Jason Stallings",
+  "license": "GPL v2",
+  "gypfile": true,
+  "bugs": {
+    "url": "https://github.com/octalmage/autojs/issues"
+  },
+  "homepage": "https://github.com/octalmage/autojs"
+}
