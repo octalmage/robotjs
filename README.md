@@ -1,7 +1,9 @@
 autojs
 ========
 
-Node.js GUI Automation.
+Node.js GUI Automation. Control the mouse, keyboard, and read the screen.
+
+Based on [autopy](https://github.com/msanders/autopy). 
 
 ##Installing##
 ```
