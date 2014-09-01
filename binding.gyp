@@ -1,7 +1,7 @@
 {
   "targets": [
     {
-      "target_name": "autojs",
+      "target_name": "robotjs",
       "conditions": [
 	      ['OS == "mac"', {
 		      'include_dirs': [
@@ -17,7 +17,7 @@
 	            }
 	          ]
 	        ],
-	      "sources": ["src/autojs.cc", "src/deadbeef_rand.c", "src/mouse.c", "src/screen.c"]
+	      "sources": ["src/robotjs.cc", "src/deadbeef_rand.c", "src/mouse.c", "src/screen.c"]
     }
   ]
 }

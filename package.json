@@ -1,5 +1,5 @@
 {
-  "name": "autojs",
+  "name": "robotjs",
   "version": "0.0.1",
   "description": "Node.js GUI Automation.",
   "main": "index.js",
@@ -9,7 +9,7 @@
   },
   "repository": {
     "type": "git",
-    "url": "https://github.com/octalmage/autojs.git"
+    "url": "https://github.com/octalmage/robotjs.git"
   },
   "keywords": [
     "Automation",
@@ -24,7 +24,7 @@
   "license": "GPL v2",
   "gypfile": true,
   "bugs": {
-    "url": "https://github.com/octalmage/autojs/issues"
+    "url": "https://github.com/octalmage/robotjs/issues"
   },
-  "homepage": "https://github.com/octalmage/autojs"
+  "homepage": "https://github.com/octalmage/robotjs"
 }

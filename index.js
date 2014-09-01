@@ -1,1 +1,1 @@
-module.exports = require('./build/Release/autojs.node');
+module.exports = require('./build/Release/robotjs.node');

@@ -1,4 +1,4 @@
-autojs
+RobotJS
 ========
 
 Node.js GUI Automation. Control the mouse, keyboard, and read the screen.
@@ -14,17 +14,17 @@ npm install autojs
 Get the mouse location and move it. 
 
 ```JavaScript
-var autojs = require("autojs");
+var robot = require("robotjs");
 
 //Get the mouse position, retuns an object with x and y. 
-var mouse=autojs.getMousePos();
+var mouse=robot.getMousePos();
 console.log("Mouse is at x:" + mouse.x + " y:" + mouse.y);
 
 //Move the mouse down by 100 pixels.
-autojs.moveMouse(mouse.x,mouse.y+100);
+robot.moveMouse(mouse.x,mouse.y+100);
 
 //Left click!
-autojs.mouseClick();
+robot.mouseClick();
 ```
 ##Progress##
 

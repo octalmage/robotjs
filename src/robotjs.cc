@@ -57,4 +57,4 @@ void init(Handle<Object> target)
   target->Set(String::NewSymbol("mouseClick"),
       FunctionTemplate::New(mouseClick)->GetFunction());
 }
-NODE_MODULE(autojs, init)
+NODE_MODULE(robotjs, init)
