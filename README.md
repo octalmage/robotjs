@@ -7,7 +7,7 @@ Based on [autopy](https://github.com/msanders/autopy).
 
 ##Installing##
 ```
-npm install autojs
+npm install robotjs
 ```
 
 ##Examples##
