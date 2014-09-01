@@ -3,9 +3,9 @@ autojs
 
 Node.js GUI Automation.
 
-##Building##
+##Installing##
 ```
-node-gyp configure build
+npm install nodejs
 ```
 
 ##Examples##
