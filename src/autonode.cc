@@ -28,10 +28,22 @@ Handle<Value> getMousePos(const Arguments& args)
   HandleScope scope;
 
   MMPoint pos = getMousePos();
+
+  //Return object with .x and .y.
   Local<Object> obj = Object::New();
   obj->Set(String::NewSymbol("x"), Number::New(pos.x));
   obj->Set(String::NewSymbol("y"), Number::New(pos.y));
   return scope.Close(obj);
+}
+
+Handle<Value> mouseClick(const Arguments& args) 
+{
+  HandleScope scope;
+
+  MMMouseButton button = LEFT_BUTTON;
+
+  clickMouse(button);
+  return scope.Close(String::New("1"));
 }
 
 void init(Handle<Object> target) 
@@ -41,5 +53,8 @@ void init(Handle<Object> target)
 
   target->Set(String::NewSymbol("getMousePos"),
       FunctionTemplate::New(getMousePos)->GetFunction());
+
+  target->Set(String::NewSymbol("mouseClick"),
+      FunctionTemplate::New(mouseClick)->GetFunction());
 }
 NODE_MODULE(autonode, init)
