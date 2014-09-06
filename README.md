@@ -30,6 +30,6 @@ robot.mouseClick();
 
 | Module        | Status        | Notes   |
 | ------------- |-------------: | ------- |
-| Mouse         | 80%           | Can't specify mouse button yet.       |
-| Keyboard      | Not Started   | Send keypress, type string.        |
-| Screen        | Not Started   | Screenshot, read pixel color, image search.        |
+| Mouse         | 80%           | Can't specify mouse button.       |
+| Keyboard      | 50%           | No toggle support.       |
+| Screen        | 5%            | Screenshot, read pixel color, image search.        |
