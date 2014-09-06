@@ -10,7 +10,10 @@
 #else
 	#include <stdbool.h>
 #endif
-
+#ifdef __cplusplus
+extern "C" 
+{
+#endif
 #if defined(IS_MACOSX)
 
 	enum _MMKeyFlags {
@@ -71,5 +74,9 @@ void typeString(const char *str);
  * deadbeef_srand() must be called before this function if you actually want
  * randomness. */
 void typeStringDelayed(const char *str, const unsigned cpm);
+
+#ifdef __cplusplus
+}
+#endif
 
 #endif /* KEYPRESS_H */

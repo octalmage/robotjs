@@ -9,6 +9,11 @@
 #include <Carbon/Carbon.h> /* Really only need <HIToolbox/Events.h> */
 #include <ApplicationServices/ApplicationServices.h>
 
+#ifdef __cplusplus
+extern "C" 
+{
+#endif
+
 enum _MMKeyCode {
 	K_BACKSPACE = kVK_Delete,
 	K_DELETE = kVK_ForwardDelete,
@@ -124,3 +129,7 @@ typedef int MMKeyCode;
 MMKeyCode keyCodeForChar(const char c);
 
 #endif /* KEYCODE_H */
+
+#ifdef __cplusplus
+}
+#endif
