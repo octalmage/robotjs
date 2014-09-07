@@ -33,3 +33,4 @@ robot.mouseClick();
 | Mouse         | 80%           | Can't specify mouse button.       |
 | Keyboard      | 50%           | No toggle support.       |
 | Screen        | 5%            | Screenshot, read pixel color, image search.        |
+| Window        | 1%            | Manipulate external windows.     |
