@@ -1,4 +1,5 @@
 #include <node.h>
+#include <nan.h>
 #include <v8.h>
 #include <vector>
 #include "mouse.h"
@@ -165,26 +166,28 @@ Handle<Value> getWindows(const Arguments& args)
 
 void init(Handle<Object> target) 
 {
-  target->Set(String::NewSymbol("moveMouse"),
-      FunctionTemplate::New(moveMouse)->GetFunction());
 
-  target->Set(String::NewSymbol("getMousePos"),
-      FunctionTemplate::New(getMousePos)->GetFunction());
+  target->Set(NanNew<String>("moveMouse"),
+    NanNew<FunctionTemplate>(moveMouse)->GetFunction());
 
-  target->Set(String::NewSymbol("mouseClick"),
-      FunctionTemplate::New(mouseClick)->GetFunction());
+  target->Set(NanNew<String>("getMousePos"),
+    NanNew<FunctionTemplate>(getMousePos)->GetFunction());
 
-  target->Set(String::NewSymbol("keyTap"),
-      FunctionTemplate::New(keyTap)->GetFunction());
+  target->Set(NanNew<String>("mouseClick"),
+    NanNew<FunctionTemplate>(mouseClick)->GetFunction());
 
-  target->Set(String::NewSymbol("typeString"),
-      FunctionTemplate::New(typeString)->GetFunction());
+  target->Set(NanNew<String>("keyTap"),
+    NanNew<FunctionTemplate>(keyTap)->GetFunction());
 
-  target->Set(String::NewSymbol("captureScreen"),
-      FunctionTemplate::New(captureScreen)->GetFunction());
+  target->Set(NanNew<String>("typeString"),
+    NanNew<FunctionTemplate>(typeString)->GetFunction());
 
-  target->Set(String::NewSymbol("getWindows"),
-      FunctionTemplate::New(getWindows)->GetFunction());
+  target->Set(NanNew<String>("captureScreen"),
+    NanNew<FunctionTemplate>(captureScreen)->GetFunction());
+
+  target->Set(NanNew<String>("getWindows"),
+    NanNew<FunctionTemplate>(getWindows)->GetFunction());
+
 }
 
 NODE_MODULE(robotjs, init)
