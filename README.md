@@ -9,12 +9,13 @@ Only tested on Mac OS X using Node.js v0.10.31. I'm working on rewriting RobotJS
 
 Based on [autopy](https://github.com/msanders/autopy). 
 
-##Installing##
+##Installing
+
 ```
 npm install robotjs
 ```
 
-##Examples##
+##Examples
 Get the mouse location and move it. 
 
 ```JavaScript
@@ -30,7 +31,25 @@ robot.moveMouse(mouse.x,mouse.y+100);
 //Left click!
 robot.mouseClick();
 ```
-##Progress##
+
+##Building
+
+RobotJS uses [node-gyp](https://github.com/TooTallNate/node-gyp) for building. 
+
+Install node-gyp using npm:
+
+```
+npm install -g node-gyp
+```
+
+Then confgure and build: 
+
+```
+node-gyp configure
+node-gyp build
+```
+
+##Progress
 
 | Module        | Status        | Notes   |
 | ------------- |-------------: | ------- |
