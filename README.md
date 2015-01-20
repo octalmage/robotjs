@@ -55,6 +55,7 @@ node-gyp build
 * Control the mouse by pressing keys, holding keys down, and typing words.
 * Read pixel color from the screen and capture the screen. 
 * Find image on screen, read pixels from image.
+* Possibly include window management? 
 
 ##Progress
 
