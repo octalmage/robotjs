@@ -3,8 +3,6 @@
 #include <vector>
 #include "mouse.h"
 #include "deadbeef_rand.h"
-#include "screen.h"
-#include "screengrab.h"
 #include "keypress.h"
 
 using namespace v8;
@@ -108,33 +106,6 @@ Handle<Value> typeString(const Arguments& args)
   return scope.Close(String::New("1"));
 }
 
-/*
-  _____                          
- / ____|                         
-| (___   ___ _ __ ___  ___ _ __  
- \___ \ / __| '__/ _ \/ _ \ '_ \ 
- ____) | (__| | |  __/  __/ | | |
-|_____/ \___|_|  \___|\___|_| |_|
-                                  
- */
-
-Handle<Value> captureScreen(const Arguments& args) 
-{
-  HandleScope scope;
-
-  MMRect rect;
-  MMBitmapRef bitmap = NULL;
-  MMSize displaySize = getMainDisplaySize();
-
-  rect = MMRectMake(0, 0, displaySize.width, displaySize.height);
-
-  bitmap = copyMMBitmapFromDisplayInRect(rect);
-
-  return scope.Close(External::Wrap(bitmap));
-
-  //return scope.Close(String::New("1"));
-}
-
 void init(Handle<Object> target) 
 {
   target->Set(String::NewSymbol("moveMouse"),
@@ -151,9 +122,6 @@ void init(Handle<Object> target)
 
   target->Set(String::NewSymbol("typeString"),
       FunctionTemplate::New(typeString)->GetFunction());
-
-  target->Set(String::NewSymbol("captureScreen"),
-      FunctionTemplate::New(captureScreen)->GetFunction());
 }
 
 NODE_MODULE(robotjs, init)
