@@ -47,14 +47,15 @@ Handle<Value> getMousePos(const Arguments& args)
   return scope.Close(obj);
 }
 
-Handle<Value> mouseClick(const Arguments& args) 
+NAN_METHOD(mouseClick) 
 {
-  HandleScope scope;
+  NanScope();
 
   MMMouseButton button = LEFT_BUTTON;
 
   clickMouse(button);
-  return scope.Close(String::New("1"));
+
+  NanReturnValue(NanNew("1"));
 }
 
 /*
@@ -124,7 +125,7 @@ void init(Handle<Object> target)
 
   target->Set(NanNew<String>("typeString"),
     NanNew<FunctionTemplate>(typeString)->GetFunction());
-  
+
 }
 
 NODE_MODULE(robotjs, init)
