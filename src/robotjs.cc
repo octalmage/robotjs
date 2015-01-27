@@ -4,8 +4,6 @@
 #include <vector>
 #include "mouse.h"
 #include "deadbeef_rand.h"
-#include "screen.h"
-#include "screengrab.h"
 #include "keypress.h"
 
 using namespace v8;
@@ -16,6 +14,7 @@ using namespace v8;
 | |\/| |/ _ \| | | / __|/ _ \
 | |  | | (_) | |_| \__ \  __/
 |_|  |_|\___/ \__,_|___/\___|
+
  */
 
 Handle<Value> moveMouse(const Arguments& args) 
@@ -108,62 +107,6 @@ Handle<Value> typeString(const Arguments& args)
   return scope.Close(String::New("1"));
 }
 
-//Screen
-
-Handle<Value> captureScreen(const Arguments& args) 
-{
-  HandleScope scope;
-
-  MMRect rect;
-  MMBitmapRef bitmap = NULL;
-  MMSize displaySize = getMainDisplaySize();
-
-  rect = MMRectMake(0, 0, displaySize.width, displaySize.height);
-
-  bitmap = copyMMBitmapFromDisplayInRect(rect);
-
-  return scope.Close(External::Wrap(bitmap));
-
-  //return scope.Close(String::New("1"));
-}
-
-Handle<Value> getWindows(const Arguments& args) 
-{
-  HandleScope scope;
-
-  CFArrayRef windowList = CGWindowListCopyWindowInfo(kCGWindowListOptionOnScreenOnly, kCGNullWindowID);
-  CFIndex windowNum = CFArrayGetCount(windowList);
-
-  std::vector<Object> windows;
-  Local<Object> obj = Object::New();
-
-  
-  for (int i = 0; i < (int)windowNum; i++) 
-  {
-        CFDictionaryRef info = (CFDictionaryRef)CFArrayGetValueAtIndex(windowList, i);
-        CFNumberRef currentPID = (CFNumberRef)CFDictionaryGetValue(info, kCGWindowOwnerPID);
-        CFNumberRef currentWindowNumber = (CFNumberRef)CFDictionaryGetValue(info, kCGWindowNumber);
-        CFStringRef currentTitle = (CFStringRef)CFDictionaryGetValue(info, kCGWindowName);
-        CFIndex length = CFStringGetLength(currentTitle);
-        CFIndex maxSize = CFStringGetMaximumSizeForEncoding(length, kCFStringEncodingUTF8);
-        char *buffer = (char *)malloc(maxSize);
-        CFStringGetCString(currentTitle, buffer, maxSize, kCFStringEncodingUTF8);
-        obj->Set(String::NewSymbol("title"), String::New(buffer));
-        obj->Set(String::NewSymbol("id"), Number::New(*(int *)currentWindowNumber));
-        printf(buffer);
-        printf("\n");
-        //windows.push_back(obj);
-
-  }
-
-
-  
-  //return scope.Close(String::New("1"));
-
-  return scope.Close(String::New("1"));
-}
-
-
 void init(Handle<Object> target) 
 {
 
@@ -187,7 +130,6 @@ void init(Handle<Object> target)
 
   target->Set(NanNew<String>("getWindows"),
     NanNew<FunctionTemplate>(getWindows)->GetFunction());
-
 }
 
 NODE_MODULE(robotjs, init)
