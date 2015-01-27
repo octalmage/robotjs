@@ -124,12 +124,7 @@ void init(Handle<Object> target)
 
   target->Set(NanNew<String>("typeString"),
     NanNew<FunctionTemplate>(typeString)->GetFunction());
-
-  target->Set(NanNew<String>("captureScreen"),
-    NanNew<FunctionTemplate>(captureScreen)->GetFunction());
-
-  target->Set(NanNew<String>("getWindows"),
-    NanNew<FunctionTemplate>(getWindows)->GetFunction());
+  
 }
 
 NODE_MODULE(robotjs, init)
