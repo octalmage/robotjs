@@ -5,7 +5,7 @@ Node.js GUI Automation. Control the mouse, keyboard, and read the screen.
 
 This is a work in progress so the exported functions could change at any time before the first stable release (1.0.0). 
 
-Only tested on Mac OS X using Node.js v0.10.31. I'm working on rewriting RobotJS using [nan](https://github.com/rvagg/nan) to support other versions of Node.js. node-gyp is only configured for Mac, but this project will support Windows and Linux when I have time to test.
+Only tested on Mac OS X using Node.js v0.10.31. I'm working on [rewriting RobotJS](https://github.com/octalmage/robotjs/issues/1) using [nan](https://github.com/rvagg/nan) to support other versions of Node.js. node-gyp is only configured for Mac, but this project will support Windows and Linux when I have time to test.
 
 [![Ready](https://badge.waffle.io/octalmage/robotjs.svg?label=ready&title=Ready)](http://waffle.io/octalmage/robotjs)
 
