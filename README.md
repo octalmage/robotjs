@@ -7,7 +7,7 @@ This is a work in progress so the exported functions could change at any time be
 
 Only tested on Mac OS X using Node.js v0.10.31. I'm working on rewriting RobotJS using [nan](https://github.com/rvagg/nan) to support other versions of Node.js. node-gyp is only configured for Mac, but this project will support Windows and Linux when I have time to test.
 
-Based on [autopy](https://github.com/msanders/autopy). 
+[![Ready](https://badge.waffle.io/octalmage/robotjs.svg?label=ready&title=Ready)](http://waffle.io/octalmage/robotjs)
 
 ##Installing
 
@@ -73,3 +73,5 @@ I'm a huge fan of [AutoHotkey](http://www.autohotkey.com/), and I've used it for
 I like AutoHotkey, but I like Node.js more. By developing RobotJS I get an AutoHotkey replacement on Mac (finally!), and I get to use my favorite language. 
 
 **TLDR:** There's nothing like AutoHotkey on Mac, so I'm making it. 
+
+Based on [autopy](https://github.com/msanders/autopy). 
