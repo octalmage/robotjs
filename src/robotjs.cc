@@ -19,42 +19,42 @@ using namespace v8;
 
 NAN_METHOD(moveMouse) 
 {
-  NanScope();
-  if (args.Length() < 2) 
-  {
-    return NanThrowError("Invalid number of arguments"); 
-  }
-  size_t x = args[0]->Int32Value();
-  size_t y = args[1]->Int32Value();
+	NanScope();
+	if (args.Length() < 2) 
+	{
+		return NanThrowError("Invalid number of arguments"); 
+	}
+	size_t x = args[0]->Int32Value();
+	size_t y = args[1]->Int32Value();
 
-  MMPoint point;
-  point = MMPointMake(x, y);
-  moveMouse(point);
-  NanReturnValue(NanNew("1"));
+	MMPoint point;
+	point = MMPointMake(x, y);
+	moveMouse(point);
+	NanReturnValue(NanNew("1"));
 }
 
 NAN_METHOD(getMousePos) 
 {
-  NanScope();
+	NanScope();
 
-  MMPoint pos = getMousePos();
+	MMPoint pos = getMousePos();
 
-  //Return object with .x and .y.
-  Local<Object> obj = NanNew<Object>();
-  obj->Set(NanNew<String>("x"), NanNew<Number>(pos.x));
-  obj->Set(NanNew<String>("y"), NanNew<Number>(pos.y));
-  NanReturnValue(obj);
+ 	//Return object with .x and .y.
+	Local<Object> obj = NanNew<Object>();
+	obj->Set(NanNew<String>("x"), NanNew<Number>(pos.x));
+	obj->Set(NanNew<String>("y"), NanNew<Number>(pos.y));
+	NanReturnValue(obj);
 }
 
 NAN_METHOD(mouseClick) 
 {
-  NanScope();
+	NanScope();
 
-  MMMouseButton button = LEFT_BUTTON;
+	MMMouseButton button = LEFT_BUTTON;
 
-  clickMouse(button);
+	clickMouse(button);
 
-  NanReturnValue(NanNew("1"));
+	NanReturnValue(NanNew("1"));
 }
 
 /*
@@ -68,48 +68,48 @@ NAN_METHOD(mouseClick)
 
 NAN_METHOD (keyTap) 
 {
-  NanScope();
+	NanScope();
 
-  MMKeyFlags flags = MOD_NONE;
+	MMKeyFlags flags = MOD_NONE;
   
-  const char c = (*v8::String::Utf8Value(args[0]->ToString()))[0];
+	const char c = (*v8::String::Utf8Value(args[0]->ToString()))[0];
 
-  tapKey(c, flags);
+	tapKey(c, flags);
 
-  NanReturnValue(NanNew("1"));
+	NanReturnValue(NanNew("1"));
 }
 
 NAN_METHOD (typeString) 
 {
-  NanScope();
-  
-  char *str;
-  NanUtf8String string(args[0]);
+	NanScope();
 
-  str= *string;
+	char *str;
+	NanUtf8String string(args[0]);
 
-  typeString(str);
+	str = *string;
 
-  NanReturnValue(NanNew("1"));
+	typeString(str);
+
+	NanReturnValue(NanNew("1"));
 }
 
 void init(Handle<Object> target) 
 {
 
-  target->Set(NanNew<String>("moveMouse"),
-    NanNew<FunctionTemplate>(moveMouse)->GetFunction());
+	target->Set(NanNew<String>("moveMouse"),
+		NanNew<FunctionTemplate>(moveMouse)->GetFunction());
 
-  target->Set(NanNew<String>("getMousePos"),
-    NanNew<FunctionTemplate>(getMousePos)->GetFunction());
+	target->Set(NanNew<String>("getMousePos"),
+		NanNew<FunctionTemplate>(getMousePos)->GetFunction());
 
-  target->Set(NanNew<String>("mouseClick"),
-    NanNew<FunctionTemplate>(mouseClick)->GetFunction());
+	target->Set(NanNew<String>("mouseClick"),
+		NanNew<FunctionTemplate>(mouseClick)->GetFunction());
 
-  target->Set(NanNew<String>("keyTap"),
-    NanNew<FunctionTemplate>(keyTap)->GetFunction());
+	target->Set(NanNew<String>("keyTap"),
+		NanNew<FunctionTemplate>(keyTap)->GetFunction());
 
-  target->Set(NanNew<String>("typeString"),
-    NanNew<FunctionTemplate>(typeString)->GetFunction());
+	target->Set(NanNew<String>("typeString"),
+		NanNew<FunctionTemplate>(typeString)->GetFunction());
 
 }
 
