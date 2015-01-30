@@ -17,13 +17,12 @@ using namespace v8;
 
  */
 
-Handle<Value> moveMouse(const Arguments& args) 
+NAN_METHOD(moveMouse) 
 {
-  HandleScope scope;
+  NanScope();
   if (args.Length() < 2) 
   {
-    ThrowException(Exception::TypeError(String::New("Wrong number of arguments")));
-    return scope.Close(Undefined());
+    return NanThrowError("Invalid number of arguments"); 
   }
   size_t x = args[0]->Int32Value();
   size_t y = args[1]->Int32Value();
@@ -31,20 +30,20 @@ Handle<Value> moveMouse(const Arguments& args)
   MMPoint point;
   point = MMPointMake(x, y);
   moveMouse(point);
-  return scope.Close(String::New("1"));
+  NanReturnValue(NanNew("1"));
 }
 
-Handle<Value> getMousePos(const Arguments& args) 
+NAN_METHOD(getMousePos) 
 {
-  HandleScope scope;
+  NanScope();
 
   MMPoint pos = getMousePos();
 
   //Return object with .x and .y.
-  Local<Object> obj = Object::New();
-  obj->Set(String::NewSymbol("x"), Number::New(pos.x));
-  obj->Set(String::NewSymbol("y"), Number::New(pos.y));
-  return scope.Close(obj);
+  Local<Object> obj = NanNew<Object>();
+  obj->Set(NanNew<String>("x"), NanNew<Number>(pos.x));
+  obj->Set(NanNew<String>("y"), NanNew<Number>(pos.y));
+  NanReturnValue(obj);
 }
 
 NAN_METHOD(mouseClick) 
@@ -81,31 +80,28 @@ char *get(v8::Local<v8::Value> value, const char *fallback = "")
     return str;
 }
 
-Handle<Value> keyTap(const Arguments& args) 
+NAN_METHOD (keyTap) 
 {
-  HandleScope scope;
+  NanScope();
 
   MMKeyFlags flags = MOD_NONE;
+  
+  const char c = (*v8::String::Utf8Value(args[0]->ToString()))[0];
 
-  char c = get(args[0])[0];
- 
-  if (strlen(&c)==1)
-  {
-    tapKey(c, flags);
-  }
+  tapKey(c, flags);
 
-  return scope.Close(String::New("1"));
+  NanReturnValue(NanNew("1"));
 }
 
-Handle<Value> typeString(const Arguments& args) 
+NAN_METHOD (typeString) 
 {
-  HandleScope scope;
+  NanScope();
 
-  char *str = get(args[0]);
+  char *str = get(args[0]->ToString());
 
   typeString(str);
 
-  return scope.Close(String::New("1"));
+  NanReturnValue(NanNew("1"));
 }
 
 void init(Handle<Object> target) 
