@@ -1,6 +1,8 @@
 RobotJS
 ========
 
+[![Join the chat at https://gitter.im/octalmage/robotjs](https://badges.gitter.im/Join%20Chat.svg)](https://gitter.im/octalmage/robotjs?utm_source=badge&utm_medium=badge&utm_campaign=pr-badge&utm_content=badge)
+
 Node.js GUI Automation. Control the mouse, keyboard, and read the screen.
 
 This is a work in progress so the exported functions could change at any time before the first stable release (1.0.0). 
