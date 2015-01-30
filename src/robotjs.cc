@@ -66,20 +66,6 @@ NAN_METHOD(mouseClick)
           |___/           
  */
 
-char *get(v8::Local<v8::Value> value, const char *fallback = "") 
-{
-    if (value->IsString()) 
-    {
-        v8::String::AsciiValue string(value);
-        char *str = (char *) malloc(string.length() + 1);
-        strcpy(str, *string);
-        return str;
-    }
-    char *str = (char *) malloc(strlen(fallback) + 1);
-    strcpy(str, fallback);
-    return str;
-}
-
 NAN_METHOD (keyTap) 
 {
   NanScope();
@@ -96,8 +82,11 @@ NAN_METHOD (keyTap)
 NAN_METHOD (typeString) 
 {
   NanScope();
+  
+  char *str;
+  NanUtf8String string(args[0]);
 
-  char *str = get(args[0]->ToString());
+  str= *string;
 
   typeString(str);
 
