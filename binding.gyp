@@ -2,7 +2,10 @@
   "targets": [
     {
       "target_name": "robotjs",
-      "conditions": [
+      "include_dirs" : [
+    		"<!(node -e \"require('nan')\")"
+       ],
+       "conditions": [
 	      ['OS == "mac"', {
 		      'include_dirs': [
 		          'System/Library/Frameworks/CoreFoundation.Framework/Headers',
