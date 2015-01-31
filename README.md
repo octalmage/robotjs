@@ -9,7 +9,7 @@ Only tested on Mac OS X using Node.js v0.10.31.
 
 node-gyp is only configured for Mac, but this project will support Windows and Linux when I have time to test.
 
-[![Ready](https://badge.waffle.io/octalmage/robotjs.svg?label=ready&title=Ready)](http://waffle.io/octalmage/robotjs)
+[![npm version](https://img.shields.io/npm/v/robotjs.svg)](https://www.npmjs.com/package/robotjs) [![Ready](https://badge.waffle.io/octalmage/robotjs.svg?label=ready&title=Ready)](http://waffle.io/octalmage/robotjs) [![Join the chat at https://gitter.im/octalmage/robotjs](https://badges.gitter.im/Join%20Chat.svg)](https://gitter.im/octalmage/robotjs?utm_source=badge&utm_medium=badge&utm_campaign=pr-badge&utm_content=badge)
 
 ## Installing
 
