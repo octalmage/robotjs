@@ -24,14 +24,14 @@ Get the mouse location and move it.
 var robot = require("robotjs");
 
 //Get the mouse position, retuns an object with x and y. 
-var mouse=robot.getMousePos();
+var mouse=robot.mouse.pos();
 console.log("Mouse is at x:" + mouse.x + " y:" + mouse.y);
 
 //Move the mouse down by 100 pixels.
-robot.moveMouse(mouse.x,mouse.y+100);
+robot.mouse.move(mouse.x,mouse.y+100);
 
 //Left click!
-robot.mouseClick();
+robot.mouse.click();
 ```
 
 ## Building
