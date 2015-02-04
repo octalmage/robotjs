@@ -24,7 +24,7 @@
 	            }
 	          ]
 	        ],
-	      "sources": ["src/robotjs.cc", "src/deadbeef_rand.c", "src/mouse.c", "src/keypress.c" , "src/keycode.c"]
+	      "sources": ["src/robotjs.cc", "src/deadbeef_rand.c", "src/mouse.c", "src/keypress.c" , "src/keycode.c", "src/screen.c", "src/screengrab.c", "src/MMBitmap.c"]
     }
   ]
 }
