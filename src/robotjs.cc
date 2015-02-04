@@ -111,7 +111,7 @@ NAN_METHOD(mouseClick)
           |___/           
 */
 
-NAN_METHOD (keyTap) 
+NAN_METHOD(keyTap) 
 {
 	NanScope();
 
@@ -124,7 +124,7 @@ NAN_METHOD (keyTap)
 	NanReturnValue(NanNew("1"));
 }
 
-NAN_METHOD (typeString) 
+NAN_METHOD(typeString) 
 {
 	NanScope();
 
@@ -147,7 +147,7 @@ NAN_METHOD (typeString)
                                  
 */
 
-NAN_METHOD (getPixelColor) 
+NAN_METHOD(getPixelColor) 
 {
 	NanScope();
 
