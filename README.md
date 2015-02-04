@@ -34,6 +34,30 @@ robot.moveMouse(mouse.x,mouse.y+100);
 robot.mouseClick();
 ```
 
+Type "Hello World".
+
+```JavaScript
+var robot = require("robotjs");
+
+//Type "Hello Worl".
+robot.typeString("Hello Worl");
+
+//Type "d".
+robot.keyTap("d");
+```
+Get pixel color under the mouse. 
+
+```JavaScript
+var robot = require("robotjs");
+
+//Get mouse position. 
+var mouse=robot.getMousePos();
+
+//Get pixel color in hex format. 
+var hex = robot.getPixelColor(mouse.x, mouse.y);
+console.log("#" + hex + " at x:" + mouse.x + " y:" + mouse.y);
+```
+
 ## Building
 
 RobotJS uses [node-gyp](https://github.com/TooTallNate/node-gyp) for building. 
