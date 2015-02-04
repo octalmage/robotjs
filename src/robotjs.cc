@@ -71,6 +71,32 @@ NAN_METHOD(mouseClick)
 
 	MMMouseButton button = LEFT_BUTTON;
 
+	if (args.Length() == 1)
+	{
+		char *but = (*v8::String::Utf8Value(args[0]->ToString()));
+
+		if (strcmp(but, "left") == 0)
+		{
+			button = LEFT_BUTTON;
+		}
+		else if (strcmp(but, "right") == 0)
+		{
+			button = RIGHT_BUTTON;
+		}
+		else if (strcmp(but, "middle") == 0)
+		{
+			button = CENTER_BUTTON;
+		}
+		else
+		{
+			return NanThrowError("Invalid mouse button specified."); 
+		}
+	}
+	else if (args.Length() > 1)
+	{
+		return NanThrowError("Invalid number of arguments.");
+	}
+
 	clickMouse(button);
 
 	NanReturnValue(NanNew("1"));
