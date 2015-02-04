@@ -25,7 +25,7 @@ NAN_METHOD(moveMouse)
 	NanScope();
 	if (args.Length() < 2) 
 	{
-		return NanThrowError("Invalid number of arguments"); 
+		return NanThrowError("Invalid number of arguments."); 
 	}
 	size_t x = args[0]->Int32Value();
 	size_t y = args[1]->Int32Value();
@@ -41,7 +41,7 @@ NAN_METHOD(moveMouseSmooth)
 	NanScope();
 	if (args.Length() < 2) 
 	{
-		return NanThrowError("Invalid number of arguments"); 
+		return NanThrowError("Invalid number of arguments."); 
 	}
 	size_t x = args[0]->Int32Value();
 	size_t y = args[1]->Int32Value();
