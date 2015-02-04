@@ -5,6 +5,9 @@
 #include "mouse.h"
 #include "deadbeef_rand.h"
 #include "keypress.h"
+#include "screen.h"
+#include "screengrab.h"
+#include "MMBitmap.h"
 
 using namespace v8;
 
@@ -15,7 +18,7 @@ using namespace v8;
 | |  | | (_) | |_| \__ \  __/
 |_|  |_|\___/ \__,_|___/\___|
 
- */
+*/
 
 NAN_METHOD(moveMouse) 
 {
@@ -80,7 +83,7 @@ NAN_METHOD(mouseClick)
 | . \  __/ |_| | |_) | (_) | (_| | | | (_| |
 |_|\_\___|\__, |_.__/ \___/ \__,_|_|  \__,_|
           |___/           
- */
+*/
 
 NAN_METHOD (keyTap) 
 {
@@ -109,6 +112,40 @@ NAN_METHOD (typeString)
 	NanReturnValue(NanNew("1"));
 }
 
+/*
+  ____                           
+ / ___|  ___ _ __ ___  ___ _ __  
+ \___ \ / __| '__/ _ \/ _ \ '_ \ 
+  ___) | (__| | |  __/  __/ | | |
+ |____/ \___|_|  \___|\___|_| |_|
+                                 
+*/
+
+NAN_METHOD (getPixelColor) 
+{
+	NanScope();
+
+	MMBitmapRef bitmap;
+	MMRGBHex color;
+
+	size_t x = args[0]->Int32Value();
+	size_t y = args[1]->Int32Value();
+
+	bitmap = copyMMBitmapFromDisplayInRect(MMRectMake(x, y, 1, 1));
+
+	color = MMRGBHexAtPoint(bitmap, 0, 0);
+	
+	char hex [6];
+
+	//Length needs to be 7 because snprintf includes a terminating null.
+	//Use %06x to pad hex value with leading 0s. 
+	snprintf(hex, 7, "%06x", color);
+
+	destroyMMBitmap(bitmap);
+
+	NanReturnValue(NanNew(hex));
+}
+
 void init(Handle<Object> target) 
 {
 
@@ -129,6 +166,9 @@ void init(Handle<Object> target)
 
 	target->Set(NanNew<String>("typeString"),
 		NanNew<FunctionTemplate>(typeString)->GetFunction());
+
+	target->Set(NanNew<String>("getPixelColor"),
+		NanNew<FunctionTemplate>(getPixelColor)->GetFunction());
 
 }
 
