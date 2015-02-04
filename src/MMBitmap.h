@@ -12,6 +12,11 @@
 	#include <stdint.h>
 #endif
 
+#ifdef __cplusplus
+extern "C" 
+{
+#endif
+
 struct _MMBitmap {
 	uint8_t *imageBuffer;  /* Pixels stored in Quad I format; i.e., origin is in
 	                        * top left. Length should be height * bytewidth. */
@@ -76,5 +81,9 @@ do {                                           \
     ++(point).y;                               \
   }                                            \
 } while (0);
+
+#ifdef __cplusplus
+}
+#endif
 
 #endif /* MMBITMAP_H */
