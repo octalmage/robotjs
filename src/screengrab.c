@@ -15,27 +15,13 @@
 	#include <string.h>
 #endif
 
-#if defined(IS_MACOSX)
-
-/* Helper functions (documented below). */
-static CGLContextObj createFullScreenCGLContext(CGOpenGLDisplayMask displayMask);
-static void destroyFullScreenCGLContext(CGLContextObj glContext);
-
-static uint8_t *createBufferFromCurrentCGLContext(GLint x,
-                                                  GLint y,
-                                                  GLsizei width,
-                                                  GLsizei height,
-                                                  size_t bytewidth);
-
-#endif
-
 MMBitmapRef copyMMBitmapFromDisplayInRect(MMRect rect)
 {
 #if defined(IS_MACOSX)
 
 	size_t bytewidth;
 	uint8_t bitsPerPixel, bytesPerPixel;
-	uint8_t *buffer;
+	//uint8_t *buffer;
 
 	CGDirectDisplayID displayID = CGMainDisplayID();
 
@@ -165,92 +151,3 @@ MMBitmapRef copyMMBitmapFromDisplayInRect(MMRect rect)
 	return bitmap;
 #endif
 }
-
-#if defined(IS_MACOSX)
-
-/* Creates and returns a full-screen OpenGL graphics context (to be
- * released/destroyed by caller).
- *
- * To clean up the returned context use destroyFullScreenCGLContext(); */
-static CGLContextObj createFullScreenCGLContext(CGOpenGLDisplayMask displayMask)
-{
-	CGLContextObj glContext = NULL;
-	CGLPixelFormatObj pix;
-	GLint npix;
-	CGLPixelFormatAttribute attribs[4];
-
-	attribs[0] = kCGLPFAFullScreen;
-	attribs[1] = kCGLPFADisplayMask;
-	attribs[2] = displayMask;
-	attribs[3] = (CGLPixelFormatAttribute)0;
-
-	CGLChoosePixelFormat(attribs, &pix, &npix);
-	CGLCreateContext(pix, NULL, &glContext);
-
-	/* The pixel format is no longer needed, so destroy it. */
-	CGLDestroyPixelFormat(pix);
-
-	if (glContext == NULL) return NULL;
-
-	/* Set our context as the current OpenGL context. */
-	CGLSetCurrentContext(glContext);
-
-	/* Set full-screen mode. */
-	CGLSetFullScreen(glContext);
-	//CGLSetFullScreenOnDisplay(glContext, displayMask);
-
-	/* Select front buffer as our source for pixel data. */
-	glReadBuffer(GL_FRONT);
-
-	/* Finish previous OpenGL commands before continuing. */
-	glFinish();
-
-	if (glGetError() != GL_NO_ERROR) return NULL;
-
-	return glContext;
-}
-
-/* Cleans up CGLContext created by createFullScreenCGLContext(); */
-static void destroyFullScreenCGLContext(CGLContextObj glContext)
-{
-	glPopClientAttrib(); /* Clear attributes previously set. */
-	CGLSetCurrentContext(NULL); /* Reset context. */
-	CGLClearDrawable(glContext); /* Disassociate from full-screen. */
-	CGLDestroyContext(glContext); /* Release memory. */
-}
-
-/* Returns newly malloc'd bitmap (to be freed by caller). */
-static uint8_t *createBufferFromCurrentCGLContext(GLint x,
-                                                  GLint y,
-                                                  GLsizei width,
-                                                  GLsizei height,
-                                                  size_t bytewidth)
-{
-	uint8_t *data = NULL;
-
-	/* For extra safety, save & restore OpenGL states that are changed. */
-	glPushClientAttrib(GL_CLIENT_PIXEL_STORE_BIT);
-
-	glPixelStorei(GL_PACK_ALIGNMENT, BYTE_ALIGN); /* Force alignment. */
-	glPixelStorei(GL_PACK_ROW_LENGTH, 0);
-	glPixelStorei(GL_PACK_SKIP_ROWS, 0);
-	glPixelStorei(GL_PACK_SKIP_PIXELS, 0);
-
-	/* Allocate size for bitmap */
-	data = malloc(bytewidth * height);
-	if (data == NULL) return NULL;
-
-	/* Read the OpenGL frame into our buffer */
-	glReadPixels(x, y, width, height,
-	             MMRGB_IS_BGR ? GL_BGRA : GL_RGBA,
-#if __BYTE_ORDER == __BIG_ENDIAN
-	             GL_UNSIGNED_INT_8_8_8_8, /* Non-native format (little-endian) */
-#elif __BYTE_ORDER == __LITTLE_ENDIAN
-	             GL_UNSIGNED_INT_8_8_8_8_REV, /* Native format */
-#endif
-	             data);
-
-	return data;
-}
-
-#endif
