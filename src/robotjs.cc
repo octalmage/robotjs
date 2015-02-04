@@ -102,6 +102,62 @@ NAN_METHOD(mouseClick)
 	NanReturnValue(NanNew("1"));
 }
 
+NAN_METHOD(mouseToggle) 
+{
+	NanScope();
+
+	MMMouseButton button = LEFT_BUTTON;
+	bool down;
+
+	if (args.Length() > 0)
+	{
+		char *d = (*v8::String::Utf8Value(args[0]->ToString()));
+
+		if (strcmp(d, "down") == 0)
+		{
+			down = true;;
+		}
+		else if (strcmp(d, "up") == 0)
+		{
+			down = false;
+		}
+		else
+		{
+			return NanThrowError("Invalid mouse button state specified."); 
+		}
+	}
+
+	if (args.Length() == 2)
+	{
+		char *but = (*v8::String::Utf8Value(args[1]->ToString()));
+
+		if (strcmp(but, "left") == 0)
+		{
+			button = LEFT_BUTTON;
+		}
+		else if (strcmp(but, "right") == 0)
+		{
+			button = RIGHT_BUTTON;
+		}
+		else if (strcmp(but, "middle") == 0)
+		{
+			button = CENTER_BUTTON;
+		}
+		else
+		{
+			return NanThrowError("Invalid mouse button specified."); 
+		}
+	}
+	else if (args.Length() > 2)
+	{
+		return NanThrowError("Invalid number of arguments.");
+	}
+
+	toggleMouse(down, button);
+
+	NanReturnValue(NanNew("1"));
+}
+
 /*
  _  __          _                         _ 
 | |/ /___ _   _| |__   ___   __ _ _ __ __| |
@@ -186,6 +242,9 @@ void init(Handle<Object> target)
 
 	target->Set(NanNew<String>("mouseClick"),
 		NanNew<FunctionTemplate>(mouseClick)->GetFunction());
+
+	target->Set(NanNew<String>("mouseToggle"),
+		NanNew<FunctionTemplate>(mouseToggle)->GetFunction());
 
 	target->Set(NanNew<String>("keyTap"),
 		NanNew<FunctionTemplate>(keyTap)->GetFunction());
