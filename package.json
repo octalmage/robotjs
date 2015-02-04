@@ -1,6 +1,6 @@
 {
   "name": "robotjs",
-  "version": "0.0.4",
+  "version": "0.0.5",
   "description": "Node.js GUI Automation.",
   "main": "index.js",
   "scripts": {
