@@ -73,17 +73,17 @@ NAN_METHOD(mouseClick)
 
 	if (args.Length() == 1)
 	{
-		char *but = (*v8::String::Utf8Value(args[0]->ToString()));
+		char *b = (*v8::String::Utf8Value(args[0]->ToString()));
 
-		if (strcmp(but, "left") == 0)
+		if (strcmp(b, "left") == 0)
 		{
 			button = LEFT_BUTTON;
 		}
-		else if (strcmp(but, "right") == 0)
+		else if (strcmp(b, "right") == 0)
 		{
 			button = RIGHT_BUTTON;
 		}
-		else if (strcmp(but, "middle") == 0)
+		else if (strcmp(b, "middle") == 0)
 		{
 			button = CENTER_BUTTON;
 		}
@@ -129,17 +129,17 @@ NAN_METHOD(mouseToggle)
 
 	if (args.Length() == 2)
 	{
-		char *but = (*v8::String::Utf8Value(args[1]->ToString()));
+		char *b = (*v8::String::Utf8Value(args[1]->ToString()));
 
-		if (strcmp(but, "left") == 0)
+		if (strcmp(b, "left") == 0)
 		{
 			button = LEFT_BUTTON;
 		}
-		else if (strcmp(but, "right") == 0)
+		else if (strcmp(b, "right") == 0)
 		{
 			button = RIGHT_BUTTON;
 		}
-		else if (strcmp(but, "middle") == 0)
+		else if (strcmp(b, "middle") == 0)
 		{
 			button = CENTER_BUTTON;
 		}
