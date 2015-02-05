@@ -111,7 +111,7 @@ NAN_METHOD(mouseToggle)
 
 	if (args.Length() > 0)
 	{
-		char *d = (*v8::String::Utf8Value(args[0]->ToString()));
+		const char *d = (*v8::String::Utf8Value(args[0]->ToString()));
 
 		if (strcmp(d, "down") == 0)
 		{
@@ -171,11 +171,51 @@ NAN_METHOD(keyTap)
 {
 	NanScope();
 
-	MMKeyFlags flags = MOD_NONE;
-  
-	const char c = (*v8::String::Utf8Value(args[0]->ToString()))[0];
+	if (args.Length() != 1)
+	{
+		return NanThrowError("Invalid number of arguments.");
+	}
 
-	tapKey(c, flags);
+	MMKeyFlags flags = MOD_NONE;
+	MMKeyCode key;
+  
+	char *k = (*v8::String::Utf8Value(args[0]->ToString()));
+
+	//There's a better way to do this, I just want to get it working.
+	if (strcmp(k, "backspace") == 0)
+	{
+		key = K_BACKSPACE;
+	}
+	else if (strcmp(k, "enter") == 0)
+	{
+		key = K_RETURN;
+	}
+	else if (strcmp(k, "up") == 0)
+	{
+		key = K_UP;
+	}
+	else if (strcmp(k, "down") == 0)
+	{
+		key = K_DOWN;
+	}
+	else if (strcmp(k, "left") == 0)
+	{
+		key = K_LEFT;
+	}
+	else if (strcmp(k, "right") == 0)
+	{
+		key = K_RIGHT;
+	}
+	else if (strcmp(k, "escape") == 0)
+	{
+		key = K_ESCAPE;
+	}
+	else 
+	{
+		return NanThrowError("Invalid key specified."); 
+	}
+
+	tapKeyCode(key, flags);
 
 	NanReturnValue(NanNew("1"));
 }
