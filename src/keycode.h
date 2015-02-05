@@ -4,15 +4,15 @@
 
 #include "os.h"
 
-#if defined(IS_MACOSX)
-
-#include <Carbon/Carbon.h> /* Really only need <HIToolbox/Events.h> */
-#include <ApplicationServices/ApplicationServices.h>
-
 #ifdef __cplusplus
 extern "C" 
 {
 #endif
+
+#if defined(IS_MACOSX)
+
+#include <Carbon/Carbon.h> /* Really only need <HIToolbox/Events.h> */
+#include <ApplicationServices/ApplicationServices.h>
 
 enum _MMKeyCode {
 	K_BACKSPACE = kVK_Delete,
