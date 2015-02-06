@@ -39,11 +39,11 @@ Type "Hello World".
 ```JavaScript
 var robot = require("robotjs");
 
-//Type "Hello Worl".
-robot.typeString("Hello Worl");
+//Type "Hello World".
+robot.typeString("Hello World");
 
-//Type "d".
-robot.keyTap("d");
+//Press enter. 
+robot.keyTap("enter");
 ```
 Get pixel color under the mouse. 
 
