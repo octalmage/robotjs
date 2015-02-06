@@ -210,6 +210,26 @@ NAN_METHOD(keyTap)
 	{
 		key = K_ESCAPE;
 	}
+	else if (strcmp(k, "delete") == 0)
+	{
+		key = K_DELETE;
+	}
+	else if (strcmp(k, "home") == 0)
+	{
+		key = K_HOME;
+	}
+	else if (strcmp(k, "end") == 0)
+	{
+		key = K_END;
+	}
+	else if (strcmp(k, "pageup") == 0)
+	{
+		key = K_PAGEUP;
+	}
+	else if (strcmp(k, "pagedown") == 0)
+	{
+		key = K_PAGEDOWN;
+	}
 	else 
 	{
 		return NanThrowError("Invalid key specified."); 
