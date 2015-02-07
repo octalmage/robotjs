@@ -87,10 +87,9 @@ node-gyp build
 
 | Module        | Status        | Notes   |
 | ------------- |-------------: | ------- |
-| Mouse         | 80%           | Can't specify mouse button.       |
-| Keyboard      | 50%           | No toggle support.       |
-| Screen        | 5%            | Screenshot, read pixel color, image search.        |
-| Window        | 1%            | Manipulate external windows.     |
+| Mouse         | 100%           | All planned features implemented.       |
+| Keyboard      | 85%           | No toggle support.       |
+| Screen        | 10%            | Screenshot, image search.   |
 
 ## Story
 
