@@ -5,6 +5,15 @@
         "<!(node -e \"require('nan')\")"
     ],
     
+    "cflags": [
+      "-Wall",
+      "-Wparentheses",
+      "-Winline",
+      "-Wbad-function-cast",
+      "-Wdisabled-optimization",
+      "-Wshadow"
+    ],
+    
     "conditions": [
       ["OS == \"mac\"", {
         "include_dirs": [
