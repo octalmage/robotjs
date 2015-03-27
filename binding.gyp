@@ -39,7 +39,11 @@
             '-lX11',
             '-lXtst'
           ]
-        }
+        },
+        
+        'sources': [
+          'src/xdisplay.c'
+        ]
       }]
     ],
     
