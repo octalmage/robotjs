@@ -10,8 +10,7 @@
       '-Wparentheses',
       '-Winline',
       '-Wbad-function-cast',
-      '-Wdisabled-optimization',
-      '-Wshadow'
+      '-Wdisabled-optimization'
     ],
     
     'conditions': [
