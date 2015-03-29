@@ -171,7 +171,7 @@ static uint32_t parseDimension(const uint8_t *buf, size_t buflen,
 	size_t i;
 
 	assert(buf != NULL);
-	assert(len != NULL);
+	assert(buflen != NULL);
 	for (i = 0; i < buflen && buf[i] != ',' && buf[i] != '\0'; ++i) {
 		if (!isdigit(buf[i]) || i > MAX_DIMENSION_LEN) return 0;
 		num[i] = buf[i];
