@@ -7,6 +7,7 @@
 #include "keypress.h"
 #include "screen.h"
 #include "screengrab.h"
+#include "str_io.h"
 #include "MMBitmap.h"
 
 using namespace v8;
@@ -288,6 +289,59 @@ NAN_METHOD(getPixelColor)
 	NanReturnValue(NanNew(hex));
 }
 
+/*
+ ____  _ _                         
+| __ )(_) |_ _ __ ___   __ _ _ __  
+|  _ \| | __| '_ ` _ \ / _` | '_ \ 
+| |_) | | |_| | | | | | (_| | |_) |
+|____/|_|\__|_| |_| |_|\__,_| .__/ 
+							|_|  
+*/
+
+NAN_METHOD(captureScreen) 
+{
+	NanScope();
+	
+	MMRect rect;
+	MMBitmapRef bitmap;
+	MMBMPStringError err;
+	MMSize displaySize = getMainDisplaySize();
+
+	rect = MMRectMake(0, 0, displaySize.width, displaySize.height);
+
+	bitmap = copyMMBitmapFromDisplayInRect(rect);
+
+	Local<Object> obj = NanNew<Object>();
+	obj->Set(NanNew<String>("width"), NanNew<Number>(displaySize.width));
+	obj->Set(NanNew<String>("height"), NanNew<Number>(displaySize.height));
+	obj->Set(NanNew<String>("image"), NanNew<String>(createStringFromMMBitmap(bitmap,  &err)));
+	
+	destroyMMBitmap(bitmap);
+	
+	NanReturnValue(obj);
+}
+
+NAN_METHOD(getColor) 
+{
+	NanScope();
+	
+	MMBitmapRef bitmap;
+	MMBMPStringError err;
+	
+	uint8_t *str = (*v8::String::Utf8Value(args[0]->ToString()));
+	size_t len = strlen(str);
+	
+	bitmap = createMMBitmapFromString(str, len, &err));
+	
+	/*Local<Object> obj = NanNew<Object>();
+	obj->Set(NanNew<String>("width"), NanNew<Number>(displaySize.width));
+	obj->Set(NanNew<String>("height"), NanNew<Number>(displaySize.height));
+	obj->Set(NanNew<String>("image"), NanNew<String>(createStringFromMMBitmap(bitmap,  &err)));
+	NanReturnValue(obj);*/
+	
+	NanReturnValue(NanNew("1"));
+}
+
 void init(Handle<Object> target) 
 {
 
@@ -314,7 +368,12 @@ void init(Handle<Object> target)
 
 	target->Set(NanNew<String>("getPixelColor"),
 		NanNew<FunctionTemplate>(getPixelColor)->GetFunction());
-
+	
+	target->Set(NanNew<String>("captureScreen"),
+		NanNew<FunctionTemplate>(captureScreen)->GetFunction());
+		
+	target->Set(NanNew<String>("getColor"),
+		NanNew<FunctionTemplate>(getColor)->GetFunction());
 }
 
 NODE_MODULE(robotjs, init)
