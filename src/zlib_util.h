@@ -10,6 +10,11 @@
 	#include <stdint.h>
 #endif
 
+#ifdef __cplusplus
+extern "C" 
+{
+#endif
+
 /* Attempts to decompress given deflated NUL-terminated buffer.
  *
  * If successful and |len| is not NULL, |len| will be set to the number of
@@ -30,3 +35,7 @@ uint8_t *zlib_compress(const uint8_t *buf, const size_t buflen, int level,
                        size_t *len);
 
 #endif /* ZLIB_UTIL_H */
+
+#ifdef __cplusplus
+}
+#endif

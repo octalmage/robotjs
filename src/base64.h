@@ -10,6 +10,11 @@
 	#include <stdint.h>
 #endif
 
+#ifdef __cplusplus
+extern "C" 
+{
+#endif
+
 /* Decode a base64 encoded string discarding line breaks and noise.
  *
  * Returns a new string to be free()'d by caller, or NULL on error.
@@ -29,3 +34,7 @@ uint8_t *base64decode(const uint8_t *buf, const size_t buflen, size_t *retlen);
 uint8_t *base64encode(const uint8_t *buf, const size_t buflen, size_t *retlen);
 
 #endif /* BASE64_H */
+
+#ifdef __cplusplus
+}
+#endif

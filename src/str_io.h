@@ -11,6 +11,11 @@
 	#include <stdint.h>
 #endif
 
+#ifdef __cplusplus
+extern "C" 
+{
+#endif
+
 enum _MMBMPStringError {
 	kMMBMPStringGenericError = 0,
 	kMMBMPStringInvalidHeaderError,
@@ -52,3 +57,7 @@ uint8_t *createStringFromMMBitmap(MMBitmapRef bitmap, MMBMPStringError *error);
 const char *MMBitmapStringErrorString(MMBMPStringError err);
 
 #endif /* STR_IO_H */
+
+#ifdef __cplusplus
+}
+#endif
