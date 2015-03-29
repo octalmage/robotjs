@@ -55,6 +55,9 @@
       'src/keycode.c',
       'src/screen.c',
       'src/screengrab.c',
+      'src/str_io.c',
+      'src/zlib_util.c',
+      'src/base64.c',
       'src/MMBitmap.c'
     ]
   }]
