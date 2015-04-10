@@ -21,7 +21,7 @@
     "pixel"
   ],
   "author": "Jason Stallings",
-  "license": "GPL v2",
+  "license": "MIT",
   "gypfile": true,
   "bugs": {
     "url": "https://github.com/octalmage/robotjs/issues"
