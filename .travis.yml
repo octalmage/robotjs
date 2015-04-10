@@ -1,0 +1,18 @@
+sudo: false
+language: node_js
+node_js:
+  - 0.10
+  - 0.12
+  - iojs
+
+addons:
+  apt:
+    packages:
+    - libx11-dev
+    - zlib1g-dev
+    - libpng12-dev
+    - libxtst-dev
+
+before_script:
+  - export DISPLAY=:99.0
+  - sh -e /etc/init.d/xvfb start
