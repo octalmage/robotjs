@@ -58,6 +58,8 @@ var hex = robot.getPixelColor(mouse.x, mouse.y);
 console.log("#" + hex + " at x:" + mouse.x + " y:" + mouse.y);
 ```
 
+Read the [Wiki](https://github.com/octalmage/robotjs/wiki) for more information!
+
 ## Building
 
 RobotJS uses [node-gyp](https://github.com/TooTallNate/node-gyp) for building. 
