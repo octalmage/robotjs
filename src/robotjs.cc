@@ -190,6 +190,10 @@ NAN_METHOD(keyTap)
 	{
 		key = K_RETURN;
 	}
+	else if (strcmp(k, "tab") == 0)
+	{
+		key = K_TAB;
+	}
 	else if (strcmp(k, "up") == 0)
 	{
 		key = K_UP;
