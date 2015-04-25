@@ -292,6 +292,22 @@ NAN_METHOD(getPixelColor)
 	NanReturnValue(NanNew(hex));
 }
 
+NAN_METHOD(getScreenSize) 
+{
+	NanScope();
+	
+	//Get display size.
+	MMSize displaySize = getMainDisplaySize();
+
+	//Create our return object.
+	Local<Object> obj = NanNew<Object>();
+	obj->Set(NanNew<String>("width"), NanNew<Number>(displaySize.width));
+	obj->Set(NanNew<String>("height"), NanNew<Number>(displaySize.height));
+
+	//Return our object with .width and .height.
+	NanReturnValue(obj);
+}
+
 void init(Handle<Object> target) 
 {
 
@@ -318,6 +334,9 @@ void init(Handle<Object> target)
 
 	target->Set(NanNew<String>("getPixelColor"),
 		NanNew<FunctionTemplate>(getPixelColor)->GetFunction());
+
+	target->Set(NanNew<String>("getScreenSize"),
+		NanNew<FunctionTemplate>(getScreenSize)->GetFunction());
 
 }
 
