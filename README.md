@@ -101,7 +101,7 @@ I like AutoHotkey, but I like Node.js more. By developing RobotJS I get an AutoH
 
 **TLDR:** There's nothing like AutoHotkey on Mac, so I'm making it. 
 
-##License
+## License
 
 MIT
 
