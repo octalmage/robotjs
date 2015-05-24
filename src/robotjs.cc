@@ -182,7 +182,16 @@ NAN_METHOD(keyTap)
 	char *k = (*v8::String::Utf8Value(args[0]->ToString()));
 
 	//There's a better way to do this, I just want to get it working.
-	if (strcmp(k, "backspace") == 0)
+  if (strcmp(k, "cmd-tab") == 0)
+	{
+		key = K_TAB;
+    flags = MOD_META;
+	}
+  else if (strcmp(k, "alt") == 0)
+	{
+		key = K_ALT;
+	}
+  else if (strcmp(k, "backspace") == 0)
 	{
 		key = K_BACKSPACE;
 	}
@@ -236,10 +245,47 @@ NAN_METHOD(keyTap)
 	}
 	else 
 	{
-		return NanThrowError("Invalid key specified."); 
+		key = keyCodeForChar(*k); 
 	}
 
 	tapKeyCode(key, flags);
+
+	NanReturnValue(NanNew("1"));
+}
+
+
+NAN_METHOD(keyToggle) 
+{
+	NanScope();
+
+	if (args.Length() != 3)
+	{
+		return NanThrowError("Invalid number of arguments.");
+	}
+
+	MMKeyFlags flags = MOD_NONE;
+	MMKeyCode key;
+  
+	char *k = (*v8::String::Utf8Value(args[0]->ToString()));
+  bool down = (*v8::Boolean::New( args[1]->ToBoolean()->BooleanValue()));
+
+
+	//There's a better way to do this, I just want to get it working.
+  if (strcmp(k, "cmd-tab") == 0)
+	{
+		key = K_TAB;
+    flags = MOD_META;
+	}
+  else if (strcmp(k, "alt") == 0)
+	{
+		key = K_ALT;
+	}
+	else 
+	{
+		key = keyCodeForChar(*k); 
+	}
+
+	toggleKeyCode(key, down, flags);
 
 	NanReturnValue(NanNew("1"));
 }
