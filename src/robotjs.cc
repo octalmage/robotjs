@@ -167,88 +167,148 @@ NAN_METHOD(mouseToggle)
           |___/           
 */
 
-NAN_METHOD(keyTap) 
-{
-	NanScope();
+int CheckKeyCodes(char* k, MMKeyCode *key) {
 
-	if (args.Length() != 1)
+  if (!key) return -1;
+
+  if (strcmp(k, "alt") == 0)
 	{
-		return NanThrowError("Invalid number of arguments.");
+		*key = K_ALT;
 	}
-
-	MMKeyFlags flags = MOD_NONE;
-	MMKeyCode key;
-  
-	char *k = (*v8::String::Utf8Value(args[0]->ToString()));
-
-	//There's a better way to do this, I just want to get it working.
-  if (strcmp(k, "cmd-tab") == 0)
+  else if (strcmp(k, "cmd") == 0)
 	{
-		key = K_TAB;
-    flags = MOD_META;
-	}
-  else if (strcmp(k, "alt") == 0)
-	{
-		key = K_ALT;
+		*key = K_META;
 	}
   else if (strcmp(k, "backspace") == 0)
 	{
-		key = K_BACKSPACE;
+		*key = K_BACKSPACE;
 	}
 	else if (strcmp(k, "enter") == 0)
 	{
-		key = K_RETURN;
+		*key = K_RETURN;
 	}
 	else if (strcmp(k, "tab") == 0)
 	{
-		key = K_TAB;
+		*key = K_TAB;
 	}
 	else if (strcmp(k, "up") == 0)
 	{
-		key = K_UP;
+		*key = K_UP;
 	}
 	else if (strcmp(k, "down") == 0)
 	{
-		key = K_DOWN;
+		*key = K_DOWN;
 	}
 	else if (strcmp(k, "left") == 0)
 	{
-		key = K_LEFT;
+		*key = K_LEFT;
 	}
 	else if (strcmp(k, "right") == 0)
 	{
-		key = K_RIGHT;
+		*key = K_RIGHT;
 	}
 	else if (strcmp(k, "escape") == 0)
 	{
-		key = K_ESCAPE;
+		*key = K_ESCAPE;
 	}
 	else if (strcmp(k, "delete") == 0)
 	{
-		key = K_DELETE;
+		*key = K_DELETE;
 	}
 	else if (strcmp(k, "home") == 0)
 	{
-		key = K_HOME;
+		*key = K_HOME;
 	}
 	else if (strcmp(k, "end") == 0)
 	{
-		key = K_END;
+		*key = K_END;
 	}
 	else if (strcmp(k, "pageup") == 0)
 	{
-		key = K_PAGEUP;
+		*key = K_PAGEUP;
 	}
 	else if (strcmp(k, "pagedown") == 0)
 	{
-		key = K_PAGEDOWN;
+		*key = K_PAGEDOWN;
 	}
-	else 
+	else if (strlen(k) == 1)
 	{
-		key = keyCodeForChar(*k); 
+		*key = keyCodeForChar(*k); 
+	}
+  else
+  {
+    return -2;
+  }
+
+  return 0;
+}
+
+int CheckKeyFlags(char* f, MMKeyFlags* flags) {
+
+  if (!flags) return -1;
+
+  if (strcmp(f, "alt") == 0) {
+    *flags = K_ALT;
+  }
+  else if(strcmp(f, "cmd") == 0) {
+    *flags = MOD_META;
+  }
+  else {
+    return -2;
+  }
+
+  return 0;
+}
+
+NAN_METHOD(keyTap) 
+{
+	NanScope();
+	
+	MMKeyFlags flags = MOD_NONE;
+	MMKeyCode key;
+
+  char *k;
+  char *f;
+
+  v8::String::Utf8Value fstr(args[1]->ToString());
+  v8::String::Utf8Value kstr(args[0]->ToString());
+  k = *kstr;
+  f = *fstr;
+
+	switch (args.Length()) 
+  {
+    case 2:
+      break;
+    case 1:
+      f = NULL;
+      break;
+    default:
+      return NanThrowError("Invalid number of arguments.");
 	}
 
-	tapKeyCode(key, flags);
+  if (f) {
+    switch(CheckKeyFlags(f, &flags)) 
+    {
+      case -1:
+        return NanThrowError("Null pointer in key flag");
+        break;
+      case -2:
+        return NanThrowError("Invalid key flag specified."); 
+        break;
+    }
+  }
+
+  switch(CheckKeyCodes(k, &key)) 
+  {
+    case -1:
+      return NanThrowError("Null pointer in key code");
+      break;
+    case -2:
+      return NanThrowError("Invalid key code specified."); 
+      break;
+    default:
+      tapKeyCode(key, flags);
+  }
 
 	NanReturnValue(NanNew("1"));
 }
@@ -258,34 +318,55 @@ NAN_METHOD(keyToggle)
 {
 	NanScope();
 
-	if (args.Length() != 3)
-	{
-		return NanThrowError("Invalid number of arguments.");
-	}
-
-	MMKeyFlags flags = MOD_NONE;
+  MMKeyFlags flags = MOD_NONE;
 	MMKeyCode key;
   
-	char *k = (*v8::String::Utf8Value(args[0]->ToString()));
-  bool down = (*v8::Boolean::New( args[1]->ToBoolean()->BooleanValue()));
+	char *k;
+  bool down;
+  char *f;
 
+  v8::String::Utf8Value kstr(args[0]->ToString());
+  v8::String::Utf8Value fstr(args[2]->ToString());
+  down = args[1]->BooleanValue();
+  k = *kstr;
+  f = *fstr;
 
-	//There's a better way to do this, I just want to get it working.
-  if (strcmp(k, "cmd-tab") == 0)
-	{
-		key = K_TAB;
-    flags = MOD_META;
-	}
-  else if (strcmp(k, "alt") == 0)
-	{
-		key = K_ALT;
-	}
-	else 
-	{
-		key = keyCodeForChar(*k); 
+	switch (args.Length()) 
+  {
+    case 3:
+      break;
+    case 2:
+      f = NULL;
+    case 1:
+      f = NULL;
+      break;
+    default:
+      return NanThrowError("Invalid number of arguments.");
 	}
 
-	toggleKeyCode(key, down, flags);
+  if (f) {
+    switch(CheckKeyFlags(f, &flags)) 
+    {
+      case -1:
+        return NanThrowError("Null pointer in key flag");
+        break;
+      case -2:
+        return NanThrowError("Invalid key flag specified."); 
+        break;
+    }
+  }
+
+  switch(CheckKeyCodes(k, &key)) 
+  {
+    case -1:
+      return NanThrowError("Null pointer in key code");
+      break;
+    case -2:
+      return NanThrowError("Invalid key code specified."); 
+      break;
+    default:
+      toggleKeyCode(key, down, flags);
+  }
 
 	NanReturnValue(NanNew("1"));
 }
@@ -374,6 +455,9 @@ void init(Handle<Object> target)
 
 	target->Set(NanNew<String>("keyTap"),
 		NanNew<FunctionTemplate>(keyTap)->GetFunction());
+	
+  target->Set(NanNew<String>("keyToggle"),
+		NanNew<FunctionTemplate>(keyToggle)->GetFunction());
 
 	target->Set(NanNew<String>("typeString"),
 		NanNew<FunctionTemplate>(typeString)->GetFunction());
