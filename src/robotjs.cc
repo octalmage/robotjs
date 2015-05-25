@@ -175,9 +175,17 @@ int CheckKeyCodes(char* k, MMKeyCode *key) {
 	{
 		*key = K_ALT;
 	}
-  else if (strcmp(k, "cmd") == 0)
+  else if (strcmp(k, "command") == 0)
 	{
 		*key = K_META;
+	}
+  else if (strcmp(k, "control") == 0)
+	{
+		*key = K_CONTROL;
+	}
+  else if (strcmp(k, "shift") == 0)
+	{
+		*key = K_SHIFT;
 	}
   else if (strcmp(k, "backspace") == 0)
 	{
@@ -248,16 +256,37 @@ int CheckKeyFlags(char* f, MMKeyFlags* flags) {
   if (!flags) return -1;
 
   if (strcmp(f, "alt") == 0) {
-    *flags = K_ALT;
+    *flags = MOD_ALT;
   }
-  else if(strcmp(f, "cmd") == 0) {
+  else if(strcmp(f, "command") == 0) {
     *flags = MOD_META;
+  }
+  else if(strcmp(f, "control") == 0) {
+    *flags = MOD_CONTROL;
+  }
+  else if(strcmp(f, "shift") == 0) {
+    *flags = MOD_SHIFT;
+  }
+  else if(strcmp(f, "none") == 0) {
+    *flags = MOD_NONE;
   }
   else {
     return -2;
   }
 
   return 0;
+}
+
+int mssleep(unsigned long millisecond)
+{
+  struct timespec req;
+  time_t sec=(int)(millisecond/1000);
+  millisecond=millisecond-(sec*1000);
+  req.tv_sec=sec;
+  req.tv_nsec=millisecond*1000000L;
+  while(nanosleep(&req,&req)==-1)
+       continue;
+  return 1;
 }
 
 NAN_METHOD(keyTap) 
@@ -308,6 +337,7 @@ NAN_METHOD(keyTap)
       break;
     default:
       tapKeyCode(key, flags);
+      mssleep(10);
   }
 
 	NanReturnValue(NanNew("1"));
@@ -337,8 +367,6 @@ NAN_METHOD(keyToggle)
       break;
     case 2:
       f = NULL;
-    case 1:
-      f = NULL;
       break;
     default:
       return NanThrowError("Invalid number of arguments.");
@@ -366,6 +394,7 @@ NAN_METHOD(keyToggle)
       break;
     default:
       toggleKeyCode(key, down, flags);
+      mssleep(10);
   }
 
 	NanReturnValue(NanNew("1"));
