@@ -355,54 +355,55 @@ NAN_METHOD(keyToggle)
 {
 	NanScope();
 
-  MMKeyFlags flags = MOD_NONE;
+	MMKeyFlags flags = MOD_NONE;
 	MMKeyCode key;
   
 	char *k;
-  bool down;
-  char *f;
+	bool down;
+	char *f;
 
-  v8::String::Utf8Value kstr(args[0]->ToString());
-  v8::String::Utf8Value fstr(args[2]->ToString());
-  down = args[1]->BooleanValue();
-  k = *kstr;
-  f = *fstr;
+	v8::String::Utf8Value kstr(args[0]->ToString());
+	v8::String::Utf8Value fstr(args[2]->ToString());
+	down = args[1]->BooleanValue();
+	k = *kstr;
+	f = *fstr;
 
 	switch (args.Length()) 
-  {
-    case 3:
-      break;
-    case 2:
-      f = NULL;
-      break;
-    default:
-      return NanThrowError("Invalid number of arguments.");
+	{
+    	case 3:
+      		break;
+    	case 2:
+      		f = NULL;
+      		break;
+    	default:
+      		return NanThrowError("Invalid number of arguments.");
 	}
 
-  if (f) {
-    switch(CheckKeyFlags(f, &flags)) 
-    {
-      case -1:
-        return NanThrowError("Null pointer in key flag.");
-        break;
-      case -2:
-        return NanThrowError("Invalid key flag specified."); 
-        break;
-    }
-  }
+	if (f) 
+	{
+		switch(CheckKeyFlags(f, &flags)) 
+		{
+			case -1:
+        		return NanThrowError("Null pointer in key flag.");
+        		break;
+			case -2:
+        		return NanThrowError("Invalid key flag specified."); 
+        		break;
+		}
+	}
 
-  switch(CheckKeyCodes(k, &key)) 
-  {
-    case -1:
-      return NanThrowError("Null pointer in key code.");
-      break;
-    case -2:
-      return NanThrowError("Invalid key code specified."); 
-      break;
-    default:
-      toggleKeyCode(key, down, flags);
-      mssleep(10);
-  }
+	switch(CheckKeyCodes(k, &key)) 
+	{
+		case -1:
+    		return NanThrowError("Null pointer in key code.");
+			break;
+		case -2:
+			return NanThrowError("Invalid key code specified."); 
+			break;
+		default:
+			toggleKeyCode(key, down, flags);
+      		mssleep(10);
+	}
 
 	NanReturnValue(NanNew("1"));
 }
