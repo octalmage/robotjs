@@ -383,7 +383,7 @@ NAN_METHOD(keyToggle)
     switch(CheckKeyFlags(f, &flags)) 
     {
       case -1:
-        return NanThrowError("Null pointer in key flag");
+        return NanThrowError("Null pointer in key flag.");
         break;
       case -2:
         return NanThrowError("Invalid key flag specified."); 
@@ -394,7 +394,7 @@ NAN_METHOD(keyToggle)
   switch(CheckKeyCodes(k, &key)) 
   {
     case -1:
-      return NanThrowError("Null pointer in key code");
+      return NanThrowError("Null pointer in key code.");
       break;
     case -2:
       return NanThrowError("Invalid key code specified."); 
