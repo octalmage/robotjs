@@ -167,27 +167,27 @@ NAN_METHOD(mouseToggle)
           |___/           
 */
 
-int CheckKeyCodes(char* k, MMKeyCode *key) {
+int CheckKeyCodes(char* k, MMKeyCode *key) 
+{
+	if (!key) return -1;
 
-  if (!key) return -1;
-
-  if (strcmp(k, "alt") == 0)
+	if (strcmp(k, "alt") == 0)
 	{
 		*key = K_ALT;
 	}
-  else if (strcmp(k, "command") == 0)
+  	else if (strcmp(k, "command") == 0)
 	{
 		*key = K_META;
 	}
-  else if (strcmp(k, "control") == 0)
+  	else if (strcmp(k, "control") == 0)
 	{
 		*key = K_CONTROL;
 	}
-  else if (strcmp(k, "shift") == 0)
+  	else if (strcmp(k, "shift") == 0)
 	{
 		*key = K_SHIFT;
 	}
-  else if (strcmp(k, "backspace") == 0)
+	else if (strcmp(k, "backspace") == 0)
 	{
 		*key = K_BACKSPACE;
 	}
@@ -243,50 +243,56 @@ int CheckKeyCodes(char* k, MMKeyCode *key) {
 	{
 		*key = keyCodeForChar(*k); 
 	}
-  else
-  {
-    return -2;
-  }
+	else
+	{
+		return -2;
+	}
 
-  return 0;
+	return 0;
 }
 
-int CheckKeyFlags(char* f, MMKeyFlags* flags) {
+int CheckKeyFlags(char* f, MMKeyFlags* flags) 
+{
+	if (!flags) return -1;
 
-  if (!flags) return -1;
+	if (strcmp(f, "alt") == 0) 
+	{
+    	*flags = MOD_ALT;
+  	}
+  	else if(strcmp(f, "command") == 0) 
+	{
+    	*flags = MOD_META;
+  	}
+  	else if(strcmp(f, "control") == 0) 
+	{
+    	*flags = MOD_CONTROL;
+  	}
+  	else if(strcmp(f, "shift") == 0) 
+	{
+    	*flags = MOD_SHIFT;
+	}
+	else if(strcmp(f, "none") == 0) 
+	{
+    	*flags = MOD_NONE;
+  	}
+ 	else 
+	{
+    	return -2;
+  	}
 
-  if (strcmp(f, "alt") == 0) {
-    *flags = MOD_ALT;
-  }
-  else if(strcmp(f, "command") == 0) {
-    *flags = MOD_META;
-  }
-  else if(strcmp(f, "control") == 0) {
-    *flags = MOD_CONTROL;
-  }
-  else if(strcmp(f, "shift") == 0) {
-    *flags = MOD_SHIFT;
-  }
-  else if(strcmp(f, "none") == 0) {
-    *flags = MOD_NONE;
-  }
-  else {
-    return -2;
-  }
-
-  return 0;
+	return 0;
 }
 
 int mssleep(unsigned long millisecond)
 {
-  struct timespec req;
-  time_t sec=(int)(millisecond/1000);
-  millisecond=millisecond-(sec*1000);
-  req.tv_sec=sec;
-  req.tv_nsec=millisecond*1000000L;
-  while(nanosleep(&req,&req)==-1)
-       continue;
-  return 1;
+	struct timespec req;
+	time_t sec=(int)(millisecond/1000);
+	millisecond=millisecond-(sec*1000);
+	req.tv_sec=sec;
+	req.tv_nsec=millisecond*1000000L;
+	while(nanosleep(&req,&req)==-1)
+		continue;
+	return 1;
 }
 
 NAN_METHOD(keyTap) 
@@ -296,49 +302,50 @@ NAN_METHOD(keyTap)
 	MMKeyFlags flags = MOD_NONE;
 	MMKeyCode key;
 
-  char *k;
-  char *f;
+  	char *k;
+  	char *f;
 
-  v8::String::Utf8Value fstr(args[1]->ToString());
-  v8::String::Utf8Value kstr(args[0]->ToString());
-  k = *kstr;
-  f = *fstr;
+  	v8::String::Utf8Value fstr(args[1]->ToString());
+  	v8::String::Utf8Value kstr(args[0]->ToString());
+  	k = *kstr;
+  	f = *fstr;
 
 	switch (args.Length()) 
-  {
-    case 2:
-      break;
-    case 1:
-      f = NULL;
-      break;
-    default:
-      return NanThrowError("Invalid number of arguments.");
+	{
+    	case 2:
+			break;
+    	case 1:
+			f = NULL;
+			break;
+    	default:
+      		return NanThrowError("Invalid number of arguments.");
 	}
 
-  if (f) {
-    switch(CheckKeyFlags(f, &flags)) 
-    {
-      case -1:
-        return NanThrowError("Null pointer in key flag");
-        break;
-      case -2:
-        return NanThrowError("Invalid key flag specified."); 
-        break;
-    }
-  }
+  	if (f) 
+	{
+    	switch(CheckKeyFlags(f, &flags)) 
+    	{
+      		case -1:
+        		return NanThrowError("Null pointer in key flag.");
+        		break;
+      		case -2:
+        		return NanThrowError("Invalid key flag specified."); 
+        		break;
+    	}
+  	}
 
-  switch(CheckKeyCodes(k, &key)) 
-  {
-    case -1:
-      return NanThrowError("Null pointer in key code");
-      break;
-    case -2:
-      return NanThrowError("Invalid key code specified."); 
-      break;
-    default:
-      tapKeyCode(key, flags);
-      mssleep(10);
-  }
+	switch(CheckKeyCodes(k, &key)) 
+	{
+    	case -1:
+      		return NanThrowError("Null pointer in key code.");
+      		break;
+    	case -2:
+      		return NanThrowError("Invalid key code specified."); 
+      		break;
+    	default:
+      		tapKeyCode(key, flags);
+      		mssleep(10);
+	}
 
 	NanReturnValue(NanNew("1"));
 }
