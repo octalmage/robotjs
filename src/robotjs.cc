@@ -492,7 +492,7 @@ void init(Handle<Object> target)
 	target->Set(NanNew<String>("keyTap"),
 		NanNew<FunctionTemplate>(keyTap)->GetFunction());
 	
-  target->Set(NanNew<String>("keyToggle"),
+	target->Set(NanNew<String>("keyToggle"),
 		NanNew<FunctionTemplate>(keyToggle)->GetFunction());
 
 	target->Set(NanNew<String>("typeString"),
