@@ -323,28 +323,28 @@ NAN_METHOD(keyTap)
 
   	if (f) 
 	{
-    	switch(CheckKeyFlags(f, &flags)) 
+		switch(CheckKeyFlags(f, &flags)) 
     	{
-      		case -1:
+			case -1:
         		return NanThrowError("Null pointer in key flag.");
         		break;
-      		case -2:
+			case -2:
         		return NanThrowError("Invalid key flag specified."); 
         		break;
     	}
-  	}
+	}
 
 	switch(CheckKeyCodes(k, &key)) 
 	{
-    	case -1:
-      		return NanThrowError("Null pointer in key code.");
-      		break;
+		case -1:
+			return NanThrowError("Null pointer in key code.");
+			break;
     	case -2:
-      		return NanThrowError("Invalid key code specified."); 
-      		break;
-    	default:
-      		tapKeyCode(key, flags);
-      		mssleep(10);
+			return NanThrowError("Invalid key code specified."); 
+			break;
+		default:
+			tapKeyCode(key, flags);
+			mssleep(10);
 	}
 
 	NanReturnValue(NanNew("1"));
