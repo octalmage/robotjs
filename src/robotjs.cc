@@ -312,13 +312,13 @@ NAN_METHOD(keyTap)
 
 	switch (args.Length()) 
 	{
-    	case 2:
+		case 2:
 			break;
-    	case 1:
+		case 1:
 			f = NULL;
 			break;
-    	default:
-      		return NanThrowError("Invalid number of arguments.");
+		default:
+			return NanThrowError("Invalid number of arguments.");
 	}
 
   	if (f) 
@@ -326,10 +326,10 @@ NAN_METHOD(keyTap)
 		switch(CheckKeyFlags(f, &flags)) 
     	{
 			case -1:
-        		return NanThrowError("Null pointer in key flag.");
+				return NanThrowError("Null pointer in key flag.");
         		break;
 			case -2:
-        		return NanThrowError("Invalid key flag specified."); 
+				return NanThrowError("Invalid key flag specified."); 
         		break;
     	}
 	}
@@ -339,7 +339,7 @@ NAN_METHOD(keyTap)
 		case -1:
 			return NanThrowError("Null pointer in key code.");
 			break;
-    	case -2:
+		case -2:
 			return NanThrowError("Invalid key code specified."); 
 			break;
 		default:
