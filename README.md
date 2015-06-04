@@ -90,7 +90,7 @@ node-gyp build
 | Module        | Status        | Notes   |
 | ------------- |-------------: | ------- |
 | Mouse         | 100%           | All planned features implemented.       |
-| Keyboard      | 85%           | No toggle support.       |
+| Keyboard      | 100%           | All planned features implemented.       |
 | Screen        | 10%            | Screenshot, image search.   |
 
 ## Story
