@@ -472,6 +472,30 @@ NAN_METHOD(getScreenSize)
 	NanReturnValue(obj);
 }
 
+NAN_METHOD(getScreenImage)
+{
+	NanScope();
+
+	size_t x = args[0]->Int32Value();
+	size_t y = args[1]->Int32Value();
+	size_t w = args[2]->Int32Value();
+	size_t h = args[3]->Int32Value();
+	MMBitmapRef bitmap = copyMMBitmapFromDisplayInRect(MMRectMake(x, y, w, h));
+	uint32_t bufferSize = bitmap->bytesPerPixel * bitmap->width * bitmap->height;
+	Local<Object> buffer = NanNewBufferHandle((char*)bitmap->imageBuffer, bufferSize);
+
+	Local<Object> obj = NanNew<Object>();
+	obj->Set(NanNew<String>("width"), NanNew<Number>(bitmap->width));
+	obj->Set(NanNew<String>("height"), NanNew<Number>(bitmap->height));
+	obj->Set(NanNew<String>("byteWidth"), NanNew<Number>(bitmap->bytewidth));
+	obj->Set(NanNew<String>("bitsPerPixel"), NanNew<Number>(bitmap->bitsPerPixel));
+	obj->Set(NanNew<String>("bytesPerPixel"), NanNew<Number>(bitmap->bytesPerPixel));
+	obj->Set(NanNew<String>("image"), buffer);
+
+	destroyMMBitmap(bitmap);
+	NanReturnValue(obj);
+}
+
 void init(Handle<Object> target) 
 {
 
@@ -492,7 +516,7 @@ void init(Handle<Object> target)
 
 	target->Set(NanNew<String>("keyTap"),
 		NanNew<FunctionTemplate>(keyTap)->GetFunction());
-	
+
 	target->Set(NanNew<String>("keyToggle"),
 		NanNew<FunctionTemplate>(keyToggle)->GetFunction());
 
@@ -504,6 +528,9 @@ void init(Handle<Object> target)
 
 	target->Set(NanNew<String>("getScreenSize"),
 		NanNew<FunctionTemplate>(getScreenSize)->GetFunction());
+
+	target->Set(NanNew<String>("getScreenImage"),
+		NanNew<FunctionTemplate>(getScreenImage)->GetFunction());
 
 }
 
