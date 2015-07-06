@@ -4,20 +4,20 @@
 
 static Display *mainDisplay = NULL;
 static int registered = 0;
-static char *display_name = ":0.0";
-static int display_name_changed = 0;
+static char *displayName = ":0.0";
+static int hasDisplayNameChanged = 0;
 
 Display *XGetMainDisplay(void)
 {
-	/* Close the display if display_name has changed */
-	if (display_name_changed) {
+	/* Close the display if displayName has changed */
+	if (hasDisplayNameChanged) {
 		XCloseMainDisplay();
+		hasDisplayNameChanged = 0;
 	}
-	display_name_changed = 0;
 
 	if (mainDisplay == NULL) {
-		/* First try the user set display_name */
-		mainDisplay = XOpenDisplay(display_name);
+		/* First try the user set displayName */
+		mainDisplay = XOpenDisplay(displayName);
 
 		/* Then try using environment variable DISPLAY */
 		if (mainDisplay == NULL) {
@@ -45,10 +45,10 @@ void XCloseMainDisplay(void)
 
 char *getXDisplay(void)
 {
-	return display_name;
+	return displayName;
 }
 
 void setXDisplay(char *name) {
-	display_name = name;
-	display_name_changed = 1;
+	displayName = name;
+	hasDisplayNameChanged = 1;
 }
