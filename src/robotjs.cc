@@ -2,12 +2,14 @@
 #include <nan.h>
 #include <v8.h>
 #include <vector>
+#include "string.h"
 #include "mouse.h"
 #include "deadbeef_rand.h"
 #include "keypress.h"
 #include "screen.h"
 #include "screengrab.h"
 #include "MMBitmap.h"
+#include "xdisplay.h"
 
 using namespace v8;
 
@@ -472,6 +474,26 @@ NAN_METHOD(getScreenSize)
 	NanReturnValue(obj);
 }
 
+NAN_METHOD(getXDisplayName)
+{
+	NanScope();
+	NanReturnValue(NanNew<String>(getXDisplay()));
+}
+
+NAN_METHOD(setXDisplayName)
+{
+	NanScope();
+
+	//Convert arg to c-string
+	//NOTE: surely better way to go from v8::String to char* ?
+	std::string name =
+		std::string(*v8::String::Utf8Value(args[0]->ToString()));
+	char *display_name = strdup(name.c_str());
+
+	setXDisplay(display_name);
+	NanReturnUndefined();
+}
+
 void init(Handle<Object> target) 
 {
 
@@ -504,6 +526,12 @@ void init(Handle<Object> target)
 
 	target->Set(NanNew<String>("getScreenSize"),
 		NanNew<FunctionTemplate>(getScreenSize)->GetFunction());
+
+	target->Set(NanNew<String>("getXDisplayName"),
+		NanNew<FunctionTemplate>(getXDisplayName)->GetFunction());
+
+	target->Set(NanNew<String>("setXDisplayName"),
+		NanNew<FunctionTemplate>(setXDisplayName)->GetFunction());
 
 }
 
