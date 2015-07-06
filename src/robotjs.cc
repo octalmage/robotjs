@@ -2,6 +2,7 @@
 #include <nan.h>
 #include <v8.h>
 #include <vector>
+#include "string.h"
 #include "mouse.h"
 #include "deadbeef_rand.h"
 #include "keypress.h"
@@ -10,6 +11,7 @@
 #include "MMBitmap.h"
 #include "snprintf.h"
 #include "microsleep.h"
+#include "xdisplay.h"
 
 using namespace v8;
 
@@ -678,6 +680,26 @@ NAN_METHOD(getScreenSize)
 	info.GetReturnValue().Set(obj);
 }
 
+NAN_METHOD(getXDisplayName)
+{
+	NanScope();
+	NanReturnValue(NanNew<String>(getXDisplay()));
+}
+
+NAN_METHOD(setXDisplayName)
+{
+	NanScope();
+
+	//Convert arg to c-string
+	//NOTE: surely better way to go from v8::String to char* ?
+	std::string name =
+		std::string(*v8::String::Utf8Value(args[0]->ToString()));
+	char *display_name = strdup(name.c_str());
+
+	setXDisplay(display_name);
+	NanReturnUndefined();
+}
+
 NAN_METHOD(captureScreen) 
 {
 	size_t x;
@@ -850,6 +872,12 @@ NAN_MODULE_INIT(InitAll)
 		
 	Nan::Set(target, Nan::New("getColor").ToLocalChecked(),
 		Nan::GetFunction(Nan::New<FunctionTemplate>(getColor)).ToLocalChecked());
+
+	Nan::Set(target, Nan::New("getXDisplayName").ToLocalChecked(),
+		Nan::GetFunction(Nan::New<FunctionTemplate>(getXDisplayName)).ToLocalChecked());
+
+	Nan::Set(target, Nan::New("setXDisplayName").ToLocalChecked(),
+		Nan::GetFunction(Nan::New<FunctionTemplate>(setXDisplayName)).ToLocalChecked());
 }
 
 NODE_MODULE(robotjs, InitAll)
