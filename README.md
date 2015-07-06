@@ -17,8 +17,6 @@ node-gyp is only configured for Mac, but this project will support Windows and L
 npm install robotjs
 ```
 
-Note: See the [wiki](https://github.com/octalmage/robotjs/wiki/Building) for Linux install instructions.
-
 ## Examples
 Get the mouse location and move it. 
 
