@@ -5,9 +5,7 @@ Node.js Desktop Automation. Control the mouse, keyboard, and read the screen.
 
 This is a work in progress so the exported functions could change at any time before the first stable release (1.0.0). [Ideas?](https://github.com/octalmage/robotjs/issues/4)
 
-Only tested on Mac OS X using Node.js v0.10.31. 
-
-node-gyp is only configured for Mac, but this project will support Windows and Linux when I have time to test.
+RobotJS is configured for Mac and [Linux](https://github.com/octalmage/robotjs/issues/17), but this project will support [Windows](https://github.com/octalmage/robotjs/issues/2) soon.
 
 [![npm version](https://img.shields.io/npm/v/robotjs.svg)](https://www.npmjs.com/package/robotjs) [![Build Status](https://travis-ci.org/octalmage/robotjs.svg)](https://travis-ci.org/octalmage/robotjs) [![Ready](https://badge.waffle.io/octalmage/robotjs.svg?label=ready&title=Ready)](http://waffle.io/octalmage/robotjs) [![Join the chat at https://gitter.im/octalmage/robotjs](https://badges.gitter.im/Join%20Chat.svg)](https://gitter.im/octalmage/robotjs?utm_source=badge&utm_medium=badge&utm_campaign=pr-badge&utm_content=badge)
 
