@@ -104,3 +104,4 @@ I like AutoHotkey, but I like Node.js more. By developing RobotJS I get an AutoH
 MIT
 
 Based on [autopy](https://github.com/msanders/autopy). 
+Maintained by [Jason Stallings](http://jason.stallin.gs).
