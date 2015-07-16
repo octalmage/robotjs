@@ -49,6 +49,6 @@ char *getXDisplay(void)
 }
 
 void setXDisplay(char *name) {
-	displayName = name;
+	displayName = strdup(name);
 	hasDisplayNameChanged = 1;
 }
