@@ -2,7 +2,6 @@
 #include <nan.h>
 #include <v8.h>
 #include <vector>
-#include "string.h"
 #include "mouse.h"
 #include "deadbeef_rand.h"
 #include "keypress.h"
@@ -690,13 +689,9 @@ NAN_METHOD(setXDisplayName)
 {
 	NanScope();
 
-	//Convert arg to c-string
-	//NOTE: surely better way to go from v8::String to char* ?
-	std::string name =
-		std::string(*v8::String::Utf8Value(args[0]->ToString()));
-	char *display_name = strdup(name.c_str());
+	NanUtf8String name(args[0]);
+	setXDisplay(*name);
 
-	setXDisplay(display_name);
 	NanReturnUndefined();
 }
 
