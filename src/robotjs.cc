@@ -10,7 +10,9 @@
 #include "MMBitmap.h"
 #include "snprintf.h"
 #include "microsleep.h"
-#include "xdisplay.h"
+#if defined(USE_X11)
+	#include "xdisplay.h"
+#endif
 
 using namespace v8;
 
@@ -682,17 +684,25 @@ NAN_METHOD(getScreenSize)
 NAN_METHOD(getXDisplayName)
 {
 	NanScope();
+
+	#if defined(USE_X11)
 	NanReturnValue(NanNew<String>(getXDisplay()));
+	#else
+	NanThrowError("getXDisplayName is only supported on Linux");
+	#endif
 }
 
 NAN_METHOD(setXDisplayName)
 {
 	NanScope();
 
+	#if defined(USE_X11)
 	NanUtf8String name(args[0]);
 	setXDisplay(*name);
-
-	NanReturnUndefined();
+	NanReturnValue(NanNew("1"));
+	#else
+	NanThrowError("setXDisplayName is only supported on Linux");
+	#endif
 }
 
 NAN_METHOD(captureScreen) 
