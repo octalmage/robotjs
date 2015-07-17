@@ -68,7 +68,7 @@ Install node-gyp using npm:
 npm install -g node-gyp
 ```
 
-Then confgure and build: 
+Then configure and build: 
 
 ```
 node-gyp configure
