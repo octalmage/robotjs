@@ -44,7 +44,8 @@ enum _MMKeyCode {
 	K_ALT = kVK_Option,
 	K_CONTROL = kVK_Control,
 	K_SHIFT = kVK_Shift,
-	K_CAPSLOCK = kVK_CapsLock
+	K_CAPSLOCK = kVK_CapsLock,
+	K_SPACE = kVK_Space
 };
 
 typedef CGKeyCode MMKeyCode;
@@ -83,7 +84,8 @@ enum _MMKeyCode {
 	K_ALT = XK_Alt_L,
 	K_CONTROL = XK_Control_L,
 	K_SHIFT = XK_Shift_L,
-	K_CAPSLOCK = XK_Shift_Lock
+	K_CAPSLOCK = XK_Shift_Lock,
+	K_SPACE = XK_KP_Space
 };
 
 typedef KeySym MMKeyCode;
@@ -120,7 +122,8 @@ enum _MMKeyCode {
 	K_CONTROL = VK_CONTROL,
 	K_SHIFT = VK_SHIFT,
 	K_ALT = VK_MENU,
-	K_CAPSLOCK = VK_CAPITAL
+	K_CAPSLOCK = VK_CAPITAL,
+	K_SPACE = VK_SPACE
 };
 
 typedef int MMKeyCode;
