@@ -239,6 +239,10 @@ int CheckKeyCodes(char* k, MMKeyCode *key)
 	{
 		*key = K_PAGEDOWN;
 	}
+	else if (strcmp(k, "space") == 0)
+	{
+		*key = K_SPACE;
+	}
 	else if (strlen(k) == 1)
 	{
 		*key = keyCodeForChar(*k); 
