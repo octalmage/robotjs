@@ -449,7 +449,7 @@ NAN_METHOD(getPixelColor)
 
 	color = MMRGBHexAtPoint(bitmap, 0, 0);
 	
-	char hex [6];
+	char hex [7];
 
 	//Length needs to be 7 because snprintf includes a terminating null.
 	//Use %06x to pad hex value with leading 0s. 
