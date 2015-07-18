@@ -85,7 +85,7 @@ enum _MMKeyCode {
 	K_CONTROL = XK_Control_L,
 	K_SHIFT = XK_Shift_L,
 	K_CAPSLOCK = XK_Shift_Lock,
-	K_SPACE = XK_KP_Space
+	K_SPACE = XK_space
 };
 
 typedef KeySym MMKeyCode;
