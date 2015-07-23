@@ -8,6 +8,7 @@
 #include "screen.h"
 #include "screengrab.h"
 #include "MMBitmap.h"
+#include "snprintf.h"
 
 using namespace v8;
 
