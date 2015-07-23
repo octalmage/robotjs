@@ -5,12 +5,8 @@
 #include <stdlib.h> /* For abs() */
 #include <math.h>
 #include "inline_keywords.h" /* For H_INLINE */
+#include <stdint.h>
 
-#if defined(_MSC_VER)
-	#include "ms_stdint.h"
-#else
-	#include <stdint.h>
-#endif
 
 /* RGB colors in MMBitmaps are stored as BGR for convenience in converting
  * to/from certain formats (mainly OpenGL).

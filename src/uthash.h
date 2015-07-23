@@ -27,12 +27,8 @@
 
 #include <string.h> /* memcmp, strlen */
 #include <stddef.h> /* ptrdiff_t */
+#include <stdint.h>
 
-#if defined(_MSC_VER)
-	#include "ms_stdint.h"
-#else
-	#include <stdint.h>
-#endif
 
 #define UTHASH_VERSION 1.8
 

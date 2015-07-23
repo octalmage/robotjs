@@ -4,12 +4,8 @@
 
 #include "MMBitmap.h"
 #include "io.h"
+#include <stdint.h>
 
-#if defined(_MSC_VER)
-	#include "ms_stdint.h"
-#else
-	#include <stdint.h>
-#endif
 
 enum _MMBMPStringError {
 	kMMBMPStringGenericError = 0,
