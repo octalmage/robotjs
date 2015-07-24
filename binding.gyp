@@ -2,7 +2,7 @@
   'targets': [{
     'target_name': 'robotjs',
     'include_dirs': [
-        '<!(node -e \'require("nan")\')'
+        'node_modules/nan/'
     ],
     
     'cflags': [
@@ -44,7 +44,11 @@
         'sources': [
           'src/xdisplay.c'
         ]
-      }]
+      }],
+    ["OS=='win'", {
+    'defines': [
+      'IS_WINDOWS']
+    }]
     ],
     
     'sources': [
@@ -55,6 +59,7 @@
       'src/keycode.c',
       'src/screen.c',
       'src/screengrab.c',
+      'src/snprintf.c',
       'src/MMBitmap.c'
     ]
   }]
