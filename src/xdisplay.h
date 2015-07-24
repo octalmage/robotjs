@@ -14,4 +14,16 @@ Display *XGetMainDisplay(void);
 /* Closes the main display if it is open, or does nothing if not. */
 void XCloseMainDisplay(void);
 
+#ifdef __cplusplus
+extern "C"
+{
+#endif
+
+char *getXDisplay(void);
+void setXDisplay(char *name);
+
+#ifdef __cplusplus
+}
+#endif
+
 #endif /* XDISPLAY_H */

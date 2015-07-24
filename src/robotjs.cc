@@ -8,6 +8,10 @@
 #include "screen.h"
 #include "screengrab.h"
 #include "MMBitmap.h"
+#if defined(USE_X11)
+	#include "xdisplay.h"
+#endif
+
 
 using namespace v8;
 
@@ -476,6 +480,30 @@ NAN_METHOD(getScreenSize)
 	NanReturnValue(obj);
 }
 
+NAN_METHOD(getXDisplayName)
+{
+	NanScope();
+
+	#if defined(USE_X11)
+	NanReturnValue(NanNew<String>(getXDisplay()));
+	#else
+	NanThrowError("getXDisplayName is only supported on Linux");
+	#endif
+}
+
+NAN_METHOD(setXDisplayName)
+{
+	NanScope();
+
+	#if defined(USE_X11)
+	NanUtf8String name(args[0]);
+	setXDisplay(*name);
+	NanReturnValue(NanNew("1"));
+	#else
+	NanThrowError("setXDisplayName is only supported on Linux");
+	#endif
+}
+
 void init(Handle<Object> target) 
 {
 
@@ -508,6 +536,12 @@ void init(Handle<Object> target)
 
 	target->Set(NanNew<String>("getScreenSize"),
 		NanNew<FunctionTemplate>(getScreenSize)->GetFunction());
+
+	target->Set(NanNew<String>("getXDisplayName"),
+		NanNew<FunctionTemplate>(getXDisplayName)->GetFunction());
+
+	target->Set(NanNew<String>("setXDisplayName"),
+		NanNew<FunctionTemplate>(setXDisplayName)->GetFunction());
 
 }
 
