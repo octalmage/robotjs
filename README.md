@@ -3,9 +3,9 @@ RobotJS
 
 Node.js Desktop Automation. Control the mouse, keyboard, and read the screen.
 
-This is a work in progress so the exported functions could change at any time before the first stable release (1.0.0). [Ideas?](https://github.com/octalmage/robotjs/issues/4)
+RobotJS supports Mac, [Windows](https://github.com/octalmage/robotjs/issues/2), and [Linux](https://github.com/octalmage/robotjs/issues/17).
 
-RobotJS is configured for Mac and [Linux](https://github.com/octalmage/robotjs/issues/17), but this project will support [Windows](https://github.com/octalmage/robotjs/issues/2) soon.
+This is a work in progress so the exported functions could change at any time before the first stable release (1.0.0). [Ideas?](https://github.com/octalmage/robotjs/issues/4)
 
 [Check out some of the cool things people are making with  RobotJS](https://github.com/octalmage/robotjs/wiki/Projects-using-RobotJS)! Have your own rad RobotJS project? Feel free to add it!
 
