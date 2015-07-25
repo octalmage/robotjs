@@ -25,10 +25,10 @@ MMBitmapRef copyMMBitmapFromDisplayInRect(MMRect rect)
 
 	CGDirectDisplayID displayID = CGMainDisplayID();
 
-	//Replacement for CGDisplayBitsPerPixel. 
+	//Replacement for CGDisplayBitsPerPixel.
 	CGDisplayModeRef mode = CGDisplayCopyDisplayMode(displayID);
 	size_t depth = 0;
-	
+
 	CFStringRef pixEnc = CGDisplayModeCopyPixelEncoding(mode);
 	if(CFStringCompare(pixEnc, CFSTR(IO32BitDirectPixels), kCFCompareCaseInsensitive) == kCFCompareEqualTo)
 		depth = 32;
@@ -37,7 +37,7 @@ MMBitmapRef copyMMBitmapFromDisplayInRect(MMRect rect)
 	else if(CFStringCompare(pixEnc, CFSTR(IO8BitIndexedPixels), kCFCompareCaseInsensitive) == kCFCompareEqualTo)
 		depth = 8;
 
-	bitsPerPixel = (uint8_t) depth;  
+	bitsPerPixel = (uint8_t) depth;
 	bytesPerPixel = bitsPerPixel / 8;
 	/* Align width to padding. */
 	//bytewidth = ADD_PADDING(rect.size.width * bytesPerPixel);
@@ -52,15 +52,15 @@ MMBitmapRef copyMMBitmapFromDisplayInRect(MMRect rect)
     CGDataProviderRef provider = CGImageGetDataProvider(image);
     CFDataRef data = CGDataProviderCopyData(provider);
 
-    size_t width, height;    
+    size_t width, height;
     width = CGImageGetWidth(image);
-    height = CGImageGetHeight(image); 
+    height = CGImageGetHeight(image);
     size_t bpp = CGImageGetBitsPerPixel(image) / 8;
 
     uint8 *pixels = malloc(width * height * bpp);
     memcpy(pixels, CFDataGetBytePtr(data), width * height * bpp);
-    CFRelease(data); 
-   	CGImageRelease(image); 
+    CFRelease(data);
+   	CGImageRelease(image);
 
 	return createMMBitmap(pixels, rect.size.width, rect.size.height, bytewidth,
 	                      bitsPerPixel, bytesPerPixel);
@@ -118,11 +118,16 @@ MMBitmapRef copyMMBitmapFromDisplayInRect(MMRect rect)
 	/* Copy the data into a bitmap struct. */
 	if ((screenMem = CreateCompatibleDC(screen)) == NULL ||
 	    SelectObject(screenMem, dib) == NULL ||
-	    !BitBlt(screenMem, 
-	            (int)rect.origin.x, 
-	            (int)rect.origin.y, 
+	    !BitBlt(screenMem,
+	            (int)0,
+	            (int)0,
 	            (int)rect.size.width,
-	            (int)rect.size.height, screen, 0, 0, SRCCOPY)) {
+	            (int)rect.size.height,
+				screen,
+				rect.origin.x,
+				rect.origin.y,
+				SRCCOPY)) {
+		
 		/* Error copying data. */
 		ReleaseDC(NULL, screen);
 		DeleteObject(dib);
@@ -135,7 +140,7 @@ MMBitmapRef copyMMBitmapFromDisplayInRect(MMRect rect)
 	                        rect.size.width,
 	                        rect.size.height,
 	                        4 * rect.size.width,
-	                        (uint8_t)bi.bmiHeader.biBitCount, 
+	                        (uint8_t)bi.bmiHeader.biBitCount,
 	                        4);
 
 	/* Copy the data to our pixel buffer. */

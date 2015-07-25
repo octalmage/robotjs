@@ -15,6 +15,11 @@
 #include <stddef.h>
 #include <stdarg.h>
 
+#ifdef __cplusplus
+extern "C" 
+{
+#endif
+
 #ifdef HAVE_SNPRINTF
 #include <stdio.h>
 #else
@@ -34,4 +39,8 @@ extern int vasprintf (char **ptr, const char *fmt, va_list ap);
 extern int asnprintf (char **ptr, size_t str_m, const char *fmt, /*args*/ ...);
 extern int vasnprintf(char **ptr, size_t str_m, const char *fmt, va_list ap);
 
+#endif
+
+#ifdef __cplusplus
+}
 #endif
