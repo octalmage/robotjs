@@ -45,10 +45,10 @@
           'src/xdisplay.c'
         ]
       }],
-    ["OS=='win'", {
-    'defines': [
-      'IS_WINDOWS']
-    }]
+
+      ["OS=='win'", {
+        'defines': ['IS_WINDOWS']
+      }]
     ],
     
     'sources': [
