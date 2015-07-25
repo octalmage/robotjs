@@ -123,10 +123,11 @@ MMBitmapRef copyMMBitmapFromDisplayInRect(MMRect rect)
 	            (int)0,
 	            (int)rect.size.width,
 	            (int)rect.size.height,
-							screen,
-							rect.origin.x,
-							rect.origin.y,
-							SRCCOPY)) {
+				screen,
+				rect.origin.x,
+				rect.origin.y,
+				SRCCOPY)) {
+		
 		/* Error copying data. */
 		ReleaseDC(NULL, screen);
 		DeleteObject(dib);
