@@ -16,6 +16,6 @@ test('Move the mouse.', function(t)
 	lastKnownPos = robot.moveMouse(0, 0);
 	t.ok(robot.moveMouse(100, 100), 'successfully moved the mouse.');
 	currentPos = robot.getMousePos();
-	t.ok(currentPos.x !== lastKnownPos.x, 'mousepos.x has changed.');
-	t.ok(currentPos.y !== lastKnownPos.y, 'mousepos.y has changed.');
+	t.ok(currentPos.x === 100, 'mousepos.x is correct.');
+	t.ok(currentPos.y === 100, 'mousepos.y is correct.');
 });
