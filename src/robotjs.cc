@@ -35,6 +35,8 @@ NAN_METHOD(moveMouse)
 	MMPoint point;
 	point = MMPointMake(x, y);
 	moveMouse(point);
+	microsleep(10);
+
 	NanReturnValue(NanNew("1"));
 }
 
@@ -51,6 +53,8 @@ NAN_METHOD(moveMouseSmooth)
 	MMPoint point;
 	point = MMPointMake(x, y);
 	smoothlyMoveMouse(point);
+	microsleep(10);
+
 	NanReturnValue(NanNew("1"));
 }
 
@@ -100,6 +104,7 @@ NAN_METHOD(mouseClick)
 	}
 
 	clickMouse(button);
+	microsleep(10);
 
 	NanReturnValue(NanNew("1"));
 }
@@ -156,6 +161,7 @@ NAN_METHOD(mouseToggle)
 	}
 
 	toggleMouse(down, button);
+	microsleep(10);
 
 	NanReturnValue(NanNew("1"));
 }
