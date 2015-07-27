@@ -60,8 +60,8 @@ NAN_METHOD(getMousePos)
 
  	//Return object with .x and .y.
 	Local<Object> obj = NanNew<Object>();
-	obj->Set(NanNew<String>("x"), NanNew<Number>(pos.x));
-	obj->Set(NanNew<String>("y"), NanNew<Number>(pos.y));
+	obj->Set(NanNew<String>("x"), NanNew<Integer>((int)pos.x));
+	obj->Set(NanNew<String>("y"), NanNew<Integer>((int)pos.y));
 	NanReturnValue(obj);
 }
 
