@@ -5,12 +5,7 @@
 #include "types.h"
 #include "rgb.h"
 #include <assert.h>
-
-#if defined(_MSC_VER)
-	#include "ms_stdint.h"
-#else
-	#include <stdint.h>
-#endif
+#include <stdint.h>
 
 #ifdef __cplusplus
 extern "C" 

@@ -8,6 +8,8 @@
 #include "screen.h"
 #include "screengrab.h"
 #include "MMBitmap.h"
+#include "snprintf.h"
+#include "microsleep.h"
 
 using namespace v8;
 
@@ -33,6 +35,8 @@ NAN_METHOD(moveMouse)
 	MMPoint point;
 	point = MMPointMake(x, y);
 	moveMouse(point);
+	microsleep(10);
+
 	NanReturnValue(NanNew("1"));
 }
 
@@ -49,6 +53,8 @@ NAN_METHOD(moveMouseSmooth)
 	MMPoint point;
 	point = MMPointMake(x, y);
 	smoothlyMoveMouse(point);
+	microsleep(10);
+
 	NanReturnValue(NanNew("1"));
 }
 
@@ -98,6 +104,7 @@ NAN_METHOD(mouseClick)
 	}
 
 	clickMouse(button);
+	microsleep(10);
 
 	NanReturnValue(NanNew("1"));
 }
@@ -154,6 +161,7 @@ NAN_METHOD(mouseToggle)
 	}
 
 	toggleMouse(down, button);
+	microsleep(10);
 
 	NanReturnValue(NanNew("1"));
 }
@@ -287,18 +295,6 @@ int CheckKeyFlags(char* f, MMKeyFlags* flags)
 	return 0;
 }
 
-int mssleep(unsigned long millisecond)
-{
-	struct timespec req;
-	time_t sec=(int)(millisecond/1000);
-	millisecond=millisecond-(sec*1000);
-	req.tv_sec=sec;
-	req.tv_nsec=millisecond*1000000L;
-	while(nanosleep(&req,&req)==-1)
-		continue;
-	return 1;
-}
-
 NAN_METHOD(keyTap) 
 {
 	NanScope();
@@ -348,7 +344,7 @@ NAN_METHOD(keyTap)
 			break;
 		default:
 			tapKeyCode(key, flags);
-			mssleep(10);
+			microsleep(10);
 	}
 
 	NanReturnValue(NanNew("1"));
@@ -406,7 +402,7 @@ NAN_METHOD(keyToggle)
 			break;
 		default:
 			toggleKeyCode(key, down, flags);
-      		mssleep(10);
+      		microsleep(10);
 	}
 
 	NanReturnValue(NanNew("1"));
