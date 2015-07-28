@@ -166,6 +166,25 @@ NAN_METHOD(mouseToggle)
 	NanReturnValue(NanNew("1"));
 }
 
+NAN_METHOD(scrollMouse) 
+{
+	NanScope();
+
+	//Get the values of magnitude and direction from the arguments list
+	if(args.Length() == 2)	
+	{
+		int scrollMagnitude = args[0]->Int32Value();
+		int scrollDirection = args[1]->Int32Value();
+		
+		scrollMouse(scrollMagnitude, scrollDirection);
+		
+		NanReturnValue(NanNew("1"));
+	} 
+	else 
+	{
+		return NanThrowError("Invalid number of arguments.");
+	}
+}
 /*
  _  __          _                         _ 
 | |/ /___ _   _| |__   ___   __ _ _ __ __| |
@@ -489,6 +508,9 @@ void init(Handle<Object> target)
 
 	target->Set(NanNew<String>("mouseToggle"),
 		NanNew<FunctionTemplate>(mouseToggle)->GetFunction());
+		
+	target->Set(NanNew<String>("scrollMouse"),
+		NanNew<FunctionTemplate>(scrollMouse)->GetFunction());
 
 	target->Set(NanNew<String>("keyTap"),
 		NanNew<FunctionTemplate>(keyTap)->GetFunction());

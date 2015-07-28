@@ -124,6 +124,38 @@ void clickMouse(MMMouseButton button)
 	toggleMouse(false, button);
 }
 
+/**
+ * Function used to scroll the screen in the required direction.
+ * This uses the magnitude to scroll the required amount in the direction. 
+ * TODO Requires further fine tuning based on the requirements.
+ */
+void scrollMouse(int scrollMagnitude, MMMouseWheelDirection scrollDirection)	
+{
+	/* Direction should only be considered based on the scrollDirection. This
+	 * Should not interfere. */
+	int cleanScrollMagnitude = abs(scrollMagnitude);
+	if (!(scrollDirection == DIRECTION_UP || scrollDirection == DIRECTION_DOWN))
+	{
+		return;
+	}
+	
+	/* Set up the OS specific solution */
+	#if defined(__APPLE__)
+		/* TODO Add Code for this platform */
+	#elif defined(USE_X11)
+		/* TODO Add Code for this platform */
+	#elif defined(IS_WINDOWS)
+		INPUT mouseScrollInput;
+		mouseScrollInput.type = INPUT_MOUSE;
+		mouseScrollInput.mi.dx = 0;
+		mouseScrollInput.mi.dy = 0;
+		mouseScrollInput.mi.dwFlags = MOUSEEVENTF_WHEEL;
+		mouseScrollInput.mi.time = 0;
+		mouseScrollInput.mi.dwExtraInfo = 0;
+		mouseScrollInput.mi.mouseData = WHEEL_DELTA * scrollDirection * cleanScrollMagnitude;
+		SendInput(1, &mouseScrollInput, sizeof(mouseScrollInput));
+	#endif
+}
 /*
  * A crude, fast hypot() approximation to get around the fact that hypot() is
  * not a standard ANSI C function.
