@@ -25,9 +25,8 @@ No dependencies.
 
 ### Windows
 
-1. Install the .NET framework 2.0 SDK.
-2. Install Microsoft Visual Studio 2005
-3. Add the location of the component to the system path if it is installed elsewhere.
+* Python (v2.7.3 recommended, v3.x.x is not supported).
+* Visual Studio 2013 (Express works fine!).
 
 ### NPM
 
