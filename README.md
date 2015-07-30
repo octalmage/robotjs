@@ -13,6 +13,24 @@ This is a work in progress so the exported functions could change at any time be
 
 ## Installing
 
+### Linux
+
+```
+sudo apt-get install libxtst-dev libpng-dev
+```
+
+### Mac
+
+No dependencies. 
+
+### Windows
+
+1. Install the .NET framework 2.0 SDK.
+2. Install Microsoft Visual Studio 2005
+3. Add the location of the component to the system path if it is installed elsewhere.
+
+### NPM
+
 ```
 npm install robotjs
 ```
