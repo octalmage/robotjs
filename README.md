@@ -13,7 +13,7 @@ This is a work in progress so the exported functions could change at any time be
 
 ## Installing
 
-RobotJS uses [node-gyp](https://github.com/TooTallNate/node-gyp) for building. If you have trouble with dependencies, look there or in our [building](https://github.com/octalmage/robotjs/wiki/Building) wiki.
+RobotJS uses [node-gyp](https://github.com/TooTallNate/node-gyp) for building. If you have trouble with dependencies, look there or in the [building](https://github.com/octalmage/robotjs/wiki/Building) wiki.
 
 Then you should be successful at installing.
 ```
