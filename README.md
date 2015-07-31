@@ -13,23 +13,9 @@ This is a work in progress so the exported functions could change at any time be
 
 ## Installing
 
-### Linux
+RobotJS uses [node-gyp](https://github.com/TooTallNate/node-gyp) for building. If you have trouble with dependencies, look there or in our [building](https://github.com/octalmage/robotjs/wiki/Building) wiki.
 
-```
-sudo apt-get install libxtst-dev libpng-dev
-```
-
-### Mac
-
-No dependencies. 
-
-### Windows
-
-* Python (v2.7.3 recommended, v3.x.x is not supported).
-* Visual Studio 2013 (Express works fine!).
-
-### NPM
-
+Then you should be successful at installing.
 ```
 npm install robotjs
 ```
@@ -77,9 +63,9 @@ console.log("#" + hex + " at x:" + mouse.x + " y:" + mouse.y);
 
 Read the [Wiki](https://github.com/octalmage/robotjs/wiki) for more information!
 
-## Building
+## Building with node-gyp
 
-RobotJS uses [node-gyp](https://github.com/TooTallNate/node-gyp) for building. 
+Node-gyp is a dependency for robotjs, and can be configured and built prior to install.
 
 Install node-gyp using npm:
 
