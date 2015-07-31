@@ -15,7 +15,7 @@ This is a work in progress so the exported functions could change at any time be
 
 RobotJS uses [node-gyp](https://github.com/TooTallNate/node-gyp) for building. If you have trouble with dependencies, look there or in the [building](https://github.com/octalmage/robotjs/wiki/Building) wiki.
 
-Then you should be successful at installing.
+Then you should be able to install robotjs.
 ```
 npm install robotjs
 ```
