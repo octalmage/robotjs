@@ -251,6 +251,54 @@ int CheckKeyCodes(char* k, MMKeyCode *key)
 	{
 		*key = K_SPACE;
 	}
+	else if (strcmp(k, "f1") == 0)
+	{
+		*key = K_F1;
+	}
+	else if (strcmp(k, "f2") == 0)
+	{
+		*key = K_F2;
+	}
+	else if (strcmp(k, "f3") == 0)
+	{
+		*key = K_F3;
+	}
+	else if (strcmp(k, "f4") == 0)
+	{
+		*key = K_F4;
+	}
+	else if (strcmp(k, "f5") == 0)
+	{
+		*key = K_F5;
+	}
+	else if (strcmp(k, "f6") == 0)
+	{
+		*key = K_F6;
+	}
+	else if (strcmp(k, "f7") == 0)
+	{
+		*key = K_F7;
+	}
+	else if (strcmp(k, "f8") == 0)
+	{
+		*key = K_F8;
+	}
+	else if (strcmp(k, "f9") == 0)
+	{
+		*key = K_F9;
+	}
+	else if (strcmp(k, "f10") == 0)
+	{
+		*key = K_F10;
+	}
+	else if (strcmp(k, "f11") == 0)
+	{
+		*key = K_F11;
+	}
+	else if (strcmp(k, "f12") == 0)
+	{
+		*key = K_F12;
+	}
 	else if (strlen(k) == 1)
 	{
 		*key = keyCodeForChar(*k); 
