@@ -13,9 +13,10 @@ This is a work in progress so the exported functions could change at any time be
 
 ## Installing
 
-RobotJS uses [node-gyp](https://github.com/TooTallNate/node-gyp) for building. If you have trouble with dependencies, look there or in the [building](https://github.com/octalmage/robotjs/wiki/Building) wiki.
+RobotJS uses [node-gyp](https://github.com/TooTallNate/node-gyp) for building. Please make sure you have the [required dependencies](https://github.com/TooTallNate/node-gyp/#installation) before installing.
 
-Then you should be able to install robotjs.
+Then install RobotJS using npm:
+
 ```
 npm install robotjs
 ```
@@ -63,9 +64,9 @@ console.log("#" + hex + " at x:" + mouse.x + " y:" + mouse.y);
 
 Read the [Wiki](https://github.com/octalmage/robotjs/wiki) for more information!
 
-## Building with node-gyp
+## Building
 
-Node-gyp is a dependency for robotjs, and can be configured and built prior to install.
+node-gyp is required to build RobotJS.
 
 Install node-gyp using npm:
 
