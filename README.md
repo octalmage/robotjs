@@ -13,6 +13,10 @@ This is a work in progress so the exported functions could change at any time be
 
 ## Installing
 
+RobotJS uses [node-gyp](https://github.com/TooTallNate/node-gyp) for building. Please make sure you have the [required dependencies](https://github.com/TooTallNate/node-gyp/#installation) before installing.
+
+Then install RobotJS using npm:
+
 ```
 npm install robotjs
 ```
@@ -24,11 +28,11 @@ Get the mouse location and move it.
 var robot = require("robotjs");
 
 //Get the mouse position, returns an object with x and y. 
-var mouse=robot.getMousePos();
+var mouse = robot.getMousePos();
 console.log("Mouse is at x:" + mouse.x + " y:" + mouse.y);
 
 //Move the mouse down by 100 pixels.
-robot.moveMouse(mouse.x,mouse.y+100);
+robot.moveMouse(mouse.x, mouse.y + 100);
 
 //Left click!
 robot.mouseClick();
@@ -51,7 +55,7 @@ Get pixel color under the mouse.
 var robot = require("robotjs");
 
 //Get mouse position. 
-var mouse=robot.getMousePos();
+var mouse = robot.getMousePos();
 
 //Get pixel color in hex format. 
 var hex = robot.getPixelColor(mouse.x, mouse.y);
@@ -62,7 +66,7 @@ Read the [Wiki](https://github.com/octalmage/robotjs/wiki) for more information!
 
 ## Building
 
-RobotJS uses [node-gyp](https://github.com/TooTallNate/node-gyp) for building. 
+node-gyp is required to build RobotJS.
 
 Install node-gyp using npm:
 
@@ -95,7 +99,7 @@ node-gyp build
 
 ## Story
 
-I'm a huge fan of [AutoHotkey](http://www.autohotkey.com/), and I've used it for a very long time. AutoHotkey is great for automation and it can do a bunch of things that are very difficult in other languages. For example, it's [imagesearch](https://www.autohotkey.com/docs/commands/ImageSearch.htm) and [pixel](https://www.autohotkey.com/docs/commands/PixelGetColor.htm) related functions are hard to reproduce on Mac, espscially in scripting languages. These functions are great for automating apps that can't be automated like [Netflix](http://blueshirtdesign.com/apps/autoflix/). This has never been a big deal since I've always used Windows at work, but for the past few years I've been using Mac exclusively. 
+I'm a huge fan of [AutoHotkey](http://www.autohotkey.com/), and I've used it for a very long time. AutoHotkey is great for automation and it can do a bunch of things that are very difficult in other languages. For example, it's [imagesearch](https://www.autohotkey.com/docs/commands/ImageSearch.htm) and [pixel](https://www.autohotkey.com/docs/commands/PixelGetColor.htm) related functions are hard to reproduce on Mac, especially in scripting languages. These functions are great for automating apps that can't be automated like [Netflix](http://blueshirtdesign.com/apps/autoflix/). This has never been a big deal since I've always used Windows at work, but for the past few years I've been using Mac exclusively. 
 
 I like AutoHotkey, but I like Node.js more. By developing RobotJS I get an AutoHotkey replacement on Mac (finally!), and I get to use my favorite language. 
 
