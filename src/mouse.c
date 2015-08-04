@@ -150,7 +150,7 @@ void doubleClick(MMMouseButton button)
 
 	/* Double click for everything else. */
 	clickMouse(button);
-	microsleep(500);
+	microsleep(200);
 	clickMouse(button);
 	
 #endif
