@@ -146,14 +146,6 @@ void doubleClick(MMMouseButton button)
 
 	CFRelease(event); 
 
-#elif defined(IS_WINDOWS)
-
-	/* Double click for Windows. */
-	clickMouse(button);
-	/* TODO: Use GetDoubleClickTime to retrieve the current double click time. */
-	microsleep(500);
-	clickMouse(button);
-
 #else
 
 	/* Double click for everything else. */
