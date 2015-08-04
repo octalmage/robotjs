@@ -80,7 +80,10 @@ NAN_METHOD(mouseClick)
 
 	if (args.Length() > 0)
 	{
-		char *b = (*v8::String::Utf8Value(args[0]->ToString()));
+		char *b;
+
+		v8::String::Utf8Value bstr(args[0]->ToString());
+		b = *bstr;
 
 		if (strcmp(b, "left") == 0)
 		{
