@@ -34,7 +34,7 @@ npm install robotjs
 I [plan on](https://github.com/octalmage/robotjs/issues/64) using node-pre-gyp to make this process easier.
 
 ## Examples
-Get the mouse location and move it. 
+Get the mouse position, move it, then click.
 
 ```JavaScript
 var robot = require("robotjs");
@@ -50,7 +50,7 @@ robot.moveMouse(mouse.x, mouse.y + 100);
 robot.mouseClick();
 ```
 
-Type "Hello World".
+Type "Hello World" then press enter.
 
 ```JavaScript
 var robot = require("robotjs");
