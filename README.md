@@ -13,13 +13,25 @@ This is a work in progress so the exported functions could change at any time be
 
 ## Installing
 
-RobotJS uses [node-gyp](https://github.com/TooTallNate/node-gyp) for building. Please make sure you have the [required dependencies](https://github.com/TooTallNate/node-gyp/#installation) before installing.
+Please make sure you have the [required dependencies](https://github.com/TooTallNate/node-gyp/#installation) before installing:
+
+* Windows
+  * Visual Studio 2013 (Express works fine).
+  * Python (v2.7.3 recommended, v3.x.x is not supported).
+* Mac
+  * Xcode Command Line Tools.
+* Linux
+  * Python (v2.7 recommended, v3.x.x is not supported).
+  * make.
+  * A C/C++ compiler like GCC.
+  * libxtst-dev and libpng++-dev (`sudo apt-get install libxtst-dev libpng++-dev`).
 
 Then install RobotJS using npm:
 
 ```
 npm install robotjs
 ```
+I [plan on](https://github.com/octalmage/robotjs/issues/64) using node-pre-gyp to make this process easier.
 
 ## Examples
 Get the mouse location and move it. 
