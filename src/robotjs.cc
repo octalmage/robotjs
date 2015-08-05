@@ -76,10 +76,14 @@ NAN_METHOD(mouseClick)
 	NanScope();
 
 	MMMouseButton button = LEFT_BUTTON;
+	bool doubleC = false;
 
-	if (args.Length() == 1)
+	if (args.Length() > 0)
 	{
-		char *b = (*v8::String::Utf8Value(args[0]->ToString()));
+		char *b;
+
+		v8::String::Utf8Value bstr(args[0]->ToString());
+		b = *bstr;
 
 		if (strcmp(b, "left") == 0)
 		{
@@ -98,12 +102,26 @@ NAN_METHOD(mouseClick)
 			return NanThrowError("Invalid mouse button specified."); 
 		}
 	}
-	else if (args.Length() > 1)
+	
+	if (args.Length() == 2)
+	{
+		doubleC = args[1]->BooleanValue();
+	}
+	else if (args.Length() > 2)
 	{
 		return NanThrowError("Invalid number of arguments.");
 	}
+	
+	if (!doubleC)
+	{
+		clickMouse(button);
+		
+	}
+	else
+	{
+		doubleClick(button);
+	}
 
-	clickMouse(button);
 	microsleep(10);
 
 	NanReturnValue(NanNew("1"));
