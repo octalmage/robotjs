@@ -3,7 +3,12 @@ language: node_js
 node_js:
   - 0.10
   - 0.12
-  - iojs
+  - iojs-v2
+  - iojs-v3
+
+matrix:
+  allow_failures:
+    - node_js: iojs-v3
 
 addons:
   apt:
