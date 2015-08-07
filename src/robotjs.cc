@@ -188,6 +188,20 @@ NAN_METHOD(mouseToggle)
 	NanReturnValue(NanNew("1"));
 }
 
+NAN_METHOD(setMouseDelay) 
+{
+	NanScope();
+
+	if (args.Length() != 1) 
+	{
+		return NanThrowError("Invalid number of arguments."); 
+	}
+
+	mouseDelay = args[0]->Int32Value();
+
+	NanReturnValue(NanNew("1"));
+}
+
 /*
  _  __          _                         _ 
 | |/ /___ _   _| |__   ___   __ _ _ __ __| |
@@ -492,6 +506,20 @@ NAN_METHOD(typeString)
 	NanReturnValue(NanNew("1"));
 }
 
+NAN_METHOD(setKeyboardDelay) 
+{
+	NanScope();
+	
+	if (args.Length() != 1) 
+	{
+		return NanThrowError("Invalid number of arguments."); 
+	}
+
+	keyboardDelay = args[0]->Int32Value();
+
+	NanReturnValue(NanNew("1"));
+}
+
 /*
   ____                           
  / ___|  ___ _ __ ___  ___ _ __  
@@ -560,6 +588,9 @@ void init(Handle<Object> target)
 	target->Set(NanNew<String>("mouseToggle"),
 		NanNew<FunctionTemplate>(mouseToggle)->GetFunction());
 
+	target->Set(NanNew<String>("setMouseDelay"),
+		NanNew<FunctionTemplate>(setMouseDelay)->GetFunction());
+
 	target->Set(NanNew<String>("keyTap"),
 		NanNew<FunctionTemplate>(keyTap)->GetFunction());
 	
@@ -568,6 +599,9 @@ void init(Handle<Object> target)
 
 	target->Set(NanNew<String>("typeString"),
 		NanNew<FunctionTemplate>(typeString)->GetFunction());
+
+	target->Set(NanNew<String>("setKeyboardDelay"),
+		NanNew<FunctionTemplate>(setKeyboardDelay)->GetFunction());
 
 	target->Set(NanNew<String>("getPixelColor"),
 		NanNew<FunctionTemplate>(getPixelColor)->GetFunction());
