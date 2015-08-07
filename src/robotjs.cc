@@ -13,6 +13,10 @@
 
 using namespace v8;
 
+//Global delays.
+int mouseDelay = 10;
+int keyboardDelay = 10;
+
 /*
  __  __                      
 |  \/  | ___  _   _ ___  ___ 
@@ -35,7 +39,7 @@ NAN_METHOD(moveMouse)
 	MMPoint point;
 	point = MMPointMake(x, y);
 	moveMouse(point);
-	microsleep(10);
+	microsleep(mouseDelay);
 
 	NanReturnValue(NanNew("1"));
 }
@@ -53,7 +57,7 @@ NAN_METHOD(moveMouseSmooth)
 	MMPoint point;
 	point = MMPointMake(x, y);
 	smoothlyMoveMouse(point);
-	microsleep(10);
+	microsleep(mouseDelay);
 
 	NanReturnValue(NanNew("1"));
 }
@@ -122,7 +126,7 @@ NAN_METHOD(mouseClick)
 		doubleClick(button);
 	}
 
-	microsleep(10);
+	microsleep(mouseDelay);
 
 	NanReturnValue(NanNew("1"));
 }
@@ -179,7 +183,7 @@ NAN_METHOD(mouseToggle)
 	}
 
 	toggleMouse(down, button);
-	microsleep(10);
+	microsleep(mouseDelay);
 
 	NanReturnValue(NanNew("1"));
 }
@@ -410,7 +414,7 @@ NAN_METHOD(keyTap)
 			break;
 		default:
 			tapKeyCode(key, flags);
-			microsleep(10);
+			microsleep(keyboardDelay);
 	}
 
 	NanReturnValue(NanNew("1"));
@@ -468,7 +472,7 @@ NAN_METHOD(keyToggle)
 			break;
 		default:
 			toggleKeyCode(key, down, flags);
-      		microsleep(10);
+      		microsleep(keyboardDelay);
 	}
 
 	NanReturnValue(NanNew("1"));
