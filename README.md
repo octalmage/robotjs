@@ -1,7 +1,7 @@
 RobotJS
 ========
 
-Node.js Desktop Automation. Control the mouse, keyboard, and read the screen.
+> Node.js Desktop Automation. Control the mouse, keyboard, and read the screen.
 
 RobotJS supports Mac, [Windows](https://github.com/octalmage/robotjs/issues/2), and [Linux](https://github.com/octalmage/robotjs/issues/17).
 
