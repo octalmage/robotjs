@@ -141,7 +141,16 @@ void scrollMouse(int scrollMagnitude, MMMouseWheelDirection scrollDirection)
 	
 	/* Set up the OS specific solution */
 	#if defined(__APPLE__)
-		/* TODO Add Code for this platform */
+	
+		CGWheelCount wheel = 1;
+		CGEventRef event;
+	
+		/* Make scroll magnitude negative if we're scrolling down. */
+		cleanScrollMagnitude = cleanScrollMagnitude * scrollDirection;
+		
+		event = CGEventCreateScrollWheelEvent(NULL, kCGScrollEventUnitLine, wheel, cleanScrollMagnitude, 0);
+		CGEventPost(kCGHIDEventTap, event);
+		
 	#elif defined(USE_X11)
 		/* TODO Add Code for this platform */
 	#elif defined(IS_WINDOWS)
