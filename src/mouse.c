@@ -10,6 +10,7 @@
 #elif defined(USE_X11)
 	#include <X11/Xlib.h>
 	#include <X11/extensions/XTest.h>
+	#include <stdlib.h>
 	#include "xdisplay.h"
 #endif
 
