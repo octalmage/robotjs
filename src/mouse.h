@@ -24,6 +24,12 @@ extern "C"
 		CENTER_BUTTON = kCGMouseButtonCenter
 	};
 	typedef CGMouseButton MMMouseButton;
+	
+	enum __MMMouseWheelDirection	{
+		DIRECTION_DOWN = -1,
+		DIRECTION_UP 	 = 1
+	};
+	typedef int MMMouseWheelDirection;
 
 #elif defined(USE_X11)
 
