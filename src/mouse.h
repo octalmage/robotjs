@@ -39,6 +39,12 @@ extern "C"
 		RIGHT_BUTTON = 3
 	};
 	typedef unsigned int MMMouseButton;
+	
+	enum __MMMouseWheelDirection	{
+		DIRECTION_DOWN = -1,
+		DIRECTION_UP 	 = 1
+	};
+	typedef int MMMouseWheelDirection;
 
 #elif defined(IS_WINDOWS)
 
