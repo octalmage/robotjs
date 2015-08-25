@@ -10,6 +10,7 @@
 #elif defined(USE_X11)
 	#include <X11/Xlib.h>
 	#include <X11/extensions/XTest.h>
+	#include <stdlib.h>
 	#include "xdisplay.h"
 #endif
 
@@ -141,9 +142,35 @@ void scrollMouse(int scrollMagnitude, MMMouseWheelDirection scrollDirection)
 	
 	/* Set up the OS specific solution */
 	#if defined(__APPLE__)
-		/* TODO Add Code for this platform */
+	
+		CGWheelCount wheel = 1;
+		CGEventRef event;
+	
+		/* Make scroll magnitude negative if we're scrolling down. */
+		cleanScrollMagnitude = cleanScrollMagnitude * scrollDirection;
+		
+		event = CGEventCreateScrollWheelEvent(NULL, kCGScrollEventUnitLine, wheel, cleanScrollMagnitude, 0);
+		CGEventPost(kCGHIDEventTap, event);
+		
 	#elif defined(USE_X11)
-		/* TODO Add Code for this platform */
+
+		int x;
+		int dir = 4; /* Button 4 is up, 5 is down. */
+		Display *display = XGetMainDisplay();
+		
+		if (scrollDirection == DIRECTION_DOWN)
+		{
+			dir = 5;
+		}
+	
+		for (x = 0; x < cleanScrollMagnitude; x++)
+		{
+			XTestFakeButtonEvent(display, dir, 1, CurrentTime);
+			XTestFakeButtonEvent(display, dir, 0, CurrentTime);
+		}
+		
+		XFlush(display);
+		
 	#elif defined(IS_WINDOWS)
 		INPUT mouseScrollInput;
 		mouseScrollInput.type = INPUT_MOUSE;
