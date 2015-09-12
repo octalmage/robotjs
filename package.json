@@ -28,7 +28,7 @@
   },
   "homepage": "https://github.com/octalmage/robotjs",
   "dependencies": {
-    "nan": "^1.3.0"
+    "nan": "^2.0.9"
   },
   "devDependencies": {
     "tape": "^3.5.0"
