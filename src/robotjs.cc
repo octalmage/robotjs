@@ -40,7 +40,7 @@ NAN_METHOD(moveMouse)
 	moveMouse(point);
 	microsleep(mouseDelay);
 
-//	info.GetReturnValue().Set(Nan::New(1));
+	info.GetReturnValue().Set(Nan::New(1));
 }
 
 NAN_METHOD(moveMouseSmooth)
