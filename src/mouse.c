@@ -99,6 +99,11 @@ MMPoint getMousePos()
 
 #endif
 
+/**
+ * Press down a button, or release it.
+ * @param down   True for down, false for up.
+ * @param button The button to press down or release.
+ */
 void toggleMouse(bool down, MMMouseButton button)
 {
 #if defined(IS_MACOSX)
