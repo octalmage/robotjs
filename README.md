@@ -17,7 +17,7 @@ This is a work in progress so the exported functions could change at any time be
 ## Contents
 
 - [Installation](#installation)
-- [Getting Started](#getting-started)
+- [Examples](#getting-started)
 - [API](https://github.com/octalmage/robotjs/wiki/Syntax)
 - [Building](#building)
 - [Plans](#plans)
@@ -46,7 +46,7 @@ npm install robotjs
 ```
 I [plan on](https://github.com/octalmage/robotjs/issues/64) using node-pre-gyp to make this process easier.
 
-## Getting Started
+## Examples
 
 ##### Mouse
 
