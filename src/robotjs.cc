@@ -213,6 +213,7 @@ NAN_METHOD(scrollMouse)
 		int scrollDirection = args[1]->Int32Value();
 		
 		scrollMouse(scrollMagnitude, scrollDirection);
+		microsleep(mouseDelay);
 		
 		NanReturnValue(NanNew("1"));
 	} 
