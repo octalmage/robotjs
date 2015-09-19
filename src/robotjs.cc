@@ -355,6 +355,14 @@ int CheckKeyCodes(char* k, MMKeyCode *key)
 	{
 		*key = K_F12;
 	}
+	else if (strcmp(k, "printscreen") == 0)
+	{
+		#if defined(IS_WINDOWS)
+			*key = K_PRINTSCREEN;
+		#else
+	 		NanThrowError("printscreen is only supported on Windows.");
+	 	#endif
+	}
 	else if (strlen(k) == 1)
 	{
 		*key = keyCodeForChar(*k); 
