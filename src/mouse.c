@@ -18,6 +18,10 @@
 	#define M_SQRT2 1.4142135623730950488016887 /* Fix for MSVC. */
 #endif
 
+/**
+ * Move the mouse to a specific point.
+ * @param point The coordinates to move the mouse to (x, y).
+ */
 void moveMouse(MMPoint point)
 {
 #if defined(IS_MACOSX)
