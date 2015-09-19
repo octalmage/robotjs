@@ -206,7 +206,7 @@ NAN_METHOD(scrollMouse)
 {
 	NanScope();
 
-	//Get the values of magnitude and direction from the arguments list
+	//Get the values of magnitude and direction from the arguments list.
 	if(args.Length() == 2)	
 	{
 		int scrollMagnitude = args[0]->Int32Value();
