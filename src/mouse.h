@@ -24,12 +24,6 @@ extern "C"
 		CENTER_BUTTON = kCGMouseButtonCenter
 	};
 	typedef CGMouseButton MMMouseButton;
-	
-	enum __MMMouseWheelDirection	{
-		DIRECTION_DOWN = -1,
-		DIRECTION_UP 	 = 1
-	};
-	typedef int MMMouseWheelDirection;
 
 #elif defined(USE_X11)
 
@@ -39,12 +33,6 @@ extern "C"
 		RIGHT_BUTTON = 3
 	};
 	typedef unsigned int MMMouseButton;
-	
-	enum __MMMouseWheelDirection	{
-		DIRECTION_DOWN = -1,
-		DIRECTION_UP 	 = 1
-	};
-	typedef int MMMouseWheelDirection;
 
 #elif defined(IS_WINDOWS)
 
@@ -54,12 +42,6 @@ extern "C"
 		RIGHT_BUTTON = 3
 	};
 	typedef unsigned int MMMouseButton;
-	
-	enum __MMMouseWheelDirection	{
-		DIRECTION_DOWN = -1,
-		DIRECTION_UP 	 = 1
-	};
-	typedef unsigned int MMMouseWheelDirection;
 
 #else
 	#error "No mouse button constants set for platform"
@@ -68,6 +50,13 @@ extern "C"
 #define MMMouseButtonIsValid(button) \
 	(button == LEFT_BUTTON || button == RIGHT_BUTTON || \
 	 button == CENTER_BUTTON)
+	 
+enum __MMMouseWheelDirection
+{
+	DIRECTION_DOWN 	= -1,
+	DIRECTION_UP	= 1
+};
+typedef int MMMouseWheelDirection;
 
 /* Immediately moves the mouse to the given point on-screen.
  * It is up to the caller to ensure that this point is within the
