@@ -355,6 +355,10 @@ int CheckKeyCodes(char* k, MMKeyCode *key)
 	{
 		*key = K_F12;
 	}
+	else if (strcmp(k, "printscreen") == 0)
+	{
+		*key = K_PRINTSCREEN;
+	}
 	else if (strlen(k) == 1)
 	{
 		*key = keyCodeForChar(*k); 
