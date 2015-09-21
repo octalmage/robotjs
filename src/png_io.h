@@ -14,6 +14,11 @@ enum _PNGReadError {
 
 typedef MMIOError MMPNGReadError;
 
+#ifdef __cplusplus
+extern "C"
+{
+#endif
+
 /* Returns description of given MMPNGReadError.
  * Returned string is constant and hence should not be freed. */
 const char *MMPNGReadErrorString(MMIOError error);
@@ -33,5 +38,9 @@ int saveMMBitmapAsPNG(MMBitmapRef bitmap, const char *path);
  *
  * Responsibility for free()'ing data is left up to the caller. */
 uint8_t *createPNGData(MMBitmapRef bitmap, size_t *len);
+
+#ifdef __cplusplus
+}
+#endif
 
 #endif /* PNG_IO_H */
