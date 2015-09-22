@@ -17,7 +17,7 @@ This is a work in progress so the exported functions could change at any time be
 ## Contents
 
 - [Installation](#installation)
-- [Examples](#getting-started)
+- [Examples](#examples)
 - [API](https://github.com/octalmage/robotjs/wiki/Syntax)
 - [Building](#building)
 - [Plans](#plans)
