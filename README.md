@@ -1,6 +1,11 @@
 RobotJS
 ========
 
+[![Build Status](https://api.travis-ci.org/octalmage/robotjs.svg?branch=master)](https://travis-ci.org/octalmage/robotjs) [![Join the chat at https://gitter.im/octalmage/robotjs](https://img.shields.io/badge/gitter-join%20chat-brightgreen.svg)](https://gitter.im/octalmage/robotjs?utm_source=badge&utm_medium=badge&utm_campaign=pr-badge&utm_content=badge)
+[![Wat: Documented](https://img.shields.io/badge/wat-documented-blue.svg)](https://github.com/dthree/wat)
+[![npm version](https://img.shields.io/npm/v/robotjs.svg)](https://www.npmjs.com/package/robotjs) 
+[![Ready](https://badge.waffle.io/octalmage/robotjs.svg?label=ready&title=Ready)](http://waffle.io/octalmage/robotjs) 
+
 > Node.js Desktop Automation. Control the mouse, keyboard, and read the screen.
 
 RobotJS supports Mac, [Windows](https://github.com/octalmage/robotjs/issues/2), and [Linux](https://github.com/octalmage/robotjs/issues/17).
@@ -9,11 +14,19 @@ This is a work in progress so the exported functions could change at any time be
 
 [Check out some of the cool things people are making with  RobotJS](https://github.com/octalmage/robotjs/wiki/Projects-using-RobotJS)! Have your own rad RobotJS project? Feel free to add it!
 
-[![npm version](https://img.shields.io/npm/v/robotjs.svg)](https://www.npmjs.com/package/robotjs) [![Build Status](https://api.travis-ci.org/octalmage/robotjs.svg?branch=master)](https://travis-ci.org/octalmage/robotjs) [![Ready](https://badge.waffle.io/octalmage/robotjs.svg?label=ready&title=Ready)](http://waffle.io/octalmage/robotjs) [![Join the chat at https://gitter.im/octalmage/robotjs](https://badges.gitter.im/Join%20Chat.svg)](https://gitter.im/octalmage/robotjs?utm_source=badge&utm_medium=badge&utm_campaign=pr-badge&utm_content=badge)
+## Contents
 
-## Installing
+- [Installation](#installation)
+- [Examples](#examples)
+- [API](https://github.com/octalmage/robotjs/wiki/Syntax)
+- [Building](#building)
+- [Plans](#plans)
+- [Progress](#progress)
+- [License](#license)
 
-Please make sure you have the [required dependencies](https://github.com/TooTallNate/node-gyp/#installation) before installing:
+## Installation
+
+Please ensure you have the [required dependencies](https://github.com/TooTallNate/node-gyp/#installation) before installing:
 
 * Windows
   * Visual Studio 2013 (Express works fine).
@@ -34,9 +47,12 @@ npm install robotjs
 I [plan on](https://github.com/octalmage/robotjs/issues/64) using node-pre-gyp to make this process easier.
 
 ## Examples
-Get the mouse position, move it, then click.
+
+##### Mouse
 
 ```JavaScript
+//Get the mouse position, move it, then click.
+
 var robot = require("robotjs");
 
 //Get the mouse position, returns an object with x and y. 
@@ -49,10 +65,11 @@ robot.moveMouse(mouse.x, mouse.y + 100);
 //Left click!
 robot.mouseClick();
 ```
-
-Type "Hello World" then press enter.
+##### Keyboard
 
 ```JavaScript
+// Type "Hello World" then press enter.
+
 var robot = require("robotjs");
 
 //Type "Hello World".
@@ -61,9 +78,12 @@ robot.typeString("Hello World");
 //Press enter. 
 robot.keyTap("enter");
 ```
-Get pixel color under the mouse. 
+
+##### Screen
 
 ```JavaScript
+// Get pixel color under the mouse. 
+
 var robot = require("robotjs");
 
 //Get mouse position. 
@@ -73,8 +93,11 @@ var mouse = robot.getMousePos();
 var hex = robot.getPixelColor(mouse.x, mouse.y);
 console.log("#" + hex + " at x:" + mouse.x + " y:" + mouse.y);
 ```
-
 Read the [Wiki](https://github.com/octalmage/robotjs/wiki) for more information!
+
+## [API](https://github.com/octalmage/robotjs/wiki/Syntax])
+
+The [RobotJS API](https://github.com/octalmage/robotjs/wiki/Syntax) is contained in the [Wiki](https://github.com/octalmage/robotjs/wiki).
 
 ## Building
 

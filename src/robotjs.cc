@@ -202,6 +202,26 @@ NAN_METHOD(setMouseDelay)
 	NanReturnValue(NanNew("1"));
 }
 
+NAN_METHOD(scrollMouse) 
+{
+	NanScope();
+
+	//Get the values of magnitude and direction from the arguments list.
+	if(args.Length() == 2)	
+	{
+		int scrollMagnitude = args[0]->Int32Value();
+		int scrollDirection = args[1]->Int32Value();
+		
+		scrollMouse(scrollMagnitude, scrollDirection);
+		microsleep(mouseDelay);
+		
+		NanReturnValue(NanNew("1"));
+	} 
+	else 
+	{
+		return NanThrowError("Invalid number of arguments.");
+	}
+}
 /*
  _  __          _                         _ 
 | |/ /___ _   _| |__   ___   __ _ _ __ __| |
@@ -334,6 +354,14 @@ int CheckKeyCodes(char* k, MMKeyCode *key)
 	else if (strcmp(k, "f12") == 0)
 	{
 		*key = K_F12;
+	}
+	else if (strcmp(k, "printscreen") == 0)
+	{
+		#if defined(IS_WINDOWS)
+			*key = K_PRINTSCREEN;
+		#else
+	 		NanThrowError("printscreen is only supported on Windows.");
+	 	#endif
 	}
 	else if (strlen(k) == 1)
 	{
@@ -587,6 +615,9 @@ void init(Handle<Object> target)
 
 	target->Set(NanNew<String>("mouseToggle"),
 		NanNew<FunctionTemplate>(mouseToggle)->GetFunction());
+		
+	target->Set(NanNew<String>("scrollMouse"),
+		NanNew<FunctionTemplate>(scrollMouse)->GetFunction());
 
 	target->Set(NanNew<String>("setMouseDelay"),
 		NanNew<FunctionTemplate>(setMouseDelay)->GetFunction());

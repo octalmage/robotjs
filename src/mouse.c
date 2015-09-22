@@ -10,6 +10,7 @@
 #elif defined(USE_X11)
 	#include <X11/Xlib.h>
 	#include <X11/extensions/XTest.h>
+	#include <stdlib.h>
 	#include "xdisplay.h"
 #endif
 
@@ -17,6 +18,10 @@
 	#define M_SQRT2 1.4142135623730950488016887 /* Fix for MSVC. */
 #endif
 
+/**
+ * Move the mouse to a specific point.
+ * @param point The coordinates to move the mouse to (x, y).
+ */
 void moveMouse(MMPoint point)
 {
 #if defined(IS_MACOSX)
@@ -98,6 +103,11 @@ MMPoint getMousePos()
 
 #endif
 
+/**
+ * Press down a button, or release it.
+ * @param down   True for down, false for up.
+ * @param button The button to press down or release.
+ */
 void toggleMouse(bool down, MMMouseButton button)
 {
 #if defined(IS_MACOSX)
@@ -124,6 +134,10 @@ void clickMouse(MMMouseButton button)
 	toggleMouse(false, button);
 }
 
+/**
+ * Special function for sending double clicks, needed for Mac OS X.
+ * @param button Button to click.
+ */
 void doubleClick(MMMouseButton button)
 {
 	
@@ -154,6 +168,65 @@ void doubleClick(MMMouseButton button)
 	clickMouse(button);
 	
 #endif
+}
+
+/**
+ * Function used to scroll the screen in the required direction.
+ * This uses the magnitude to scroll the required amount in the direction. 
+ * TODO Requires further fine tuning based on the requirements.
+ */
+void scrollMouse(int scrollMagnitude, MMMouseWheelDirection scrollDirection)	
+{
+	/* Direction should only be considered based on the scrollDirection. This
+	 * Should not interfere. */
+	int cleanScrollMagnitude = abs(scrollMagnitude);
+	if (!(scrollDirection == DIRECTION_UP || scrollDirection == DIRECTION_DOWN))
+	{
+		return;
+	}
+	
+	/* Set up the OS specific solution */
+	#if defined(__APPLE__)
+	
+		CGWheelCount wheel = 1;
+		CGEventRef event;
+	
+		/* Make scroll magnitude negative if we're scrolling down. */
+		cleanScrollMagnitude = cleanScrollMagnitude * scrollDirection;
+		
+		event = CGEventCreateScrollWheelEvent(NULL, kCGScrollEventUnitLine, wheel, cleanScrollMagnitude, 0);
+		CGEventPost(kCGHIDEventTap, event);
+		
+	#elif defined(USE_X11)
+
+		int x;
+		int dir = 4; /* Button 4 is up, 5 is down. */
+		Display *display = XGetMainDisplay();
+		
+		if (scrollDirection == DIRECTION_DOWN)
+		{
+			dir = 5;
+		}
+	
+		for (x = 0; x < cleanScrollMagnitude; x++)
+		{
+			XTestFakeButtonEvent(display, dir, 1, CurrentTime);
+			XTestFakeButtonEvent(display, dir, 0, CurrentTime);
+		}
+		
+		XFlush(display);
+		
+	#elif defined(IS_WINDOWS)
+		INPUT mouseScrollInput;
+		mouseScrollInput.type = INPUT_MOUSE;
+		mouseScrollInput.mi.dx = 0;
+		mouseScrollInput.mi.dy = 0;
+		mouseScrollInput.mi.dwFlags = MOUSEEVENTF_WHEEL;
+		mouseScrollInput.mi.time = 0;
+		mouseScrollInput.mi.dwExtraInfo = 0;
+		mouseScrollInput.mi.mouseData = WHEEL_DELTA * scrollDirection * cleanScrollMagnitude;
+		SendInput(1, &mouseScrollInput, sizeof(mouseScrollInput));
+	#endif
 }
 
 /*
