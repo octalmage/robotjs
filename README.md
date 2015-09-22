@@ -1,7 +1,7 @@
 RobotJS
 ========
 
-Node.js Desktop Automation. Control the mouse, keyboard, and read the screen.
+> Node.js Desktop Automation. Control the mouse, keyboard, and read the screen.
 
 RobotJS supports Mac, [Windows](https://github.com/octalmage/robotjs/issues/2), and [Linux](https://github.com/octalmage/robotjs/issues/17).
 
@@ -9,20 +9,32 @@ This is a work in progress so the exported functions could change at any time be
 
 [Check out some of the cool things people are making with  RobotJS](https://github.com/octalmage/robotjs/wiki/Projects-using-RobotJS)! Have your own rad RobotJS project? Feel free to add it!
 
-[![npm version](https://img.shields.io/npm/v/robotjs.svg)](https://www.npmjs.com/package/robotjs) [![Build Status](https://travis-ci.org/octalmage/robotjs.svg)](https://travis-ci.org/octalmage/robotjs) [![Ready](https://badge.waffle.io/octalmage/robotjs.svg?label=ready&title=Ready)](http://waffle.io/octalmage/robotjs) [![Join the chat at https://gitter.im/octalmage/robotjs](https://badges.gitter.im/Join%20Chat.svg)](https://gitter.im/octalmage/robotjs?utm_source=badge&utm_medium=badge&utm_campaign=pr-badge&utm_content=badge)
+[![npm version](https://img.shields.io/npm/v/robotjs.svg)](https://www.npmjs.com/package/robotjs) [![Build Status](https://api.travis-ci.org/octalmage/robotjs.svg?branch=master)](https://travis-ci.org/octalmage/robotjs) [![Ready](https://badge.waffle.io/octalmage/robotjs.svg?label=ready&title=Ready)](http://waffle.io/octalmage/robotjs) [![Join the chat at https://gitter.im/octalmage/robotjs](https://badges.gitter.im/Join%20Chat.svg)](https://gitter.im/octalmage/robotjs?utm_source=badge&utm_medium=badge&utm_campaign=pr-badge&utm_content=badge)
 
 ## Installing
 
-RobotJS uses [node-gyp](https://github.com/TooTallNate/node-gyp) for building. Please make sure you have the [required dependencies](https://github.com/TooTallNate/node-gyp/#installation) before installing.
+Please make sure you have the [required dependencies](https://github.com/TooTallNate/node-gyp/#installation) before installing:
+
+* Windows
+  * Visual Studio 2013 (Express works fine).
+  * Python (v2.7.3 recommended, v3.x.x is not supported).
+* Mac
+  * Xcode Command Line Tools.
+* Linux
+  * Python (v2.7 recommended, v3.x.x is not supported).
+  * make.
+  * A C/C++ compiler like GCC.
+  * libxtst-dev and libpng++-dev (`sudo apt-get install libxtst-dev libpng++-dev`).
 
 Then install RobotJS using npm:
 
 ```
 npm install robotjs
 ```
+I [plan on](https://github.com/octalmage/robotjs/issues/64) using node-pre-gyp to make this process easier.
 
 ## Examples
-Get the mouse location and move it. 
+Get the mouse position, move it, then click.
 
 ```JavaScript
 var robot = require("robotjs");
@@ -38,7 +50,7 @@ robot.moveMouse(mouse.x, mouse.y + 100);
 robot.mouseClick();
 ```
 
-Type "Hello World".
+Type "Hello World" then press enter.
 
 ```JavaScript
 var robot = require("robotjs");

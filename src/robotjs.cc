@@ -13,6 +13,10 @@
 
 using namespace v8;
 
+//Global delays.
+int mouseDelay = 10;
+int keyboardDelay = 10;
+
 /*
  __  __                      
 |  \/  | ___  _   _ ___  ___ 
@@ -35,7 +39,7 @@ NAN_METHOD(moveMouse)
 	MMPoint point;
 	point = MMPointMake(x, y);
 	moveMouse(point);
-	microsleep(10);
+	microsleep(mouseDelay);
 
 	NanReturnValue(NanNew("1"));
 }
@@ -53,7 +57,7 @@ NAN_METHOD(moveMouseSmooth)
 	MMPoint point;
 	point = MMPointMake(x, y);
 	smoothlyMoveMouse(point);
-	microsleep(10);
+	microsleep(mouseDelay);
 
 	NanReturnValue(NanNew("1"));
 }
@@ -76,10 +80,14 @@ NAN_METHOD(mouseClick)
 	NanScope();
 
 	MMMouseButton button = LEFT_BUTTON;
+	bool doubleC = false;
 
-	if (args.Length() == 1)
+	if (args.Length() > 0)
 	{
-		char *b = (*v8::String::Utf8Value(args[0]->ToString()));
+		char *b;
+
+		v8::String::Utf8Value bstr(args[0]->ToString());
+		b = *bstr;
 
 		if (strcmp(b, "left") == 0)
 		{
@@ -98,13 +106,27 @@ NAN_METHOD(mouseClick)
 			return NanThrowError("Invalid mouse button specified."); 
 		}
 	}
-	else if (args.Length() > 1)
+	
+	if (args.Length() == 2)
+	{
+		doubleC = args[1]->BooleanValue();
+	}
+	else if (args.Length() > 2)
 	{
 		return NanThrowError("Invalid number of arguments.");
 	}
+	
+	if (!doubleC)
+	{
+		clickMouse(button);
+		
+	}
+	else
+	{
+		doubleClick(button);
+	}
 
-	clickMouse(button);
-	microsleep(10);
+	microsleep(mouseDelay);
 
 	NanReturnValue(NanNew("1"));
 }
@@ -161,7 +183,21 @@ NAN_METHOD(mouseToggle)
 	}
 
 	toggleMouse(down, button);
-	microsleep(10);
+	microsleep(mouseDelay);
+
+	NanReturnValue(NanNew("1"));
+}
+
+NAN_METHOD(setMouseDelay) 
+{
+	NanScope();
+
+	if (args.Length() != 1) 
+	{
+		return NanThrowError("Invalid number of arguments."); 
+	}
+
+	mouseDelay = args[0]->Int32Value();
 
 	NanReturnValue(NanNew("1"));
 }
@@ -392,7 +428,7 @@ NAN_METHOD(keyTap)
 			break;
 		default:
 			tapKeyCode(key, flags);
-			microsleep(10);
+			microsleep(keyboardDelay);
 	}
 
 	NanReturnValue(NanNew("1"));
@@ -450,7 +486,7 @@ NAN_METHOD(keyToggle)
 			break;
 		default:
 			toggleKeyCode(key, down, flags);
-      		microsleep(10);
+      		microsleep(keyboardDelay);
 	}
 
 	NanReturnValue(NanNew("1"));
@@ -466,6 +502,20 @@ NAN_METHOD(typeString)
 	str = *string;
 
 	typeString(str);
+
+	NanReturnValue(NanNew("1"));
+}
+
+NAN_METHOD(setKeyboardDelay) 
+{
+	NanScope();
+	
+	if (args.Length() != 1) 
+	{
+		return NanThrowError("Invalid number of arguments."); 
+	}
+
+	keyboardDelay = args[0]->Int32Value();
 
 	NanReturnValue(NanNew("1"));
 }
@@ -538,6 +588,9 @@ void init(Handle<Object> target)
 	target->Set(NanNew<String>("mouseToggle"),
 		NanNew<FunctionTemplate>(mouseToggle)->GetFunction());
 
+	target->Set(NanNew<String>("setMouseDelay"),
+		NanNew<FunctionTemplate>(setMouseDelay)->GetFunction());
+
 	target->Set(NanNew<String>("keyTap"),
 		NanNew<FunctionTemplate>(keyTap)->GetFunction());
 	
@@ -546,6 +599,9 @@ void init(Handle<Object> target)
 
 	target->Set(NanNew<String>("typeString"),
 		NanNew<FunctionTemplate>(typeString)->GetFunction());
+
+	target->Set(NanNew<String>("setKeyboardDelay"),
+		NanNew<FunctionTemplate>(setKeyboardDelay)->GetFunction());
 
 	target->Set(NanNew<String>("getPixelColor"),
 		NanNew<FunctionTemplate>(getPixelColor)->GetFunction());
