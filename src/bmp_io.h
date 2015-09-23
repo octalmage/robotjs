@@ -18,6 +18,11 @@ enum _BMPReadError {
 
 typedef MMIOError MMBMPReadError;
 
+#ifdef __cplusplus
+extern "C"
+{
+#endif
+
 /* Returns description of given MMBMPReadError.
  * Returned string is constant and hence should not be freed. */
 const char *MMBMPReadErrorString(MMIOError error);
@@ -50,5 +55,9 @@ int saveMMBitmapAsBMP(MMBitmapRef bitmap, const char *path);
  * (upside-down Cartesian/PostScript/GL <-> right side up QD/CG raster format).
  */
 void flipBitmapData(void *data, size_t width, size_t height, size_t bytewidth);
+
+#ifdef __cplusplus
+}
+#endif
 
 #endif /* BMP_IO_H */

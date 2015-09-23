@@ -21,6 +21,11 @@ enum _MMIOError {
 
 typedef uint16_t MMIOError;
 
+#ifdef __cplusplus
+extern "C"
+{
+#endif
+
 const char *getExtension(const char *fname, size_t len);
 
 /* Returns best guess at the MMImageType based on a file extension, or
@@ -42,5 +47,9 @@ int saveMMBitmapToFile(MMBitmapRef bitmap, const char *path, MMImageType type);
 /* Returns description of given error code.
  * Returned string is constant and hence should not be freed. */
 const char *MMIOErrorString(MMImageType type, MMIOError error);
+
+#ifdef __cplusplus
+}
+#endif
 
 #endif /* IO_H */

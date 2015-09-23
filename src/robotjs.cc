@@ -2,6 +2,7 @@
 #include <nan.h>
 #include <v8.h>
 #include <vector>
+#include "io.h"
 #include "mouse.h"
 #include "deadbeef_rand.h"
 #include "keypress.h"
@@ -582,10 +583,30 @@ NAN_METHOD(getPixelColor)
 	NanReturnValue(NanNew(hex));
 }
 
-NAN_METHOD(getScreenSize) 
+NAN_METHOD(getScreenshoot)
 {
 	NanScope();
-	
+
+	MMBitmapRef bitmap;
+	MMSize displaySize = getMainDisplaySize();
+        const String::Utf8Value str(args[0]->ToString());
+        const char *c_filename = *str;
+        const char *c_extension = getExtension(c_filename, strlen(c_filename));
+        MMImageType type = imageTypeFromExtension(c_extension);
+
+	bitmap = copyMMBitmapFromDisplayInRect(MMRectMake(0, 0, displaySize.width, displaySize.height));
+
+        saveMMBitmapToFile(bitmap, c_filename, type);
+
+        destroyMMBitmap(bitmap);
+
+	NanReturnValue(NanNew("1"));
+}
+
+NAN_METHOD(getScreenSize)
+{
+	NanScope();
+
 	//Get display size.
 	MMSize displaySize = getMainDisplaySize();
 
@@ -636,6 +657,9 @@ void init(Handle<Object> target)
 
 	target->Set(NanNew<String>("getPixelColor"),
 		NanNew<FunctionTemplate>(getPixelColor)->GetFunction());
+
+	target->Set(NanNew<String>("getScreenshoot"),
+		NanNew<FunctionTemplate>(getScreenshoot)->GetFunction());
 
 	target->Set(NanNew<String>("getScreenSize"),
 		NanNew<FunctionTemplate>(getScreenSize)->GetFunction());

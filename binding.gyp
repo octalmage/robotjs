@@ -23,6 +23,7 @@
         ],
         'link_settings': {
           'libraries': [
+            '-lpng',
             '-framework Carbon',
             '-framework CoreFoundation',
             '-framework ApplicationServices',
@@ -53,6 +54,9 @@
     
     'sources': [
       'src/robotjs.cc',
+      'src/io.c',
+      'src/bmp_io.c',
+      'src/png_io.c',
       'src/deadbeef_rand.c',
       'src/mouse.c',
       'src/keypress.c',
