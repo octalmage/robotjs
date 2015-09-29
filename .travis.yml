@@ -1,22 +1,26 @@
 sudo: false
+env:
+  - CXX=g++-4.8
 language: node_js
+
 node_js:
   - 0.10
   - 0.12
+  - 4.0.0
   - iojs-v2
   - iojs-v3
 
-matrix:
-  allow_failures:
-    - node_js: iojs-v3
-
 addons:
   apt:
+    sources:
+      - ubuntu-toolchain-r-test
     packages:
-    - libx11-dev
-    - zlib1g-dev
-    - libpng12-dev
-    - libxtst-dev
+      - libx11-dev
+      - zlib1g-dev
+      - libpng12-dev
+      - libxtst-dev
+      - g++-4.8
+      - gcc-4.8
 
 before_script:
   - export DISPLAY=:99.0
