@@ -22,6 +22,7 @@ This is a work in progress so the exported functions could change at any time be
 - [Building](#building)
 - [Plans](#plans)
 - [Progress](#progress)
+- [Blog](#blog)
 - [License](#license)
 
 ## Installation
@@ -131,6 +132,12 @@ node-gyp build
 | Mouse         | 100%           | All planned features implemented.       |
 | Keyboard      | 100%           | All planned features implemented.       |
 | Screen        | 10%            | Screenshot, image search.   |
+
+## <a href="http://robotjavascript.tumblr.com/">Blog</a>
+
+For the latest RobotJS news, check out the [blog](http://robotjavascript.tumblr.com)!
+
+<a href="http://robotjavascript.tumblr.com" target="_blank"><img src="http://feeds.feedburner.com/RobotjsOfficialBlog.1.gif"></a>
 
 ## Story
 
