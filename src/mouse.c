@@ -217,7 +217,8 @@ void scrollMouse(int scrollMagnitude, MMMouseWheelDirection scrollDirection)
 		XFlush(display);
 		
 	#elif defined(IS_WINDOWS)
-		INPUT mouseScrollInput;
+		//FIXME: Need to figure out why this code doesn't work on Windows XP.
+		/*INPUT mouseScrollInput;
 		mouseScrollInput.type = INPUT_MOUSE;
 		mouseScrollInput.mi.dx = 0;
 		mouseScrollInput.mi.dy = 0;
@@ -225,7 +226,7 @@ void scrollMouse(int scrollMagnitude, MMMouseWheelDirection scrollDirection)
 		mouseScrollInput.mi.time = 0;
 		mouseScrollInput.mi.dwExtraInfo = 0;
 		mouseScrollInput.mi.mouseData = WHEEL_DELTA * scrollDirection * cleanScrollMagnitude;
-		SendInput(1, &mouseScrollInput, sizeof(mouseScrollInput));
+		SendInput(1, &mouseScrollInput, sizeof(mouseScrollInput));*/
 	#endif
 }
 
