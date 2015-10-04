@@ -199,7 +199,10 @@ NAN_METHOD(scrollMouse)
 	if(info.Length() == 2)	
 	{
 		int scrollMagnitude = info[0]->Int32Value();
-		char *s = (*v8::String::Utf8Value(info[1]->ToString()));
+		char *s;
+
+		Nan::Utf8String sstr(info[1]);
+		s = *sstr;
 		
 		MMMouseWheelDirection scrollDirection;
 		
