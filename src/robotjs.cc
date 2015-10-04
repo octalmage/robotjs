@@ -199,7 +199,22 @@ NAN_METHOD(scrollMouse)
 	if(info.Length() == 2)	
 	{
 		int scrollMagnitude = info[0]->Int32Value();
-		int scrollDirection = info[1]->Int32Value();
+		char *s = (*v8::String::Utf8Value(info[1]->ToString()));
+		
+		MMMouseWheelDirection scrollDirection;
+		
+		if (strcmp(s, "up") == 0)
+		{
+			scrollDirection = DIRECTION_UP;
+		}
+		else if (strcmp(s, "down") == 0)
+		{
+			scrollDirection = DIRECTION_DOWN;
+		}
+		else
+		{
+			return Nan::ThrowError("Invalid scroll direction specified.");
+		}
 		
 		scrollMouse(scrollMagnitude, scrollDirection);
 		microsleep(mouseDelay);
