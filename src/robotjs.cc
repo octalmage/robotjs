@@ -625,6 +625,14 @@ NAN_METHOD(captureScreen)
 	info.GetReturnValue().Set(obj);
 }
 
+/*
+ ____  _ _                         
+| __ )(_) |_ _ __ ___   __ _ _ __  
+|  _ \| | __| '_ ` _ \ / _` | '_ \ 
+| |_) | | |_| | | | | | (_| | |_) |
+|____/|_|\__|_| |_| |_|\__,_| .__/ 
+						   |_|    
+ */
 NAN_METHOD(getColor) 
 {	
 	MMBitmapRef bitmap;
