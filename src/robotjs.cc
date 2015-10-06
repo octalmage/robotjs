@@ -615,6 +615,42 @@ NAN_METHOD(captureScreen)
 	info.GetReturnValue().Set(obj);
 }
 
+NAN_METHOD(getColor) 
+{	
+	MMBitmapRef bitmap;
+	MMRGBHex color;
+	
+	size_t x = info[0]->Int32Value();
+	size_t y = info[1]->Int32Value();
+	
+	//Get our image object from JavaScript.
+	Local<Object> obj = Nan::To<v8::Object>(info[0]).ToLocalChecked();
+
+	unsigned int width = obj->Get(Nan::New("width").ToLocalChecked())->Uint32Value();
+	unsigned int height = obj->Get(Nan::New("height").ToLocalChecked())->Uint32Value();
+	unsigned int byteWidth = obj->Get(Nan::New("byteWidth").ToLocalChecked())->Uint32Value();
+	unsigned int bitsPerPixel = obj->Get(Nan::New("bitsPerPixel").ToLocalChecked())->Uint32Value();
+	unsigned int bytesPerPixel = obj->Get(Nan::New("bytesPerPixel").ToLocalChecked())->Uint32Value();
+	
+	char* buf = node::Buffer::Data(obj->Get(Nan::New("image").ToLocalChecked()));
+	
+	bitmap = createMMBitmap((uint8_t *)buf, width, height, byteWidth, bitsPerPixel, bytesPerPixel);
+	
+	color = MMRGBHexAtPoint(bitmap, 300, 300);
+	
+	char hex [7];
+
+	snprintf(hex, 7, "%06x", color);
+
+	printf("2: %s\n", hex);
+
+	//FIXME: Currently causes an error.
+	//destroyMMBitmap(bitmap);
+	
+	info.GetReturnValue().Set(Nan::New(hex).ToLocalChecked());
+	
+}
+
 NAN_MODULE_INIT(InitAll)
 {
 
@@ -659,6 +695,9 @@ NAN_MODULE_INIT(InitAll)
 		
 	Nan::Set(target, Nan::New("captureScreen").ToLocalChecked(),
 	    Nan::GetFunction(Nan::New<FunctionTemplate>(captureScreen)).ToLocalChecked());
+		
+	Nan::Set(target, Nan::New("getColor").ToLocalChecked(),
+		Nan::GetFunction(Nan::New<FunctionTemplate>(getColor)).ToLocalChecked());
 }
 
 NODE_MODULE(robotjs, InitAll)
