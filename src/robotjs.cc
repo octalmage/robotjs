@@ -660,7 +660,6 @@ NAN_METHOD(getColor)
 		memcpy(bitmap->imageBuffer, buf, bitmap->bytewidth * bitmap->height);
 	}
 
-	printf("2: %s\n", hex);
 	color = MMRGBHexAtPoint(bitmap, x, y);
 
 	//destroyMMBitmap(bitmap);
