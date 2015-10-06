@@ -133,7 +133,7 @@ NAN_METHOD(mouseToggle)
 	{
 		char *d;
 
-		v8::String::Utf8Value bstr(info[0]->ToString());
+		Nan::Utf8String bstr(info[1]);
 		d = *bstr;
 
 		if (strcmp(d, "down") == 0)
@@ -154,7 +154,7 @@ NAN_METHOD(mouseToggle)
 	{
 		char *b;
 
-		v8::String::Utf8Value bstr(info[1]->ToString());
+		Nan::Utf8String bstr(info[1]);
 		b = *bstr;
 
 		if (strcmp(b, "left") == 0)
