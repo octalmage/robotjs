@@ -14,6 +14,11 @@ function bitmap (width, height, byteWidth, bitsPerPixel, bytesPerPixel, image)
 	this.image = image;
 }
 
+bitmap.prototype.color = function()
+{
+	return robotjs.getColor(this);
+};
+
 module.exports.screen.capture = function()
 {
     b = robotjs.captureScreen();
