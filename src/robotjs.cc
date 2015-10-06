@@ -644,11 +644,11 @@ NAN_METHOD(getColor)
 	//Get our image object from JavaScript.
 	Local<Object> obj = Nan::To<v8::Object>(info[0]).ToLocalChecked();
 
-	unsigned int width = obj->Get(Nan::New("width").ToLocalChecked())->Uint32Value();
-	unsigned int height = obj->Get(Nan::New("height").ToLocalChecked())->Uint32Value();
-	unsigned int byteWidth = obj->Get(Nan::New("byteWidth").ToLocalChecked())->Uint32Value();
-	unsigned int bitsPerPixel = obj->Get(Nan::New("bitsPerPixel").ToLocalChecked())->Uint32Value();
-	unsigned int bytesPerPixel = obj->Get(Nan::New("bytesPerPixel").ToLocalChecked())->Uint32Value();
+	size_t width = obj->Get(Nan::New("width").ToLocalChecked())->Uint32Value();
+	size_t height = obj->Get(Nan::New("height").ToLocalChecked())->Uint32Value();
+	size_t byteWidth = obj->Get(Nan::New("byteWidth").ToLocalChecked())->Uint32Value();
+	uint8_t bitsPerPixel = obj->Get(Nan::New("bitsPerPixel").ToLocalChecked())->Uint32Value();
+	uint8_t bytesPerPixel = obj->Get(Nan::New("bytesPerPixel").ToLocalChecked())->Uint32Value();
 	
 	char* buf = node::Buffer::Data(obj->Get(Nan::New("image").ToLocalChecked()));
 	
