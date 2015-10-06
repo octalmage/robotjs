@@ -662,10 +662,11 @@ NAN_METHOD(getColor)
 
 	color = MMRGBHexAtPoint(bitmap, x, y);
 
-	//destroyMMBitmap(bitmap);
 	char hex[7];
 	
 	padHex(color, hex);
+
+	destroyMMBitmap(bitmap);
 	
 	info.GetReturnValue().Set(Nan::New(hex).ToLocalChecked());
 	
