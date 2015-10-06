@@ -127,15 +127,18 @@ NAN_METHOD(mouseClick)
 NAN_METHOD(mouseToggle)
 {
 	MMMouseButton button = LEFT_BUTTON;
-	bool down;
+	bool down = false;
 
 	if (info.Length() > 0)
 	{
-		const char *d = (*v8::String::Utf8Value(info[0]->ToString()));
+		char *d;
+
+		v8::String::Utf8Value bstr(info[0]->ToString());
+		d = *bstr;
 
 		if (strcmp(d, "down") == 0)
 		{
-			down = true;;
+			down = true;
 		}
 		else if (strcmp(d, "up") == 0)
 		{
@@ -149,7 +152,10 @@ NAN_METHOD(mouseToggle)
 
 	if (info.Length() == 2)
 	{
-		char *b = (*v8::String::Utf8Value(info[1]->ToString()));
+		char *b;
+
+		v8::String::Utf8Value bstr(info[1]->ToString());
+		b = *bstr;
 
 		if (strcmp(b, "left") == 0)
 		{
