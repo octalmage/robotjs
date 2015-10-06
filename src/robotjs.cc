@@ -638,8 +638,8 @@ NAN_METHOD(getColor)
 	MMBitmapRef bitmap;
 	MMRGBHex color;
 	
-	size_t x = info[0]->Int32Value();
-	size_t y = info[1]->Int32Value();
+	size_t x = info[1]->Int32Value();
+	size_t y = info[2]->Int32Value();
 	
 	//Get our image object from JavaScript.
 	Local<Object> obj = Nan::To<v8::Object>(info[0]).ToLocalChecked();
