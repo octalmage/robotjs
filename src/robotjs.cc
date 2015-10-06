@@ -593,6 +593,28 @@ NAN_METHOD(getScreenSize)
 	info.GetReturnValue().Set(obj);
 }
 
+NAN_METHOD(captureScreen) 
+{	
+	MMSize displaySize = getMainDisplaySize();
+	
+	MMBitmapRef bitmap = copyMMBitmapFromDisplayInRect(MMRectMake(0, 0, displaySize.width, displaySize.height));
+	
+	uint32_t bufferSize = bitmap->bytesPerPixel * bitmap->width * bitmap->height;
+	Local<Object> buffer = Nan::NewBuffer((char*)bitmap->imageBuffer, bufferSize).ToLocalChecked();
+
+	Local<Object> obj = Nan::New<Object>();
+	Nan::Set(obj, Nan::New("width").ToLocalChecked(), Nan::New<Number>(bitmap->width));
+	Nan::Set(obj, Nan::New("height").ToLocalChecked(), Nan::New<Number>(bitmap->height));
+	Nan::Set(obj, Nan::New("byteWidth").ToLocalChecked(), Nan::New<Number>(bitmap->bytewidth));
+	Nan::Set(obj, Nan::New("bitsPerPixel").ToLocalChecked(), Nan::New<Number>(bitmap->bitsPerPixel));
+	Nan::Set(obj, Nan::New("bytesPerPixel").ToLocalChecked(), Nan::New<Number>(bitmap->bytesPerPixel));
+	Nan::Set(obj, Nan::New("image").ToLocalChecked(), buffer);
+
+	destroyMMBitmap(bitmap);
+	
+	info.GetReturnValue().Set(obj);
+}
+
 NAN_MODULE_INIT(InitAll)
 {
 
@@ -634,6 +656,9 @@ NAN_MODULE_INIT(InitAll)
 
     Nan::Set(target, Nan::New("getScreenSize").ToLocalChecked(),
         Nan::GetFunction(Nan::New<FunctionTemplate>(getScreenSize)).ToLocalChecked());
+		
+	Nan::Set(target, Nan::New("captureScreen").ToLocalChecked(),
+	    Nan::GetFunction(Nan::New<FunctionTemplate>(captureScreen)).ToLocalChecked());
 }
 
 NODE_MODULE(robotjs, InitAll)
