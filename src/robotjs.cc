@@ -556,6 +556,18 @@ NAN_METHOD(setKeyboardDelay)
                                  
 */
 
+/**
+ * Pad hex color code with leading zeros.
+ * @param color Hex value to pad.
+ * @param hex   Hex value to output.
+ */
+void padHex(MMRGBHex color, char* hex)
+{
+	//Length needs to be 7 because snprintf includes a terminating null.
+	//Use %06x to pad hex value with leading 0s.
+	snprintf(hex, 7, "%06x", color);
+}
+
 NAN_METHOD(getPixelColor)
 {
 	MMBitmapRef bitmap;
@@ -567,12 +579,10 @@ NAN_METHOD(getPixelColor)
 	bitmap = copyMMBitmapFromDisplayInRect(MMRectMake(x, y, 1, 1));
 
 	color = MMRGBHexAtPoint(bitmap, 0, 0);
-
-	char hex [7];
-
-	//Length needs to be 7 because snprintf includes a terminating null.
-	//Use %06x to pad hex value with leading 0s.
-	snprintf(hex, 7, "%06x", color);
+	
+	char hex[7];
+	
+	padHex(color, hex);
 
 	destroyMMBitmap(bitmap);
 
@@ -638,14 +648,14 @@ NAN_METHOD(getColor)
 	
 	color = MMRGBHexAtPoint(bitmap, 300, 300);
 	
-	char hex [7];
 
-	snprintf(hex, 7, "%06x", color);
 
 	printf("2: %s\n", hex);
 
-	//FIXME: Currently causes an error.
 	//destroyMMBitmap(bitmap);
+	char hex[7];
+	
+	padHex(color, hex);
 	
 	info.GetReturnValue().Set(Nan::New(hex).ToLocalChecked());
 	
