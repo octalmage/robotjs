@@ -651,12 +651,15 @@ NAN_METHOD(getColor)
 	uint8_t bytesPerPixel = obj->Get(Nan::New("bytesPerPixel").ToLocalChecked())->Uint32Value();
 	
 	char* buf = node::Buffer::Data(obj->Get(Nan::New("image").ToLocalChecked()));
-	
-	bitmap = createMMBitmap((uint8_t *)buf, width, height, byteWidth, bitsPerPixel, bytesPerPixel);
-	
 	color = MMRGBHexAtPoint(bitmap, 300, 300);
-	
 
+	bitmap = createMMBitmap(NULL, width, height, byteWidth, bitsPerPixel, bytesPerPixel);
+
+	if (bitmap != NULL) 
+	{
+		bitmap->imageBuffer = malloc(bitmap->bytewidth * bitmap->height);
+		memcpy(bitmap->imageBuffer, buf, bitmap->bytewidth * bitmap->height);
+	}
 
 	printf("2: %s\n", hex);
 
