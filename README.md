@@ -1,4 +1,4 @@
-RobotJS
+![](https://cldup.com/1ATDf2JMtv.png)
 ========
 
 [![Build Status](https://api.travis-ci.org/octalmage/robotjs.svg?branch=master)](https://travis-ci.org/octalmage/robotjs) [![Join the chat at https://gitter.im/octalmage/robotjs](https://img.shields.io/badge/gitter-join%20chat-brightgreen.svg)](https://gitter.im/octalmage/robotjs?utm_source=badge&utm_medium=badge&utm_campaign=pr-badge&utm_content=badge)
