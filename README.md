@@ -69,7 +69,7 @@ robot.mouseClick();
 ##### Keyboard
 
 ```JavaScript
-// Type "Hello World" then press enter.
+//Type "Hello World" then press enter.
 
 var robot = require("robotjs");
 
@@ -83,7 +83,7 @@ robot.keyTap("enter");
 ##### Screen
 
 ```JavaScript
-// Get pixel color under the mouse. 
+//Get pixel color under the mouse. 
 
 var robot = require("robotjs");
 
