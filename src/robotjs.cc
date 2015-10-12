@@ -479,8 +479,8 @@ NAN_METHOD(keyToggle)
 	MMKeyFlags flags = MOD_NONE;
 	MMKeyCode key;
 
-	char *k;
 	bool down;
+	char *k;
 	char *f;
 
 	v8::String::Utf8Value kstr(info[0]->ToString());
