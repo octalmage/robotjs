@@ -479,16 +479,19 @@ NAN_METHOD(keyToggle)
 	MMKeyFlags flags = MOD_NONE;
 	MMKeyCode key;
 
-	char *k;
 	bool down;
+	char *k;
 	char *f;
+	
+	//Get arguments from JavaScript.
+	Nan::Utf8String kstr(info[0]);
+	Nan::Utf8String fstr(info[2]);
 
-	v8::String::Utf8Value kstr(info[0]->ToString());
-	v8::String::Utf8Value fstr(info[2]->ToString());
-	down = info[1]->BooleanValue();
+	//Convert arguments to chars.
 	k = *kstr;
 	f = *fstr;
-
+	
+	//Check and confirm number of arguments.
 	switch (info.Length())
 	{
     	case 3:
@@ -499,7 +502,30 @@ NAN_METHOD(keyToggle)
     	default:
       		return Nan::ThrowError("Invalid number of arguments.");
 	}
+	
+	//Get down value if provided.
+	if (info.Length() > 1)
+	{
+		char *d;
 
+		Nan::Utf8String dstr(info[1]);
+		d = *dstr;
+
+		if (strcmp(d, "down") == 0)
+		{
+			down = true;
+		}
+		else if (strcmp(d, "up") == 0)
+		{
+			down = false;
+		}
+		else
+		{
+			return Nan::ThrowError("Invalid key state specified.");
+		}
+	}
+
+	//Get key modifier.
 	if (f)
 	{
 		switch(CheckKeyFlags(f, &flags))
@@ -513,6 +539,7 @@ NAN_METHOD(keyToggle)
 		}
 	}
 
+	//Get the acutal key.
 	switch(CheckKeyCodes(k, &key))
 	{
 		case -1:
