@@ -482,12 +482,16 @@ NAN_METHOD(keyToggle)
 	bool down;
 	char *k;
 	char *f;
+	
+	//Get arguments from JavaScript.
 	Nan::Utf8String kstr(info[0]);
 	Nan::Utf8String fstr(info[2]);
 
+	//Convert arguments to chars.
 	k = *kstr;
 	f = *fstr;
-
+	
+	//Check and confirm number of arguments.
 	switch (info.Length())
 	{
     	case 3:
@@ -521,6 +525,7 @@ NAN_METHOD(keyToggle)
 		}
 	}
 
+	//Get key modifier.
 	if (f)
 	{
 		switch(CheckKeyFlags(f, &flags))
@@ -534,6 +539,7 @@ NAN_METHOD(keyToggle)
 		}
 	}
 
+	//Get the acutal key.
 	switch(CheckKeyCodes(k, &key))
 	{
 		case -1:
