@@ -517,7 +517,7 @@ NAN_METHOD(keyToggle)
 		}
 		else
 		{
-			return Nan::ThrowError("Invalid mouse button state specified.");
+			return Nan::ThrowError("Invalid key state specified.");
 		}
 	}
 
