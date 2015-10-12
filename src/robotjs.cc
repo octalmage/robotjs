@@ -482,9 +482,9 @@ NAN_METHOD(keyToggle)
 	bool down;
 	char *k;
 	char *f;
+	Nan::Utf8String kstr(info[0]);
+	Nan::Utf8String fstr(info[2]);
 
-	v8::String::Utf8Value kstr(info[0]->ToString());
-	v8::String::Utf8Value fstr(info[2]->ToString());
 	k = *kstr;
 	f = *fstr;
 
