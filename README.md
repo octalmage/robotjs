@@ -96,7 +96,7 @@ console.log("#" + hex + " at x:" + mouse.x + " y:" + mouse.y);
 ```
 Read the [Wiki](https://github.com/octalmage/robotjs/wiki) for more information!
 
-## [API](https://github.com/octalmage/robotjs/wiki/Syntax])
+## [API](https://github.com/octalmage/robotjs/wiki/Syntax)
 
 The [RobotJS API](https://github.com/octalmage/robotjs/wiki/Syntax) is contained in the [Wiki](https://github.com/octalmage/robotjs/wiki).
 
