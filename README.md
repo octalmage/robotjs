@@ -76,7 +76,6 @@ for (var x = 0; x < width; x++)
 
 ```JavaScript
 //Type "Hello World" then press enter.
-
 var robot = require("robotjs");
 
 //Type "Hello World".
@@ -90,7 +89,6 @@ robot.keyTap("enter");
 
 ```JavaScript
 //Get pixel color under the mouse. 
-
 var robot = require("robotjs");
 
 //Get mouse position. 
