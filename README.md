@@ -51,21 +51,27 @@ I [plan on](https://github.com/octalmage/robotjs/issues/64) using node-pre-gyp t
 
 ##### Mouse
 
-```JavaScript
-//Get the mouse position, move it, then click.
+![](https://cloudup.com/cw5JY2cusx3+)
 
+```JavaScript
+//Move the mouse across the screen as a sine wave.
 var robot = require("robotjs");
 
-//Get the mouse position, returns an object with x and y. 
-var mouse = robot.getMousePos();
-console.log("Mouse is at x:" + mouse.x + " y:" + mouse.y);
+//Speed up the mouse.
+robot.setMouseDelay(2);
 
-//Move the mouse down by 100 pixels.
-robot.moveMouse(mouse.x, mouse.y + 100);
+var twoPI = Math.PI * 2.0;
+var screenSize = robot.getScreenSize();
+var height = (screenSize.height / 2) - 10;
+var width = screenSize.width;
 
-//Left click!
-robot.mouseClick();
+for (var x = 0; x < width; x++)
+{
+	y = height * Math.sin((twoPI * x) / width) + height;
+	robot.moveMouse(x, y);
+}
 ```
+
 ##### Keyboard
 
 ```JavaScript
