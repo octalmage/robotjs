@@ -261,8 +261,8 @@ static KeyNames key_names[] =
 	{ "left",           K_LEFT },
 	{ "home",           K_HOME },
 	{ "end",            K_END },
-	{ "page_up",        K_PAGEUP },
-	{ "page_down",      K_PAGEDOWN },
+	{ "pageup",         K_PAGEUP },
+	{ "pagedown",       K_PAGEDOWN },
 	{ "f1",             K_F1 },
 	{ "f2",             K_F2 },
 	{ "f3",             K_F3 },
@@ -279,7 +279,6 @@ static KeyNames key_names[] =
 	{ "alt",            K_ALT },
 	{ "control",        K_CONTROL },
 	{ "shift",          K_SHIFT },
-	{ "caps",           K_CAPSLOCK },
 	{ "space",          K_SPACE },
 	{ "printscreen",    K_PRINTSCREEN },
 		          
