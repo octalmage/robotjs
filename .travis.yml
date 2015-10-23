@@ -7,8 +7,11 @@ node_js:
   - 0.10
   - 0.12
   - 4.0.0
+  - 4
+  - node
   - iojs-v2
   - iojs-v3
+  - iojs
 
 addons:
   apt:
@@ -21,6 +24,9 @@ addons:
       - libxtst-dev
       - g++-4.8
       - gcc-4.8
+      
+before_install:
+  - export CC="gcc-4.9" CXX="g++-4.9"
 
 before_script:
   - export DISPLAY=:99.0
