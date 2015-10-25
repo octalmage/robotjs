@@ -1,10 +1,9 @@
 ![](https://cldup.com/1ATDf2JMtv.png)
 ========
 
-[![Build Status](https://api.travis-ci.org/octalmage/robotjs.svg?branch=master)](https://travis-ci.org/octalmage/robotjs) [![Join the chat at https://gitter.im/octalmage/robotjs](https://img.shields.io/badge/gitter-join%20chat-brightgreen.svg)](https://gitter.im/octalmage/robotjs?utm_source=badge&utm_medium=badge&utm_campaign=pr-badge&utm_content=badge)
+[![Build Status](https://api.travis-ci.org/octalmage/robotjs.svg?branch=master)](https://travis-ci.org/octalmage/robotjs) [![Build status](https://ci.appveyor.com/api/projects/status/qh2eqb37j7ap6x36?svg=true)](https://ci.appveyor.com/project/octalmage/robotjs) 
+[![npm version](https://img.shields.io/npm/v/robotjs.svg)](https://www.npmjs.com/package/robotjs) [![Join the chat at https://gitter.im/octalmage/robotjs](https://img.shields.io/badge/gitter-join%20chat-blue.svg)](https://gitter.im/octalmage/robotjs?utm_source=badge&utm_medium=badge&utm_campaign=pr-badge&utm_content=badge)
 [![Wat: Documented](https://img.shields.io/badge/wat-documented-blue.svg)](https://github.com/dthree/wat)
-[![npm version](https://img.shields.io/npm/v/robotjs.svg)](https://www.npmjs.com/package/robotjs) 
-[![Ready](https://badge.waffle.io/octalmage/robotjs.svg?label=ready&title=Ready)](http://waffle.io/octalmage/robotjs) 
 
 > Node.js Desktop Automation. Control the mouse, keyboard, and read the screen.
 

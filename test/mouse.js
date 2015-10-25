@@ -2,6 +2,9 @@ var test = require('tape');
 var robot = require('..');
 var lastKnownPos, currentPos;
 
+//Increase delay to help test reliability.
+robot.setMouseDelay(100);
+
 test('Get the initial mouse position.', function(t) 
 {
 	t.plan(3);
