@@ -36,8 +36,9 @@ void moveMouse(MMPoint point)
 	             0, 0, 0, 0, point.x, point.y);
 	XFlush(display);
 #elif defined(IS_WINDOWS)
-	point.x *= 65536.0f / GetSystemMetrics(SM_CXSCREEN);
-	point.y *= 65536.0f / GetSystemMetrics(SM_CYSCREEN);
+	#define MOUSE_COORD_TO_ABS(coord, width_or_height) (((65536 * coord) / width_or_height) + (coord < 0 ? -1 : 1))
+	point.x = MOUSE_COORD_TO_ABS(point.x, GetSystemMetrics(SM_CXSCREEN));
+	point.y = MOUSE_COORD_TO_ABS(point.y, GetSystemMetrics(SM_CYSCREEN));
 	mouse_event(MOUSEEVENTF_ABSOLUTE | MOUSEEVENTF_MOVE,
 	            (DWORD)point.x, (DWORD)point.y, 0, 0);
 #endif
