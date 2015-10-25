@@ -1,6 +1,6 @@
 var test = require('tape');
 var robot = require('..');
-var stdin = process.openStdin();
+
 
 test('Type hello world.', function(t) 
 {
@@ -12,8 +12,9 @@ test('Type hello world.', function(t)
 	robot.mouseClick();
 	
 	t.plan(1);
-	t.timeoutAfter(1000);
+	t.timeoutAfter(5000);
 	
+	var stdin = process.openStdin();
 	stdin.resume();
 	
 	stdin.addListener("data", function(d) 
