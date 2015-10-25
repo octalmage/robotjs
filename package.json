@@ -18,7 +18,8 @@
     "keyboard",
     "screenshot",
     "image",
-    "pixel"
+    "pixel",
+    "desktop"
   ],
   "author": "Jason Stallings",
   "license": "MIT",
