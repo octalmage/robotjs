@@ -1,6 +1,7 @@
 var test = require('tape');
 var robot = require('..');
 var lastKnownPos, currentPos;
+//var detectMouse = require('./detectMouse.js');
 
 //Increase delay to help test reliability.
 robot.setMouseDelay(100);
@@ -22,3 +23,17 @@ test('Move the mouse.', function(t)
 	t.ok(currentPos.x === 100, 'mousepos.x is correct.');
 	t.ok(currentPos.y === 100, 'mousepos.y is correct.');
 });
+
+
+/*test('Click the mouse.', function(t) 
+{
+	t.plan(1);
+	t.timeoutAfter(1000);
+	
+	detectMouse(function(e)
+	{
+		t.ok(e.button === 'left', 'mouse clicked.');
+	});
+
+	robot.mouseClick();
+});*/
