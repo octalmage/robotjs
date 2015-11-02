@@ -19,7 +19,15 @@
     "screenshot",
     "image",
     "pixel",
-    "desktop"
+    "desktop",
+    "robotjs",
+    "screen",
+    "recognition",
+    "autohotkey",
+    "machine",
+    "learning",
+    "color"
+    
   ],
   "author": "Jason Stallings",
   "license": "MIT",
