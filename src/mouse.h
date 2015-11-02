@@ -18,12 +18,11 @@ extern "C"
 
 	#include <ApplicationServices/ApplicationServices.h>
 
-	enum _MMMouseButton {
+	typedef enum  {
 		LEFT_BUTTON = kCGMouseButtonLeft,
 		RIGHT_BUTTON = kCGMouseButtonRight,
 		CENTER_BUTTON = kCGMouseButtonCenter
-	};
-	typedef CGMouseButton MMMouseButton;
+	} MMMouseButton;
 
 #elif defined(USE_X11)
 
