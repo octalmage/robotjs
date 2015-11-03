@@ -19,6 +19,7 @@ This is a work in progress so the exported functions could change at any time be
 - [Building](#building)
 - [Plans](#plans)
 - [Progress](#progress)
+- [FAQ](#faq)
 - [Blog](#blog)
 - [License](#license)
 
@@ -133,6 +134,22 @@ node-gyp build
 | Mouse         | 100%           | All planned features implemented.       |
 | Keyboard      | 100%           | All planned features implemented.       |
 | Screen        | 10%            | Screenshot, image search.   |
+
+## FAQ
+
+#### Does RobotJS support global hotkeys? 
+
+Not currently, and I don't know if it ever will. I personally use [Electron](http://electron.atom.io/)/[NW.js](http://nwjs.io/) for global hotkeys, and this works well. Later on I might add hotkey support or create a separate module. See [#55](https://github.com/octalmage/robotjs/issues/55) for details. 
+
+#### Can I take a screenshot with RobotJS? 
+
+Soon! This is a bit more complicated than the rest of the features, so I saved it for last. Luckily the code is already there, I just need to write the bindings, and I've already started. Subscribe to [#13](https://github.com/octalmage/robotjs/issues/13) for updates. 
+
+#### Why is &#60;insert key&#62; missing from the keyboard functions? 
+
+We've been implementing keys as we need them. Feel free to create an issue or submit a pull request!
+
+For any other questions please [submit an issue](https://github.com/octalmage/robotjs/issues/new).
 
 ## <a href="http://robotjavascript.tumblr.com/">Blog</a>
 
