@@ -147,7 +147,7 @@ Soon! This is a bit more complicated than the rest of the features, so I saved i
 
 #### Why is &#60;insert key&#62; missing from the keyboard functions? 
 
-We've been implementing keys as we need them. Feel free to create an issue and we'll see what we can do! 
+We've been implementing keys as we need them. Feel free to create an issue or submit a pull request!
 
 ## <a href="http://robotjavascript.tumblr.com/">Blog</a>
 
