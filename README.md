@@ -149,6 +149,8 @@ Soon! This is a bit more complicated than the rest of the features, so I saved i
 
 We've been implementing keys as we need them. Feel free to create an issue or submit a pull request!
 
+For any other questions please [submit an issue](https://github.com/octalmage/robotjs/issues/new).
+
 ## <a href="http://robotjavascript.tumblr.com/">Blog</a>
 
 For the latest RobotJS news, check out the [blog](http://robotjavascript.tumblr.com)!
