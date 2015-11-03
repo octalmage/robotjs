@@ -22,7 +22,6 @@ This is a work in progress so the exported functions could change at any time be
 - [Plans](#plans)
 - [Progress](#progress)
 - [FAQ](#faq)
-- [Blog](#blog)
 - [License](#license)
 
 ## Installation
@@ -156,12 +155,6 @@ We've been implementing keys as we need them. Feel free to create an issue or su
 The library doesn't have explicit multi-monitor support, so anything that works is kind of on accident. Subscribe to [#88](https://github.com/octalmage/robotjs/issues/88) for updates.
 
 For any other questions please [submit an issue](https://github.com/octalmage/robotjs/issues/new).
-
-## <a href="http://robotjavascript.tumblr.com/">Blog</a>
-
-For the latest RobotJS news, check out the [blog](http://robotjavascript.tumblr.com)!
-
-<a href="http://robotjavascript.tumblr.com" target="_blank"><img src="http://feeds.feedburner.com/RobotjsOfficialBlog.1.gif"></a>
 
 ## Story
 
