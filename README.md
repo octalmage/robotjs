@@ -11,6 +11,8 @@ This is a work in progress so the exported functions could change at any time be
 
 [Check out some of the cool things people are making with  RobotJS](https://github.com/octalmage/robotjs/wiki/Projects-using-RobotJS)! Have your own rad RobotJS project? Feel free to add it!
 
+<p align="center"><a href="https://twitter.com/robotjavascript"><img width="300" src="https://cldup.com/Et-C6_ue45.png"></a><a href="http://robotjavascript.tumblr.com/"><img width="300" src="https://cldup.com/3apDirNmSB.png"></a></p>
+
 ## Contents
 
 - [Installation](#installation)
