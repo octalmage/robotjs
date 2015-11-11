@@ -433,10 +433,10 @@ int GetFlagsFromValue(v8::Handle<v8::Value> value, MMKeyFlags* flags)
 	// Optionally allow an array of flag strings to be passed
 	if (value->IsArray())
 	{
-		v8::Local<v8::Array> a = v8::Local<v8::Array>::Cast(value);
+		v8::Handle<v8::Array> a = v8::Handle<v8::Array>::Cast(value);
 		for (uint32_t i = 0; i < a->Length(); i++)
 		{
-			v8::Local<v8::Value> v(a->Get(i));
+			v8::Handle<v8::Value> v(a->Get(i));
 			if (!v->IsString()) return -2;
 
 			MMKeyFlags f = MOD_NONE;
@@ -505,7 +505,6 @@ NAN_METHOD(keyToggle)
 
 	bool down;
 	char *k;
-	char *f;
 
 	//Get arguments from JavaScript.
 	Nan::Utf8String kstr(info[0]);
