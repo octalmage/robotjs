@@ -73,7 +73,15 @@ void toggleKey(char c, const bool down, MMKeyFlags flags)
 	if (isupper(c) && !(flags & MOD_SHIFT)) {
 		flags |= MOD_SHIFT; /* Not sure if this is safe for all layouts. */
 	}
-	toggleKeyCode(keyCodeForChar(c), down, flags);
+	MMKeyCode keyCode = keyCodeForChar(c);
+#if defined(IS_WINDOWS)
+	int modifiers = keyCode >> 8; // Pull out modifers.
+	if ((modifiers & 1) != 0) flags |= MOD_SHIFT; // Uptdate flags from keycode modifiers.
+    if ((modifiers & 2) != 0) flags |= MOD_CONTROL;
+    if ((modifiers & 4) != 0) flags |= MOD_ALT;
+    keyCode = keyCode & 0xff; // Mask out modifiers.
+#endif	
+	toggleKeyCode(keyCode, down, flags);
 }
 
 void tapKey(char c, MMKeyFlags flags)
