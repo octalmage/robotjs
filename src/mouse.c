@@ -27,7 +27,7 @@ void moveMouse(MMPoint point)
 #if defined(IS_MACOSX)
 	CGEventRef move = CGEventCreateMouseEvent(NULL, kCGEventMouseMoved,
 	                                          CGPointFromMMPoint(point),
-	                                          0);
+	                                          kCGMouseButtonLeft);
 	CGEventPost(kCGSessionEventTap, move);
 	CFRelease(move);
 #elif defined(USE_X11)
