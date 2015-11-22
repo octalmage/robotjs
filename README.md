@@ -48,7 +48,7 @@ I [plan on](https://github.com/octalmage/robotjs/issues/64) using node-pre-gyp t
 
 ## Examples
 
-##### Mouse
+##### [Mouse](https://github.com/octalmage/robotjs/wiki/Syntax#mouse)
 
 ![](https://cloudup.com/cw5JY2cusx3+)
 
@@ -71,7 +71,7 @@ for (var x = 0; x < width; x++)
 }
 ```
 
-##### Keyboard
+##### [Keyboard](https://github.com/octalmage/robotjs/wiki/Syntax#keyboard)
 
 ```JavaScript
 //Type "Hello World" then press enter.
@@ -84,7 +84,7 @@ robot.typeString("Hello World");
 robot.keyTap("enter");
 ```
 
-##### Screen
+##### [Screen](https://github.com/octalmage/robotjs/wiki/Syntax#screen)
 
 ```JavaScript
 //Get pixel color under the mouse. 
