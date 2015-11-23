@@ -69,9 +69,13 @@ void tapKeyCode(MMKeyCode code, MMKeyFlags flags)
 }
 
 void toggleKey(char c, const bool down, MMKeyFlags flags)
-{
-	int modifiers;
+{	
 	MMKeyCode keyCode = keyCodeForChar(c);
+	
+	//Prevent unused variable warning for Mac and Linux.
+#if defined(IS_WINDOWS)
+	int modifiers;
+#endif	
 	
 	if (isupper(c) && !(flags & MOD_SHIFT)) {
 		flags |= MOD_SHIFT; /* Not sure if this is safe for all layouts. */
