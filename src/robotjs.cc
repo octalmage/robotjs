@@ -26,7 +26,66 @@ int keyboardDelay = 10;
 
 */
 
-NAN_METHOD(moveMouse) 
+int CheckMouseButton(const char * const b, MMMouseButton * const button)
+{
+	if (!button) return -1;
+
+	if (strcmp(b, "left") == 0)
+	{
+		*button = LEFT_BUTTON;
+	}
+	else if (strcmp(b, "right") == 0)
+	{
+		*button = RIGHT_BUTTON;
+	}
+	else if (strcmp(b, "middle") == 0)
+	{
+		*button = CENTER_BUTTON;
+	}
+	else
+	{
+		return -2;
+	}
+
+	return 0;
+}
+
+NAN_METHOD(dragMouse)
+{
+	if (info.Length() < 2)
+	{
+		return Nan::ThrowError("Invalid number of arguments.");
+	}
+
+	const size_t x = info[0]->Int32Value();
+	const size_t y = info[1]->Int32Value();
+	MMMouseButton button = LEFT_BUTTON;
+
+	if (info.Length() >= 3)
+	{
+		Nan::Utf8String bstr(info[2]);
+		const char * const b = *bstr;
+
+		switch (CheckMouseButton(b, &button))
+		{
+			case -1:
+				return Nan::ThrowError("Null pointer in mouse button code.");
+				break;
+			case -2:
+				return Nan::ThrowError("Invalid mouse button specified.");
+				break;
+		}
+	}
+
+	MMPoint point;
+	point = MMPointMake(x, y);
+	dragMouse(point, button);
+	microsleep(mouseDelay);
+
+	info.GetReturnValue().Set(Nan::New(1));
+}
+
+NAN_METHOD(moveMouse)
 {
 	if (info.Length() < 2)
 	{
@@ -78,26 +137,17 @@ NAN_METHOD(mouseClick)
 
 	if (info.Length() > 0)
 	{
-		char *b;
-
 		v8::String::Utf8Value bstr(info[0]->ToString());
-		b = *bstr;
+		const char * const b = *bstr;
 
-		if (strcmp(b, "left") == 0)
+		switch (CheckMouseButton(b, &button))
 		{
-			button = LEFT_BUTTON;
-		}
-		else if (strcmp(b, "right") == 0)
-		{
-			button = RIGHT_BUTTON;
-		}
-		else if (strcmp(b, "middle") == 0)
-		{
-			button = CENTER_BUTTON;
-		}
-		else
-		{
-			return Nan::ThrowError("Invalid mouse button specified.");
+			case -1:
+				return Nan::ThrowError("Null pointer in mouse button code.");
+				break;
+			case -2:
+				return Nan::ThrowError("Invalid mouse button specified.");
+				break;
 		}
 	}
 
@@ -152,26 +202,17 @@ NAN_METHOD(mouseToggle)
 
 	if (info.Length() == 2)
 	{
-		char *b;
-
 		Nan::Utf8String bstr(info[1]);
-		b = *bstr;
+		const char * const b = *bstr;
 
-		if (strcmp(b, "left") == 0)
+		switch (CheckMouseButton(b, &button))
 		{
-			button = LEFT_BUTTON;
-		}
-		else if (strcmp(b, "right") == 0)
-		{
-			button = RIGHT_BUTTON;
-		}
-		else if (strcmp(b, "middle") == 0)
-		{
-			button = CENTER_BUTTON;
-		}
-		else
-		{
-			return Nan::ThrowError("Invalid mouse button specified.");
+			case -1:
+				return Nan::ThrowError("Null pointer in mouse button code.");
+				break;
+			case -2:
+				return Nan::ThrowError("Invalid mouse button specified.");
+				break;
 		}
 	}
 	else if (info.Length() > 2)
@@ -628,6 +669,8 @@ NAN_METHOD(getScreenSize)
 
 NAN_MODULE_INIT(InitAll)
 {
+    Nan::Set(target, Nan::New("dragMouse").ToLocalChecked(),
+        Nan::GetFunction(Nan::New<FunctionTemplate>(dragMouse)).ToLocalChecked());
 
     Nan::Set(target, Nan::New("moveMouse").ToLocalChecked(),
         Nan::GetFunction(Nan::New<FunctionTemplate>(moveMouse)).ToLocalChecked());
