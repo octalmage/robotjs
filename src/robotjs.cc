@@ -471,7 +471,7 @@ int GetFlagsFromValue(v8::Handle<v8::Value> value, MMKeyFlags* flags)
 {
 	if (!flags) return -1;
 
-	// Optionally allow an array of flag strings to be passed
+	//Optionally allow an array of flag strings to be passed.
 	if (value->IsArray())
 	{
 		v8::Handle<v8::Array> a = v8::Handle<v8::Array>::Cast(value);
@@ -489,7 +489,7 @@ int GetFlagsFromValue(v8::Handle<v8::Value> value, MMKeyFlags* flags)
 		return 0;
 	}
 
-	// If it's not an array, it should be a single string value
+	//If it's not an array, it should be a single string value.
 	return GetFlagsFromString(value, flags);
 }
 
