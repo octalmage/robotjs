@@ -461,41 +461,65 @@ int CheckKeyFlags(char* f, MMKeyFlags* flags)
 	return 0;
 }
 
+int GetFlagsFromString(v8::Handle<v8::Value> value, MMKeyFlags* flags)
+{
+	v8::String::Utf8Value fstr(value->ToString());
+	return CheckKeyFlags(*fstr, flags);
+}
+
+int GetFlagsFromValue(v8::Handle<v8::Value> value, MMKeyFlags* flags)
+{
+	if (!flags) return -1;
+
+	// Optionally allow an array of flag strings to be passed
+	if (value->IsArray())
+	{
+		v8::Handle<v8::Array> a = v8::Handle<v8::Array>::Cast(value);
+		for (uint32_t i = 0; i < a->Length(); i++)
+		{
+			v8::Handle<v8::Value> v(a->Get(i));
+			if (!v->IsString()) return -2;
+
+			MMKeyFlags f = MOD_NONE;
+			const int rv = GetFlagsFromString(v, &f);
+			if (rv) return rv;
+
+			*flags = (MMKeyFlags)(*flags | f);
+		}
+		return 0;
+	}
+
+	// If it's not an array, it should be a single string value
+	return GetFlagsFromString(value, flags);
+}
+
 NAN_METHOD(keyTap)
 {
 	MMKeyFlags flags = MOD_NONE;
 	MMKeyCode key;
 
   	char *k;
-  	char *f;
 
-  	v8::String::Utf8Value fstr(info[1]->ToString());
   	v8::String::Utf8Value kstr(info[0]->ToString());
   	k = *kstr;
-  	f = *fstr;
 
 	switch (info.Length())
 	{
 		case 2:
+			switch (GetFlagsFromValue(info[1], &flags))
+			{
+				case -1:
+					return Nan::ThrowError("Null pointer in key flag.");
+					break;
+				case -2:
+					return Nan::ThrowError("Invalid key flag specified.");
+					break;
+			}
 			break;
 		case 1:
-			f = NULL;
 			break;
 		default:
 			return Nan::ThrowError("Invalid number of arguments.");
-	}
-
-  	if (f)
-	{
-		switch(CheckKeyFlags(f, &flags))
-    	{
-			case -1:
-				return Nan::ThrowError("Null pointer in key flag.");
-        		break;
-			case -2:
-				return Nan::ThrowError("Invalid key flag specified.");
-        		break;
-    	}
 	}
 
 	switch(CheckKeyCodes(k, &key))
@@ -522,28 +546,34 @@ NAN_METHOD(keyToggle)
 
 	bool down;
 	char *k;
-	char *f;
-	
+
 	//Get arguments from JavaScript.
 	Nan::Utf8String kstr(info[0]);
-	Nan::Utf8String fstr(info[2]);
 
 	//Convert arguments to chars.
 	k = *kstr;
-	f = *fstr;
-	
+
 	//Check and confirm number of arguments.
 	switch (info.Length())
 	{
-    	case 3:
-      		break;
-    	case 2:
-      		f = NULL;
-      		break;
-    	default:
-      		return Nan::ThrowError("Invalid number of arguments.");
+		case 3:
+			//Get key modifier.
+			switch (GetFlagsFromValue(info[2], &flags))
+			{
+				case -1:
+					return Nan::ThrowError("Null pointer in key flag.");
+					break;
+				case -2:
+					return Nan::ThrowError("Invalid key flag specified.");
+					break;
+			}
+			break;
+		case 2:
+			break;
+		default:
+			return Nan::ThrowError("Invalid number of arguments.");
 	}
-	
+
 	//Get down value if provided.
 	if (info.Length() > 1)
 	{
@@ -563,20 +593,6 @@ NAN_METHOD(keyToggle)
 		else
 		{
 			return Nan::ThrowError("Invalid key state specified.");
-		}
-	}
-
-	//Get key modifier.
-	if (f)
-	{
-		switch(CheckKeyFlags(f, &flags))
-		{
-			case -1:
-        		return Nan::ThrowError("Null pointer in key flag.");
-        		break;
-			case -2:
-        		return Nan::ThrowError("Invalid key flag specified.");
-        		break;
 		}
 	}
 
