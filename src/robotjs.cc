@@ -26,100 +26,143 @@ int keyboardDelay = 10;
 
 */
 
-NAN_METHOD(moveMouse) 
+int CheckMouseButton(const char * const b, MMMouseButton * const button)
 {
-	NanScope();
-	if (args.Length() < 2) 
+	if (!button) return -1;
+
+	if (strcmp(b, "left") == 0)
 	{
-		return NanThrowError("Invalid number of arguments."); 
+		*button = LEFT_BUTTON;
 	}
-	size_t x = args[0]->Int32Value();
-	size_t y = args[1]->Int32Value();
+	else if (strcmp(b, "right") == 0)
+	{
+		*button = RIGHT_BUTTON;
+	}
+	else if (strcmp(b, "middle") == 0)
+	{
+		*button = CENTER_BUTTON;
+	}
+	else
+	{
+		return -2;
+	}
+
+	return 0;
+}
+
+NAN_METHOD(dragMouse)
+{
+	if (info.Length() < 2)
+	{
+		return Nan::ThrowError("Invalid number of arguments.");
+	}
+
+	const size_t x = info[0]->Int32Value();
+	const size_t y = info[1]->Int32Value();
+	MMMouseButton button = LEFT_BUTTON;
+
+	if (info.Length() >= 3)
+	{
+		Nan::Utf8String bstr(info[2]);
+		const char * const b = *bstr;
+
+		switch (CheckMouseButton(b, &button))
+		{
+			case -1:
+				return Nan::ThrowError("Null pointer in mouse button code.");
+				break;
+			case -2:
+				return Nan::ThrowError("Invalid mouse button specified.");
+				break;
+		}
+	}
+
+	MMPoint point;
+	point = MMPointMake(x, y);
+	dragMouse(point, button);
+	microsleep(mouseDelay);
+
+	info.GetReturnValue().Set(Nan::New(1));
+}
+
+NAN_METHOD(moveMouse)
+{
+	if (info.Length() < 2)
+	{
+		return Nan::ThrowError("Invalid number of arguments.");
+	}
+	size_t x = info[0]->Int32Value();
+	size_t y = info[1]->Int32Value();
 
 	MMPoint point;
 	point = MMPointMake(x, y);
 	moveMouse(point);
 	microsleep(mouseDelay);
 
-	NanReturnValue(NanNew("1"));
+	info.GetReturnValue().Set(Nan::New(1));
 }
 
-NAN_METHOD(moveMouseSmooth) 
+NAN_METHOD(moveMouseSmooth)
 {
-	NanScope();
-	if (args.Length() < 2) 
+	if (info.Length() < 2)
 	{
-		return NanThrowError("Invalid number of arguments."); 
+		return Nan::ThrowError("Invalid number of arguments.");
 	}
-	size_t x = args[0]->Int32Value();
-	size_t y = args[1]->Int32Value();
+	size_t x = info[0]->Int32Value();
+	size_t y = info[1]->Int32Value();
 
 	MMPoint point;
 	point = MMPointMake(x, y);
 	smoothlyMoveMouse(point);
 	microsleep(mouseDelay);
 
-	NanReturnValue(NanNew("1"));
+	info.GetReturnValue().Set(Nan::New(1));
 }
 
-NAN_METHOD(getMousePos) 
+NAN_METHOD(getMousePos)
 {
-	NanScope();
-
 	MMPoint pos = getMousePos();
 
  	//Return object with .x and .y.
-	Local<Object> obj = NanNew<Object>();
-	obj->Set(NanNew<String>("x"), NanNew<Integer>((int)pos.x));
-	obj->Set(NanNew<String>("y"), NanNew<Integer>((int)pos.y));
-	NanReturnValue(obj);
+	Local<Object> obj = Nan::New<Object>();
+    Nan::Set(obj, Nan::New("x").ToLocalChecked(), Nan::New((int)pos.x));
+    Nan::Set(obj, Nan::New("y").ToLocalChecked(), Nan::New((int)pos.y));
+	info.GetReturnValue().Set(obj);
 }
 
-NAN_METHOD(mouseClick) 
+NAN_METHOD(mouseClick)
 {
-	NanScope();
-
 	MMMouseButton button = LEFT_BUTTON;
 	bool doubleC = false;
 
-	if (args.Length() > 0)
+	if (info.Length() > 0)
 	{
-		char *b;
+		v8::String::Utf8Value bstr(info[0]->ToString());
+		const char * const b = *bstr;
 
-		v8::String::Utf8Value bstr(args[0]->ToString());
-		b = *bstr;
+		switch (CheckMouseButton(b, &button))
+		{
+			case -1:
+				return Nan::ThrowError("Null pointer in mouse button code.");
+				break;
+			case -2:
+				return Nan::ThrowError("Invalid mouse button specified.");
+				break;
+		}
+	}
 
-		if (strcmp(b, "left") == 0)
-		{
-			button = LEFT_BUTTON;
-		}
-		else if (strcmp(b, "right") == 0)
-		{
-			button = RIGHT_BUTTON;
-		}
-		else if (strcmp(b, "middle") == 0)
-		{
-			button = CENTER_BUTTON;
-		}
-		else
-		{
-			return NanThrowError("Invalid mouse button specified."); 
-		}
-	}
-	
-	if (args.Length() == 2)
+	if (info.Length() == 2)
 	{
-		doubleC = args[1]->BooleanValue();
+		doubleC = info[1]->BooleanValue();
 	}
-	else if (args.Length() > 2)
+	else if (info.Length() > 2)
 	{
-		return NanThrowError("Invalid number of arguments.");
+		return Nan::ThrowError("Invalid number of arguments.");
 	}
-	
+
 	if (!doubleC)
 	{
 		clickMouse(button);
-		
 	}
 	else
 	{
@@ -128,23 +171,24 @@ NAN_METHOD(mouseClick)
 
 	microsleep(mouseDelay);
 
-	NanReturnValue(NanNew("1"));
+    info.GetReturnValue().Set(Nan::New(1));
 }
 
-NAN_METHOD(mouseToggle) 
+NAN_METHOD(mouseToggle)
 {
-	NanScope();
-
 	MMMouseButton button = LEFT_BUTTON;
-	bool down;
+	bool down = false;
 
-	if (args.Length() > 0)
+	if (info.Length() > 0)
 	{
-		const char *d = (*v8::String::Utf8Value(args[0]->ToString()));
+		char *d;
+
+		Nan::Utf8String dstr(info[0]);
+		d = *dstr;
 
 		if (strcmp(d, "down") == 0)
 		{
-			down = true;;
+			down = true;
 		}
 		else if (strcmp(d, "up") == 0)
 		{
@@ -152,74 +196,84 @@ NAN_METHOD(mouseToggle)
 		}
 		else
 		{
-			return NanThrowError("Invalid mouse button state specified."); 
+			return Nan::ThrowError("Invalid mouse button state specified.");
 		}
 	}
 
-	if (args.Length() == 2)
+	if (info.Length() == 2)
 	{
-		char *b = (*v8::String::Utf8Value(args[1]->ToString()));
+		Nan::Utf8String bstr(info[1]);
+		const char * const b = *bstr;
 
-		if (strcmp(b, "left") == 0)
+		switch (CheckMouseButton(b, &button))
 		{
-			button = LEFT_BUTTON;
-		}
-		else if (strcmp(b, "right") == 0)
-		{
-			button = RIGHT_BUTTON;
-		}
-		else if (strcmp(b, "middle") == 0)
-		{
-			button = CENTER_BUTTON;
-		}
-		else
-		{
-			return NanThrowError("Invalid mouse button specified."); 
+			case -1:
+				return Nan::ThrowError("Null pointer in mouse button code.");
+				break;
+			case -2:
+				return Nan::ThrowError("Invalid mouse button specified.");
+				break;
 		}
 	}
-	else if (args.Length() > 2)
+	else if (info.Length() > 2)
 	{
-		return NanThrowError("Invalid number of arguments.");
+		return Nan::ThrowError("Invalid number of arguments.");
 	}
 
 	toggleMouse(down, button);
 	microsleep(mouseDelay);
 
-	NanReturnValue(NanNew("1"));
+	info.GetReturnValue().Set(Nan::New(1));
 }
 
-NAN_METHOD(setMouseDelay) 
+NAN_METHOD(setMouseDelay)
 {
-	NanScope();
-
-	if (args.Length() != 1) 
+	if (info.Length() != 1)
 	{
-		return NanThrowError("Invalid number of arguments."); 
+		return Nan::ThrowError("Invalid number of arguments.");
 	}
 
-	mouseDelay = args[0]->Int32Value();
+	mouseDelay = info[0]->Int32Value();
 
-	NanReturnValue(NanNew("1"));
+    info.GetReturnValue().Set(Nan::New(1));
 }
 
 NAN_METHOD(scrollMouse) 
 {
-	NanScope();
+	Nan::HandleScope scope;
 
 	//Get the values of magnitude and direction from the arguments list.
-	if(args.Length() == 2)	
+	if(info.Length() == 2)	
 	{
-		int scrollMagnitude = args[0]->Int32Value();
-		int scrollDirection = args[1]->Int32Value();
+		int scrollMagnitude = info[0]->Int32Value();
+		char *s;
+
+		Nan::Utf8String sstr(info[1]);
+		s = *sstr;
+		
+		MMMouseWheelDirection scrollDirection;
+		
+		if (strcmp(s, "up") == 0)
+		{
+			scrollDirection = DIRECTION_UP;
+		}
+		else if (strcmp(s, "down") == 0)
+		{
+			scrollDirection = DIRECTION_DOWN;
+		}
+		else
+		{
+			return Nan::ThrowError("Invalid scroll direction specified.");
+		}
 		
 		scrollMouse(scrollMagnitude, scrollDirection);
 		microsleep(mouseDelay);
 		
-		NanReturnValue(NanNew("1"));
+		info.GetReturnValue().Set(Nan::New(1));
 	} 
 	else 
 	{
-		return NanThrowError("Invalid number of arguments.");
+		return Nan::ThrowError("Invalid number of arguments.");
 	}
 }
 /*
@@ -231,7 +285,7 @@ NAN_METHOD(scrollMouse)
           |___/           
 */
 
-int CheckKeyCodes(char* k, MMKeyCode *key) 
+int CheckKeyCodes(char* k, MMKeyCode *key)
 {
 	if (!key) return -1;
 
@@ -360,12 +414,12 @@ int CheckKeyCodes(char* k, MMKeyCode *key)
 		#if defined(IS_WINDOWS)
 			*key = K_PRINTSCREEN;
 		#else
-	 		NanThrowError("printscreen is only supported on Windows.");
+	 		Nan::ThrowError("printscreen is only supported on Windows.");
 	 	#endif
 	}
 	else if (strlen(k) == 1)
 	{
-		*key = keyCodeForChar(*k); 
+		*key = keyCodeForChar(*k);
 	}
 	else
 	{
@@ -375,31 +429,31 @@ int CheckKeyCodes(char* k, MMKeyCode *key)
 	return 0;
 }
 
-int CheckKeyFlags(char* f, MMKeyFlags* flags) 
+int CheckKeyFlags(char* f, MMKeyFlags* flags)
 {
 	if (!flags) return -1;
 
-	if (strcmp(f, "alt") == 0) 
+	if (strcmp(f, "alt") == 0)
 	{
     	*flags = MOD_ALT;
   	}
-  	else if(strcmp(f, "command") == 0) 
+  	else if(strcmp(f, "command") == 0)
 	{
     	*flags = MOD_META;
   	}
-  	else if(strcmp(f, "control") == 0) 
+  	else if(strcmp(f, "control") == 0)
 	{
     	*flags = MOD_CONTROL;
   	}
-  	else if(strcmp(f, "shift") == 0) 
+  	else if(strcmp(f, "shift") == 0)
 	{
     	*flags = MOD_SHIFT;
 	}
-	else if(strcmp(f, "none") == 0) 
+	else if(strcmp(f, "none") == 0)
 	{
     	*flags = MOD_NONE;
   	}
- 	else 
+ 	else
 	{
     	return -2;
   	}
@@ -407,145 +461,180 @@ int CheckKeyFlags(char* f, MMKeyFlags* flags)
 	return 0;
 }
 
-NAN_METHOD(keyTap) 
+int GetFlagsFromString(v8::Handle<v8::Value> value, MMKeyFlags* flags)
 {
-	NanScope();
-	
+	v8::String::Utf8Value fstr(value->ToString());
+	return CheckKeyFlags(*fstr, flags);
+}
+
+int GetFlagsFromValue(v8::Handle<v8::Value> value, MMKeyFlags* flags)
+{
+	if (!flags) return -1;
+
+	//Optionally allow an array of flag strings to be passed.
+	if (value->IsArray())
+	{
+		v8::Handle<v8::Array> a = v8::Handle<v8::Array>::Cast(value);
+		for (uint32_t i = 0; i < a->Length(); i++)
+		{
+			v8::Handle<v8::Value> v(a->Get(i));
+			if (!v->IsString()) return -2;
+
+			MMKeyFlags f = MOD_NONE;
+			const int rv = GetFlagsFromString(v, &f);
+			if (rv) return rv;
+
+			*flags = (MMKeyFlags)(*flags | f);
+		}
+		return 0;
+	}
+
+	//If it's not an array, it should be a single string value.
+	return GetFlagsFromString(value, flags);
+}
+
+NAN_METHOD(keyTap)
+{
 	MMKeyFlags flags = MOD_NONE;
 	MMKeyCode key;
 
   	char *k;
-  	char *f;
 
-  	v8::String::Utf8Value fstr(args[1]->ToString());
-  	v8::String::Utf8Value kstr(args[0]->ToString());
+  	v8::String::Utf8Value kstr(info[0]->ToString());
   	k = *kstr;
-  	f = *fstr;
 
-	switch (args.Length()) 
+	switch (info.Length())
 	{
 		case 2:
+			switch (GetFlagsFromValue(info[1], &flags))
+			{
+				case -1:
+					return Nan::ThrowError("Null pointer in key flag.");
+					break;
+				case -2:
+					return Nan::ThrowError("Invalid key flag specified.");
+					break;
+			}
 			break;
 		case 1:
-			f = NULL;
 			break;
 		default:
-			return NanThrowError("Invalid number of arguments.");
+			return Nan::ThrowError("Invalid number of arguments.");
 	}
 
-  	if (f) 
-	{
-		switch(CheckKeyFlags(f, &flags)) 
-    	{
-			case -1:
-				return NanThrowError("Null pointer in key flag.");
-        		break;
-			case -2:
-				return NanThrowError("Invalid key flag specified."); 
-        		break;
-    	}
-	}
-
-	switch(CheckKeyCodes(k, &key)) 
+	switch(CheckKeyCodes(k, &key))
 	{
 		case -1:
-			return NanThrowError("Null pointer in key code.");
+			return Nan::ThrowError("Null pointer in key code.");
 			break;
 		case -2:
-			return NanThrowError("Invalid key code specified."); 
+			return Nan::ThrowError("Invalid key code specified.");
 			break;
 		default:
 			tapKeyCode(key, flags);
 			microsleep(keyboardDelay);
 	}
 
-	NanReturnValue(NanNew("1"));
+	info.GetReturnValue().Set(Nan::New(1));
 }
 
 
-NAN_METHOD(keyToggle) 
+NAN_METHOD(keyToggle)
 {
-	NanScope();
-
 	MMKeyFlags flags = MOD_NONE;
 	MMKeyCode key;
-  
-	char *k;
+
 	bool down;
-	char *f;
+	char *k;
 
-	v8::String::Utf8Value kstr(args[0]->ToString());
-	v8::String::Utf8Value fstr(args[2]->ToString());
-	down = args[1]->BooleanValue();
+	//Get arguments from JavaScript.
+	Nan::Utf8String kstr(info[0]);
+
+	//Convert arguments to chars.
 	k = *kstr;
-	f = *fstr;
 
-	switch (args.Length()) 
+	//Check and confirm number of arguments.
+	switch (info.Length())
 	{
-    	case 3:
-      		break;
-    	case 2:
-      		f = NULL;
-      		break;
-    	default:
-      		return NanThrowError("Invalid number of arguments.");
+		case 3:
+			//Get key modifier.
+			switch (GetFlagsFromValue(info[2], &flags))
+			{
+				case -1:
+					return Nan::ThrowError("Null pointer in key flag.");
+					break;
+				case -2:
+					return Nan::ThrowError("Invalid key flag specified.");
+					break;
+			}
+			break;
+		case 2:
+			break;
+		default:
+			return Nan::ThrowError("Invalid number of arguments.");
 	}
 
-	if (f) 
+	//Get down value if provided.
+	if (info.Length() > 1)
 	{
-		switch(CheckKeyFlags(f, &flags)) 
+		char *d;
+
+		Nan::Utf8String dstr(info[1]);
+		d = *dstr;
+
+		if (strcmp(d, "down") == 0)
 		{
-			case -1:
-        		return NanThrowError("Null pointer in key flag.");
-        		break;
-			case -2:
-        		return NanThrowError("Invalid key flag specified."); 
-        		break;
+			down = true;
+		}
+		else if (strcmp(d, "up") == 0)
+		{
+			down = false;
+		}
+		else
+		{
+			return Nan::ThrowError("Invalid key state specified.");
 		}
 	}
 
-	switch(CheckKeyCodes(k, &key)) 
+	//Get the acutal key.
+	switch(CheckKeyCodes(k, &key))
 	{
 		case -1:
-    		return NanThrowError("Null pointer in key code.");
+    		return Nan::ThrowError("Null pointer in key code.");
 			break;
 		case -2:
-			return NanThrowError("Invalid key code specified."); 
+			return Nan::ThrowError("Invalid key code specified.");
 			break;
 		default:
 			toggleKeyCode(key, down, flags);
       		microsleep(keyboardDelay);
 	}
 
-	NanReturnValue(NanNew("1"));
+	info.GetReturnValue().Set(Nan::New(1));
 }
 
-NAN_METHOD(typeString) 
+NAN_METHOD(typeString)
 {
-	NanScope();
-
 	char *str;
-	NanUtf8String string(args[0]);
+	Nan::Utf8String string(info[0]);
 
 	str = *string;
 
 	typeString(str);
 
-	NanReturnValue(NanNew("1"));
+	info.GetReturnValue().Set(Nan::New(1));
 }
 
-NAN_METHOD(setKeyboardDelay) 
+NAN_METHOD(setKeyboardDelay)
 {
-	NanScope();
-	
-	if (args.Length() != 1) 
+	if (info.Length() != 1)
 	{
-		return NanThrowError("Invalid number of arguments."); 
+		return Nan::ThrowError("Invalid number of arguments.");
 	}
 
-	keyboardDelay = args[0]->Int32Value();
+	keyboardDelay = info[0]->Int32Value();
 
-	NanReturnValue(NanNew("1"));
+	info.GetReturnValue().Set(Nan::New(1));
 }
 
 /*
@@ -557,89 +646,86 @@ NAN_METHOD(setKeyboardDelay)
                                  
 */
 
-NAN_METHOD(getPixelColor) 
+NAN_METHOD(getPixelColor)
 {
-	NanScope();
-
 	MMBitmapRef bitmap;
 	MMRGBHex color;
 
-	size_t x = args[0]->Int32Value();
-	size_t y = args[1]->Int32Value();
+	size_t x = info[0]->Int32Value();
+	size_t y = info[1]->Int32Value();
 
 	bitmap = copyMMBitmapFromDisplayInRect(MMRectMake(x, y, 1, 1));
 
 	color = MMRGBHexAtPoint(bitmap, 0, 0);
-	
+
 	char hex [7];
 
 	//Length needs to be 7 because snprintf includes a terminating null.
-	//Use %06x to pad hex value with leading 0s. 
+	//Use %06x to pad hex value with leading 0s.
 	snprintf(hex, 7, "%06x", color);
 
 	destroyMMBitmap(bitmap);
 
-	NanReturnValue(NanNew(hex));
+    info.GetReturnValue().Set(Nan::New(hex).ToLocalChecked());
 }
 
-NAN_METHOD(getScreenSize) 
+NAN_METHOD(getScreenSize)
 {
-	NanScope();
-	
 	//Get display size.
 	MMSize displaySize = getMainDisplaySize();
 
 	//Create our return object.
-	Local<Object> obj = NanNew<Object>();
-	obj->Set(NanNew<String>("width"), NanNew<Number>(displaySize.width));
-	obj->Set(NanNew<String>("height"), NanNew<Number>(displaySize.height));
+	Local<Object> obj = Nan::New<Object>();
+	Nan::Set(obj, Nan::New("width").ToLocalChecked(), Nan::New<Number>(displaySize.width));
+	Nan::Set(obj, Nan::New("height").ToLocalChecked(), Nan::New<Number>(displaySize.height));
 
 	//Return our object with .width and .height.
-	NanReturnValue(obj);
+	info.GetReturnValue().Set(obj);
 }
 
-void init(Handle<Object> target) 
+NAN_MODULE_INIT(InitAll)
 {
+    Nan::Set(target, Nan::New("dragMouse").ToLocalChecked(),
+        Nan::GetFunction(Nan::New<FunctionTemplate>(dragMouse)).ToLocalChecked());
 
-	target->Set(NanNew<String>("moveMouse"),
-		NanNew<FunctionTemplate>(moveMouse)->GetFunction());
+    Nan::Set(target, Nan::New("moveMouse").ToLocalChecked(),
+        Nan::GetFunction(Nan::New<FunctionTemplate>(moveMouse)).ToLocalChecked());
 
-	target->Set(NanNew<String>("moveMouseSmooth"),
-		NanNew<FunctionTemplate>(moveMouseSmooth)->GetFunction());
+    Nan::Set(target, Nan::New("moveMouseSmooth").ToLocalChecked(),
+        Nan::GetFunction(Nan::New<FunctionTemplate>(moveMouseSmooth)).ToLocalChecked());
 
-	target->Set(NanNew<String>("getMousePos"),
-		NanNew<FunctionTemplate>(getMousePos)->GetFunction());
+    Nan::Set(target, Nan::New("getMousePos").ToLocalChecked(),
+        Nan::GetFunction(Nan::New<FunctionTemplate>(getMousePos)).ToLocalChecked());
 
-	target->Set(NanNew<String>("mouseClick"),
-		NanNew<FunctionTemplate>(mouseClick)->GetFunction());
+    Nan::Set(target, Nan::New("mouseClick").ToLocalChecked(),
+        Nan::GetFunction(Nan::New<FunctionTemplate>(mouseClick)).ToLocalChecked());
 
-	target->Set(NanNew<String>("mouseToggle"),
-		NanNew<FunctionTemplate>(mouseToggle)->GetFunction());
+    Nan::Set(target, Nan::New("mouseToggle").ToLocalChecked(),
+        Nan::GetFunction(Nan::New<FunctionTemplate>(mouseToggle)).ToLocalChecked());
 		
-	target->Set(NanNew<String>("scrollMouse"),
-		NanNew<FunctionTemplate>(scrollMouse)->GetFunction());
+	Nan::Set(target, Nan::New("scrollMouse").ToLocalChecked(),
+		Nan::GetFunction(Nan::New<FunctionTemplate>(scrollMouse)).ToLocalChecked());
 
-	target->Set(NanNew<String>("setMouseDelay"),
-		NanNew<FunctionTemplate>(setMouseDelay)->GetFunction());
+    Nan::Set(target, Nan::New("setMouseDelay").ToLocalChecked(),
+        Nan::GetFunction(Nan::New<FunctionTemplate>(setMouseDelay)).ToLocalChecked());
 
-	target->Set(NanNew<String>("keyTap"),
-		NanNew<FunctionTemplate>(keyTap)->GetFunction());
-	
-	target->Set(NanNew<String>("keyToggle"),
-		NanNew<FunctionTemplate>(keyToggle)->GetFunction());
+    Nan::Set(target, Nan::New("keyTap").ToLocalChecked(),
+        Nan::GetFunction(Nan::New<FunctionTemplate>(keyTap)).ToLocalChecked());
 
-	target->Set(NanNew<String>("typeString"),
-		NanNew<FunctionTemplate>(typeString)->GetFunction());
+    Nan::Set(target, Nan::New("keyToggle").ToLocalChecked(),
+        Nan::GetFunction(Nan::New<FunctionTemplate>(keyToggle)).ToLocalChecked());
 
-	target->Set(NanNew<String>("setKeyboardDelay"),
-		NanNew<FunctionTemplate>(setKeyboardDelay)->GetFunction());
+    Nan::Set(target, Nan::New("typeString").ToLocalChecked(),
+        Nan::GetFunction(Nan::New<FunctionTemplate>(typeString)).ToLocalChecked());
 
-	target->Set(NanNew<String>("getPixelColor"),
-		NanNew<FunctionTemplate>(getPixelColor)->GetFunction());
+    Nan::Set(target, Nan::New("setKeyboardDelay").ToLocalChecked(),
+        Nan::GetFunction(Nan::New<FunctionTemplate>(setKeyboardDelay)).ToLocalChecked());
 
-	target->Set(NanNew<String>("getScreenSize"),
-		NanNew<FunctionTemplate>(getScreenSize)->GetFunction());
+    Nan::Set(target, Nan::New("getPixelColor").ToLocalChecked(),
+        Nan::GetFunction(Nan::New<FunctionTemplate>(getPixelColor)).ToLocalChecked());
 
+    Nan::Set(target, Nan::New("getScreenSize").ToLocalChecked(),
+        Nan::GetFunction(Nan::New<FunctionTemplate>(getScreenSize)).ToLocalChecked());
 }
 
-NODE_MODULE(robotjs, init)
+NODE_MODULE(robotjs, InitAll)

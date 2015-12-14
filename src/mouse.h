@@ -18,12 +18,11 @@ extern "C"
 
 	#include <ApplicationServices/ApplicationServices.h>
 
-	enum _MMMouseButton {
+	typedef enum  {
 		LEFT_BUTTON = kCGMouseButtonLeft,
 		RIGHT_BUTTON = kCGMouseButtonRight,
 		CENTER_BUTTON = kCGMouseButtonCenter
-	};
-	typedef CGMouseButton MMMouseButton;
+	} MMMouseButton;
 
 #elif defined(USE_X11)
 
@@ -62,6 +61,12 @@ typedef int MMMouseWheelDirection;
  * It is up to the caller to ensure that this point is within the
  * screen boundaries. */
 void moveMouse(MMPoint point);
+
+/* Like moveMouse, moves the mouse to the given point on-screen, but marks
+ * the event as the mouse being dragged on platforms where it is supported.
+ * It is up to the caller to ensure that this point is within the screen
+ * boundaries. */
+void dragMouse(MMPoint point, const MMMouseButton button);
 
 /* Smoothly moves the mouse from the current position to the given point.
  * deadbeef_srand() should be called before using this function.
