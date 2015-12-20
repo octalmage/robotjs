@@ -114,7 +114,7 @@ enum _MMKeyCode {
 	K_F6 = VK_F6,
 	K_F7 = VK_F7,
 	K_F8 = VK_F8,
-	K_F9 = VK_F19,
+	K_F9 = VK_F9,
 	K_F10 = VK_F10,
 	K_F11 = VK_F11,
 	K_F12 = VK_F12,
