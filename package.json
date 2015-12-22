@@ -1,6 +1,6 @@
 {
   "name": "robotjs",
-  "version": "0.3.0",
+  "version": "0.3.6",
   "description": "Node.js Desktop Automation.",
   "main": "index.js",
   "scripts": {
@@ -18,7 +18,15 @@
     "keyboard",
     "screenshot",
     "image",
-    "pixel"
+    "pixel",
+    "desktop",
+    "robotjs",
+    "screen",
+    "recognition",
+    "autohotkey",
+    "machine",
+    "learning",
+    "color"
   ],
   "author": "Jason Stallings",
   "license": "MIT",

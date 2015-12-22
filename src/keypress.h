@@ -16,15 +16,13 @@ extern "C"
 #endif
 #if defined(IS_MACOSX)
 
-	enum _MMKeyFlags {
+	typedef enum  {
 		MOD_NONE = 0,
 		MOD_META = kCGEventFlagMaskCommand,
 		MOD_ALT = kCGEventFlagMaskAlternate,
 		MOD_CONTROL = kCGEventFlagMaskControl,
 		MOD_SHIFT = kCGEventFlagMaskShift
-	};
-
-	typedef CGEventFlags MMKeyFlags;
+	} MMKeyFlags;
 
 #elif defined(USE_X11)
 
