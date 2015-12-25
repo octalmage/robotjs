@@ -34,6 +34,14 @@ void destroyMMBitmap(MMBitmapRef bitmap)
 	free(bitmap);
 }
 
+void destroyMMBitmapBuffer(char * data, void * hint)
+{
+	//This is used to free the buffer as a callback.
+	if (data != NULL)	{
+		free(data);
+	}
+}
+
 MMBitmapRef copyMMBitmap(MMBitmapRef bitmap)
 {
 	uint8_t *copiedBuf = NULL;
