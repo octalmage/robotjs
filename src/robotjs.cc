@@ -26,7 +26,66 @@ int keyboardDelay = 10;
 
 */
 
-NAN_METHOD(moveMouse) 
+int CheckMouseButton(const char * const b, MMMouseButton * const button)
+{
+	if (!button) return -1;
+
+	if (strcmp(b, "left") == 0)
+	{
+		*button = LEFT_BUTTON;
+	}
+	else if (strcmp(b, "right") == 0)
+	{
+		*button = RIGHT_BUTTON;
+	}
+	else if (strcmp(b, "middle") == 0)
+	{
+		*button = CENTER_BUTTON;
+	}
+	else
+	{
+		return -2;
+	}
+
+	return 0;
+}
+
+NAN_METHOD(dragMouse)
+{
+	if (info.Length() < 2)
+	{
+		return Nan::ThrowError("Invalid number of arguments.");
+	}
+
+	const size_t x = info[0]->Int32Value();
+	const size_t y = info[1]->Int32Value();
+	MMMouseButton button = LEFT_BUTTON;
+
+	if (info.Length() >= 3)
+	{
+		Nan::Utf8String bstr(info[2]);
+		const char * const b = *bstr;
+
+		switch (CheckMouseButton(b, &button))
+		{
+			case -1:
+				return Nan::ThrowError("Null pointer in mouse button code.");
+				break;
+			case -2:
+				return Nan::ThrowError("Invalid mouse button specified.");
+				break;
+		}
+	}
+
+	MMPoint point;
+	point = MMPointMake(x, y);
+	dragMouse(point, button);
+	microsleep(mouseDelay);
+
+	info.GetReturnValue().Set(Nan::New(1));
+}
+
+NAN_METHOD(moveMouse)
 {
 	if (info.Length() < 2)
 	{
@@ -78,26 +137,17 @@ NAN_METHOD(mouseClick)
 
 	if (info.Length() > 0)
 	{
-		char *b;
-
 		v8::String::Utf8Value bstr(info[0]->ToString());
-		b = *bstr;
+		const char * const b = *bstr;
 
-		if (strcmp(b, "left") == 0)
+		switch (CheckMouseButton(b, &button))
 		{
-			button = LEFT_BUTTON;
-		}
-		else if (strcmp(b, "right") == 0)
-		{
-			button = RIGHT_BUTTON;
-		}
-		else if (strcmp(b, "middle") == 0)
-		{
-			button = CENTER_BUTTON;
-		}
-		else
-		{
-			return Nan::ThrowError("Invalid mouse button specified.");
+			case -1:
+				return Nan::ThrowError("Null pointer in mouse button code.");
+				break;
+			case -2:
+				return Nan::ThrowError("Invalid mouse button specified.");
+				break;
 		}
 	}
 
@@ -127,15 +177,18 @@ NAN_METHOD(mouseClick)
 NAN_METHOD(mouseToggle)
 {
 	MMMouseButton button = LEFT_BUTTON;
-	bool down;
+	bool down = false;
 
 	if (info.Length() > 0)
 	{
-		const char *d = (*v8::String::Utf8Value(info[0]->ToString()));
+		char *d;
+
+		Nan::Utf8String dstr(info[0]);
+		d = *dstr;
 
 		if (strcmp(d, "down") == 0)
 		{
-			down = true;;
+			down = true;
 		}
 		else if (strcmp(d, "up") == 0)
 		{
@@ -149,23 +202,17 @@ NAN_METHOD(mouseToggle)
 
 	if (info.Length() == 2)
 	{
-		char *b = (*v8::String::Utf8Value(info[1]->ToString()));
+		Nan::Utf8String bstr(info[1]);
+		const char * const b = *bstr;
 
-		if (strcmp(b, "left") == 0)
+		switch (CheckMouseButton(b, &button))
 		{
-			button = LEFT_BUTTON;
-		}
-		else if (strcmp(b, "right") == 0)
-		{
-			button = RIGHT_BUTTON;
-		}
-		else if (strcmp(b, "middle") == 0)
-		{
-			button = CENTER_BUTTON;
-		}
-		else
-		{
-			return Nan::ThrowError("Invalid mouse button specified.");
+			case -1:
+				return Nan::ThrowError("Null pointer in mouse button code.");
+				break;
+			case -2:
+				return Nan::ThrowError("Invalid mouse button specified.");
+				break;
 		}
 	}
 	else if (info.Length() > 2)
@@ -414,41 +461,65 @@ int CheckKeyFlags(char* f, MMKeyFlags* flags)
 	return 0;
 }
 
+int GetFlagsFromString(v8::Handle<v8::Value> value, MMKeyFlags* flags)
+{
+	v8::String::Utf8Value fstr(value->ToString());
+	return CheckKeyFlags(*fstr, flags);
+}
+
+int GetFlagsFromValue(v8::Handle<v8::Value> value, MMKeyFlags* flags)
+{
+	if (!flags) return -1;
+
+	//Optionally allow an array of flag strings to be passed.
+	if (value->IsArray())
+	{
+		v8::Handle<v8::Array> a = v8::Handle<v8::Array>::Cast(value);
+		for (uint32_t i = 0; i < a->Length(); i++)
+		{
+			v8::Handle<v8::Value> v(a->Get(i));
+			if (!v->IsString()) return -2;
+
+			MMKeyFlags f = MOD_NONE;
+			const int rv = GetFlagsFromString(v, &f);
+			if (rv) return rv;
+
+			*flags = (MMKeyFlags)(*flags | f);
+		}
+		return 0;
+	}
+
+	//If it's not an array, it should be a single string value.
+	return GetFlagsFromString(value, flags);
+}
+
 NAN_METHOD(keyTap)
 {
 	MMKeyFlags flags = MOD_NONE;
 	MMKeyCode key;
 
   	char *k;
-  	char *f;
 
-  	v8::String::Utf8Value fstr(info[1]->ToString());
   	v8::String::Utf8Value kstr(info[0]->ToString());
   	k = *kstr;
-  	f = *fstr;
 
 	switch (info.Length())
 	{
 		case 2:
+			switch (GetFlagsFromValue(info[1], &flags))
+			{
+				case -1:
+					return Nan::ThrowError("Null pointer in key flag.");
+					break;
+				case -2:
+					return Nan::ThrowError("Invalid key flag specified.");
+					break;
+			}
 			break;
 		case 1:
-			f = NULL;
 			break;
 		default:
 			return Nan::ThrowError("Invalid number of arguments.");
-	}
-
-  	if (f)
-	{
-		switch(CheckKeyFlags(f, &flags))
-    	{
-			case -1:
-				return Nan::ThrowError("Null pointer in key flag.");
-        		break;
-			case -2:
-				return Nan::ThrowError("Invalid key flag specified.");
-        		break;
-    	}
 	}
 
 	switch(CheckKeyCodes(k, &key))
@@ -473,40 +544,59 @@ NAN_METHOD(keyToggle)
 	MMKeyFlags flags = MOD_NONE;
 	MMKeyCode key;
 
-	char *k;
 	bool down;
-	char *f;
+	char *k;
 
-	v8::String::Utf8Value kstr(info[0]->ToString());
-	v8::String::Utf8Value fstr(info[2]->ToString());
-	down = info[1]->BooleanValue();
+	//Get arguments from JavaScript.
+	Nan::Utf8String kstr(info[0]);
+
+	//Convert arguments to chars.
 	k = *kstr;
-	f = *fstr;
 
+	//Check and confirm number of arguments.
 	switch (info.Length())
 	{
-    	case 3:
-      		break;
-    	case 2:
-      		f = NULL;
-      		break;
-    	default:
-      		return Nan::ThrowError("Invalid number of arguments.");
+		case 3:
+			//Get key modifier.
+			switch (GetFlagsFromValue(info[2], &flags))
+			{
+				case -1:
+					return Nan::ThrowError("Null pointer in key flag.");
+					break;
+				case -2:
+					return Nan::ThrowError("Invalid key flag specified.");
+					break;
+			}
+			break;
+		case 2:
+			break;
+		default:
+			return Nan::ThrowError("Invalid number of arguments.");
 	}
 
-	if (f)
+	//Get down value if provided.
+	if (info.Length() > 1)
 	{
-		switch(CheckKeyFlags(f, &flags))
+		char *d;
+
+		Nan::Utf8String dstr(info[1]);
+		d = *dstr;
+
+		if (strcmp(d, "down") == 0)
 		{
-			case -1:
-        		return Nan::ThrowError("Null pointer in key flag.");
-        		break;
-			case -2:
-        		return Nan::ThrowError("Invalid key flag specified.");
-        		break;
+			down = true;
+		}
+		else if (strcmp(d, "up") == 0)
+		{
+			down = false;
+		}
+		else
+		{
+			return Nan::ThrowError("Invalid key state specified.");
 		}
 	}
 
+	//Get the acutal key.
 	switch(CheckKeyCodes(k, &key))
 	{
 		case -1:
@@ -677,6 +767,8 @@ NAN_METHOD(getColor)
 
 NAN_MODULE_INIT(InitAll)
 {
+    Nan::Set(target, Nan::New("dragMouse").ToLocalChecked(),
+        Nan::GetFunction(Nan::New<FunctionTemplate>(dragMouse)).ToLocalChecked());
 
     Nan::Set(target, Nan::New("moveMouse").ToLocalChecked(),
         Nan::GetFunction(Nan::New<FunctionTemplate>(moveMouse)).ToLocalChecked());
