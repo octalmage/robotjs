@@ -34,6 +34,9 @@ MMBitmapRef createMMBitmap(uint8_t *buffer, size_t width, size_t height,
 /* Releases memory occupied by MMBitmap. */
 void destroyMMBitmap(MMBitmapRef bitmap);
 
+/* Frees the memory occupied by the bitmap via CallBack method. */
+void destroyMMBitmapBuffer(char * data, void * hint);
+
 /* Returns copy of MMBitmap, to be destroy()'d by caller. */
 MMBitmapRef copyMMBitmap(MMBitmapRef bitmap);
 

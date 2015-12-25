@@ -646,6 +646,18 @@ NAN_METHOD(setKeyboardDelay)
                                  
 */
 
+/**
+ * Pad hex color code with leading zeros.
+ * @param color Hex value to pad.
+ * @param hex   Hex value to output.
+ */
+void padHex(MMRGBHex color, char* hex)
+{
+	//Length needs to be 7 because snprintf includes a terminating null.
+	//Use %06x to pad hex value with leading 0s.
+	snprintf(hex, 7, "%06x", color);
+}
+
 NAN_METHOD(getPixelColor)
 {
 	MMBitmapRef bitmap;
@@ -657,12 +669,10 @@ NAN_METHOD(getPixelColor)
 	bitmap = copyMMBitmapFromDisplayInRect(MMRectMake(x, y, 1, 1));
 
 	color = MMRGBHexAtPoint(bitmap, 0, 0);
-
-	char hex [7];
-
-	//Length needs to be 7 because snprintf includes a terminating null.
-	//Use %06x to pad hex value with leading 0s.
-	snprintf(hex, 7, "%06x", color);
+	
+	char hex[7];
+	
+	padHex(color, hex);
 
 	destroyMMBitmap(bitmap);
 
@@ -681,6 +691,79 @@ NAN_METHOD(getScreenSize)
 
 	//Return our object with .width and .height.
 	info.GetReturnValue().Set(obj);
+}
+
+NAN_METHOD(captureScreen) 
+{	
+	MMSize displaySize = getMainDisplaySize();
+	
+	MMBitmapRef bitmap = copyMMBitmapFromDisplayInRect(MMRectMake(0, 0, displaySize.width, displaySize.height));
+	
+	uint32_t bufferSize = bitmap->bytesPerPixel * bitmap->width * bitmap->height;
+	Local<Object> buffer = Nan::NewBuffer((char*)bitmap->imageBuffer, 
+										  bufferSize,
+										  destroyMMBitmapBuffer,
+										  NULL).ToLocalChecked();
+
+	Local<Object> obj = Nan::New<Object>();
+	Nan::Set(obj, Nan::New("width").ToLocalChecked(), Nan::New<Number>(bitmap->width));
+	Nan::Set(obj, Nan::New("height").ToLocalChecked(), Nan::New<Number>(bitmap->height));
+	Nan::Set(obj, Nan::New("byteWidth").ToLocalChecked(), Nan::New<Number>(bitmap->bytewidth));
+	Nan::Set(obj, Nan::New("bitsPerPixel").ToLocalChecked(), Nan::New<Number>(bitmap->bitsPerPixel));
+	Nan::Set(obj, Nan::New("bytesPerPixel").ToLocalChecked(), Nan::New<Number>(bitmap->bytesPerPixel));
+	Nan::Set(obj, Nan::New("image").ToLocalChecked(), buffer);
+	
+	info.GetReturnValue().Set(obj);
+}
+
+/*
+ ____  _ _                         
+| __ )(_) |_ _ __ ___   __ _ _ __  
+|  _ \| | __| '_ ` _ \ / _` | '_ \ 
+| |_) | | |_| | | | | | (_| | |_) |
+|____/|_|\__|_| |_| |_|\__,_| .__/ 
+						   |_|    
+ */
+NAN_METHOD(getColor) 
+{	
+	MMBitmapRef bitmap;
+	MMRGBHex color;
+	
+	size_t x = info[1]->Int32Value();
+	size_t y = info[2]->Int32Value();
+	
+	//Get our image object from JavaScript.
+	Local<Object> obj = Nan::To<v8::Object>(info[0]).ToLocalChecked();
+
+	size_t width = obj->Get(Nan::New("width").ToLocalChecked())->Uint32Value();
+	size_t height = obj->Get(Nan::New("height").ToLocalChecked())->Uint32Value();
+	size_t byteWidth = obj->Get(Nan::New("byteWidth").ToLocalChecked())->Uint32Value();
+	uint8_t bitsPerPixel = obj->Get(Nan::New("bitsPerPixel").ToLocalChecked())->Uint32Value();
+	uint8_t bytesPerPixel = obj->Get(Nan::New("bytesPerPixel").ToLocalChecked())->Uint32Value();
+	
+	char* buf = node::Buffer::Data(obj->Get(Nan::New("image").ToLocalChecked()));
+	
+	uint8_t *data = (uint8_t *)malloc(byteWidth * height);
+	memcpy(data, buf, byteWidth * height);
+
+	bitmap = createMMBitmap(data, width, height, byteWidth, bitsPerPixel, bytesPerPixel);
+
+	/*if (bitmap != NULL) 
+	{
+		bitmap->imageBuffer = malloc(bitmap->bytewidth * bitmap->height);
+		memcpy(bitmap->imageBuffer, buf, bitmap->bytewidth * bitmap->height);
+	}*/
+
+	color = MMRGBHexAtPoint(bitmap, x, y);
+
+	char hex[7];
+	
+	padHex(color, hex);
+
+	destroyMMBitmap(bitmap);
+	
+	info.GetReturnValue().Set(Nan::New(hex).ToLocalChecked());
+	
 }
 
 NAN_MODULE_INIT(InitAll)
@@ -726,6 +809,12 @@ NAN_MODULE_INIT(InitAll)
 
     Nan::Set(target, Nan::New("getScreenSize").ToLocalChecked(),
         Nan::GetFunction(Nan::New<FunctionTemplate>(getScreenSize)).ToLocalChecked());
+		
+	Nan::Set(target, Nan::New("captureScreen").ToLocalChecked(),
+	    Nan::GetFunction(Nan::New<FunctionTemplate>(captureScreen)).ToLocalChecked());
+		
+	Nan::Set(target, Nan::New("getColor").ToLocalChecked(),
+		Nan::GetFunction(Nan::New<FunctionTemplate>(getColor)).ToLocalChecked());
 }
 
 NODE_MODULE(robotjs, InitAll)
