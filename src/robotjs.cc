@@ -284,145 +284,90 @@ NAN_METHOD(scrollMouse)
 |_|\_\___|\__, |_.__/ \___/ \__,_|_|  \__,_|
           |___/           
 */
+struct KeyNames {
+	const char* name;
+	MMKeyCode   key;
+};
+
+static KeyNames key_names[] =
+{
+	{ "backspace",      K_BACKSPACE },
+	{ "delete",         K_DELETE },
+	{ "enter",          K_RETURN },
+	{ "tab",            K_TAB },
+	{ "escape",         K_ESCAPE },
+	{ "up",             K_UP },
+	{ "down",           K_DOWN },
+	{ "right",          K_RIGHT },
+	{ "left",           K_LEFT },
+	{ "home",           K_HOME },
+	{ "end",            K_END },
+	{ "pageup",         K_PAGEUP },
+	{ "pagedown",       K_PAGEDOWN },
+	{ "f1",             K_F1 },
+	{ "f2",             K_F2 },
+	{ "f3",             K_F3 },
+	{ "f4",             K_F4 },
+	{ "f5",             K_F5 },
+	{ "f6",             K_F6 },
+	{ "f7",             K_F7 },
+	{ "f8",             K_F8 },
+	{ "f9",             K_F9 },
+	{ "f10",            K_F10 },
+	{ "f11",            K_F11 },
+	{ "f12",            K_F12 },
+	{ "command",        K_META },
+	{ "alt",            K_ALT },
+	{ "control",        K_CONTROL },
+	{ "shift",          K_SHIFT },
+	{ "space",          K_SPACE },
+	{ "printscreen",    K_PRINTSCREEN },
+		          
+	{ "audio_mute",     K_AUDIO_VOLUME_MUTE },
+	{ "audio_vol_down", K_AUDIO_VOLUME_DOWN },
+	{ "audio_vol_up",   K_AUDIO_VOLUME_UP },
+	{ "audio_play",     K_AUDIO_PLAY },
+	{ "audio_stop",     K_AUDIO_STOP },
+	{ "audio_pause",    K_AUDIO_PAUSE },
+	{ "audio_prev",     K_AUDIO_PREV },
+	{ "audio_next",     K_AUDIO_NEXT },
+	{ "audio_rewind",   K_AUDIO_REWIND },
+	{ "audio_forward",  K_AUDIO_FORWARD },
+	{ "audio_repeat",   K_AUDIO_REPEAT },
+	{ "audio_random",   K_AUDIO_RANDOM },
+		           
+	{ "lights_mon_up",    K_LIGHTS_MON_UP },
+	{ "lights_mon_down",  K_LIGHTS_MON_DOWN },
+	{ "lights_kbd_toggle",K_LIGHTS_KBD_TOGGLE },
+	{ "lights_kbd_up",    K_LIGHTS_KBD_UP },
+	{ "lights_kbd_down",  K_LIGHTS_KBD_DOWN },
+
+	{ NULL,               K_NOT_A_KEY } /* end marker */
+};
 
 int CheckKeyCodes(char* k, MMKeyCode *key)
 {
 	if (!key) return -1;
 
-	if (strcmp(k, "alt") == 0)
-	{
-		*key = K_ALT;
-	}
-  	else if (strcmp(k, "command") == 0)
-	{
-		*key = K_META;
-	}
-  	else if (strcmp(k, "control") == 0)
-	{
-		*key = K_CONTROL;
-	}
-  	else if (strcmp(k, "shift") == 0)
-	{
-		*key = K_SHIFT;
-	}
-	else if (strcmp(k, "backspace") == 0)
-	{
-		*key = K_BACKSPACE;
-	}
-	else if (strcmp(k, "enter") == 0)
-	{
-		*key = K_RETURN;
-	}
-	else if (strcmp(k, "tab") == 0)
-	{
-		*key = K_TAB;
-	}
-	else if (strcmp(k, "up") == 0)
-	{
-		*key = K_UP;
-	}
-	else if (strcmp(k, "down") == 0)
-	{
-		*key = K_DOWN;
-	}
-	else if (strcmp(k, "left") == 0)
-	{
-		*key = K_LEFT;
-	}
-	else if (strcmp(k, "right") == 0)
-	{
-		*key = K_RIGHT;
-	}
-	else if (strcmp(k, "escape") == 0)
-	{
-		*key = K_ESCAPE;
-	}
-	else if (strcmp(k, "delete") == 0)
-	{
-		*key = K_DELETE;
-	}
-	else if (strcmp(k, "home") == 0)
-	{
-		*key = K_HOME;
-	}
-	else if (strcmp(k, "end") == 0)
-	{
-		*key = K_END;
-	}
-	else if (strcmp(k, "pageup") == 0)
-	{
-		*key = K_PAGEUP;
-	}
-	else if (strcmp(k, "pagedown") == 0)
-	{
-		*key = K_PAGEDOWN;
-	}
-	else if (strcmp(k, "space") == 0)
-	{
-		*key = K_SPACE;
-	}
-	else if (strcmp(k, "f1") == 0)
-	{
-		*key = K_F1;
-	}
-	else if (strcmp(k, "f2") == 0)
-	{
-		*key = K_F2;
-	}
-	else if (strcmp(k, "f3") == 0)
-	{
-		*key = K_F3;
-	}
-	else if (strcmp(k, "f4") == 0)
-	{
-		*key = K_F4;
-	}
-	else if (strcmp(k, "f5") == 0)
-	{
-		*key = K_F5;
-	}
-	else if (strcmp(k, "f6") == 0)
-	{
-		*key = K_F6;
-	}
-	else if (strcmp(k, "f7") == 0)
-	{
-		*key = K_F7;
-	}
-	else if (strcmp(k, "f8") == 0)
-	{
-		*key = K_F8;
-	}
-	else if (strcmp(k, "f9") == 0)
-	{
-		*key = K_F9;
-	}
-	else if (strcmp(k, "f10") == 0)
-	{
-		*key = K_F10;
-	}
-	else if (strcmp(k, "f11") == 0)
-	{
-		*key = K_F11;
-	}
-	else if (strcmp(k, "f12") == 0)
-	{
-		*key = K_F12;
-	}
-	else if (strcmp(k, "printscreen") == 0)
-	{
-		#if defined(IS_WINDOWS)
-			*key = K_PRINTSCREEN;
-		#else
-	 		Nan::ThrowError("printscreen is only supported on Windows.");
-	 	#endif
-	}
-	else if (strlen(k) == 1)
+	if (strlen(k) == 1)
 	{
 		*key = keyCodeForChar(*k);
+		return 0;
 	}
-	else
-	{
+
+	*key = K_NOT_A_KEY;
+
+	KeyNames* kn = key_names;
+	while (kn->name) {
+		if (strcmp(k, kn->name) == 0)
+		{
+			*key = kn->key;
+			break;
+		}
+		kn++;
+	}
+
+	if (*key == K_NOT_A_KEY) {
 		return -2;
 	}
 
