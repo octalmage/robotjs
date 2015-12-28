@@ -2,7 +2,7 @@
   'targets': [{
     'target_name': 'robotjs',
     'include_dirs': [
-        'node_modules/nan/'
+        "<!(node -e \"require('nan')\")"
     ],
     
     'cflags': [
