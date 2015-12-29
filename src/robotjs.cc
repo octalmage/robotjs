@@ -384,27 +384,27 @@ int CheckKeyFlags(char* f, MMKeyFlags* flags)
 	if (strcmp(f, "alt") == 0)
 	{
 		*flags = MOD_ALT;
-	  }
-	  else if(strcmp(f, "command") == 0)
+	}
+	else if(strcmp(f, "command") == 0)
 	{
 		*flags = MOD_META;
-	  }
-	  else if(strcmp(f, "control") == 0)
+	}
+	else if(strcmp(f, "control") == 0)
 	{
 		*flags = MOD_CONTROL;
-	  }
-	  else if(strcmp(f, "shift") == 0)
+	}
+	else if(strcmp(f, "shift") == 0)
 	{
 		*flags = MOD_SHIFT;
 	}
 	else if(strcmp(f, "none") == 0)
 	{
 		*flags = MOD_NONE;
-	  }
-	 else
+	}
+	else
 	{
 		return -2;
-	  }
+	}
 
 	return 0;
 }
@@ -446,10 +446,10 @@ NAN_METHOD(keyTap)
 	MMKeyFlags flags = MOD_NONE;
 	MMKeyCode key;
 
-	  char *k;
+	char *k;
 
-	  v8::String::Utf8Value kstr(info[0]->ToString());
-	  k = *kstr;
+	v8::String::Utf8Value kstr(info[0]->ToString());
+	k = *kstr;
 
 	switch (info.Length())
 	{
