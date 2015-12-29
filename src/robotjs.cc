@@ -284,7 +284,8 @@ NAN_METHOD(scrollMouse)
 |_|\_\___|\__, |_.__/ \___/ \__,_|_|  \__,_|
           |___/           
 */
-struct KeyNames {
+struct KeyNames 
+{
 	const char* name;
 	MMKeyCode   key;
 };
@@ -358,7 +359,8 @@ int CheckKeyCodes(char* k, MMKeyCode *key)
 	*key = K_NOT_A_KEY;
 
 	KeyNames* kn = key_names;
-	while (kn->name) {
+	while (kn->name) 
+	{
 		if (strcmp(k, kn->name) == 0)
 		{
 			*key = kn->key;
@@ -367,7 +369,8 @@ int CheckKeyCodes(char* k, MMKeyCode *key)
 		kn++;
 	}
 
-	if (*key == K_NOT_A_KEY) {
+	if (*key == K_NOT_A_KEY) 
+	{
 		return -2;
 	}
 
