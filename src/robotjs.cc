@@ -123,7 +123,7 @@ NAN_METHOD(getMousePos)
 {
 	MMPoint pos = getMousePos();
 
- 	//Return object with .x and .y.
+	 //Return object with .x and .y.
 	Local<Object> obj = Nan::New<Object>();
 	Nan::Set(obj, Nan::New("x").ToLocalChecked(), Nan::New((int)pos.x));
 	Nan::Set(obj, Nan::New("y").ToLocalChecked(), Nan::New((int)pos.y));
@@ -171,7 +171,7 @@ NAN_METHOD(mouseClick)
 
 	microsleep(mouseDelay);
 
-    info.GetReturnValue().Set(Nan::New(1));
+	info.GetReturnValue().Set(Nan::New(1));
 }
 
 NAN_METHOD(mouseToggle)
@@ -235,7 +235,7 @@ NAN_METHOD(setMouseDelay)
 
 	mouseDelay = info[0]->Int32Value();
 
-    info.GetReturnValue().Set(Nan::New(1));
+	info.GetReturnValue().Set(Nan::New(1));
 }
 
 NAN_METHOD(scrollMouse) 
@@ -282,7 +282,7 @@ NAN_METHOD(scrollMouse)
 | ' // _ \ | | | '_ \ / _ \ / _` | '__/ _` |
 | . \  __/ |_| | |_) | (_) | (_| | | | (_| |
 |_|\_\___|\__, |_.__/ \___/ \__,_|_|  \__,_|
-          |___/           
+		  |___/           
 */
 struct KeyNames 
 {
@@ -323,7 +323,7 @@ static KeyNames key_names[] =
 	{ "shift",          K_SHIFT },
 	{ "space",          K_SPACE },
 	{ "printscreen",    K_PRINTSCREEN },
-		          
+				  
 	{ "audio_mute",     K_AUDIO_VOLUME_MUTE },
 	{ "audio_vol_down", K_AUDIO_VOLUME_DOWN },
 	{ "audio_vol_up",   K_AUDIO_VOLUME_UP },
@@ -336,7 +336,7 @@ static KeyNames key_names[] =
 	{ "audio_forward",  K_AUDIO_FORWARD },
 	{ "audio_repeat",   K_AUDIO_REPEAT },
 	{ "audio_random",   K_AUDIO_RANDOM },
-		           
+				   
 	{ "lights_mon_up",    K_LIGHTS_MON_UP },
 	{ "lights_mon_down",  K_LIGHTS_MON_DOWN },
 	{ "lights_kbd_toggle",K_LIGHTS_KBD_TOGGLE },
@@ -384,27 +384,27 @@ int CheckKeyFlags(char* f, MMKeyFlags* flags)
 	if (strcmp(f, "alt") == 0)
 	{
 		*flags = MOD_ALT;
-  	}
-  	else if(strcmp(f, "command") == 0)
+	  }
+	  else if(strcmp(f, "command") == 0)
 	{
 		*flags = MOD_META;
-  	}
-  	else if(strcmp(f, "control") == 0)
+	  }
+	  else if(strcmp(f, "control") == 0)
 	{
 		*flags = MOD_CONTROL;
-  	}
-  	else if(strcmp(f, "shift") == 0)
+	  }
+	  else if(strcmp(f, "shift") == 0)
 	{
 		*flags = MOD_SHIFT;
 	}
 	else if(strcmp(f, "none") == 0)
 	{
 		*flags = MOD_NONE;
-  	}
- 	else
+	  }
+	 else
 	{
 		return -2;
-  	}
+	  }
 
 	return 0;
 }
@@ -446,10 +446,10 @@ NAN_METHOD(keyTap)
 	MMKeyFlags flags = MOD_NONE;
 	MMKeyCode key;
 
-  	char *k;
+	  char *k;
 
-  	v8::String::Utf8Value kstr(info[0]->ToString());
-  	k = *kstr;
+	  v8::String::Utf8Value kstr(info[0]->ToString());
+	  k = *kstr;
 
 	switch (info.Length())
 	{
@@ -548,14 +548,14 @@ NAN_METHOD(keyToggle)
 	switch(CheckKeyCodes(k, &key))
 	{
 		case -1:
-    		return Nan::ThrowError("Null pointer in key code.");
+			return Nan::ThrowError("Null pointer in key code.");
 			break;
 		case -2:
 			return Nan::ThrowError("Invalid key code specified.");
 			break;
 		default:
 			toggleKeyCode(key, down, flags);
-      		microsleep(keyboardDelay);
+			  microsleep(keyboardDelay);
 	}
 
 	info.GetReturnValue().Set(Nan::New(1));
@@ -591,7 +591,7 @@ NAN_METHOD(setKeyboardDelay)
  \___ \ / __| '__/ _ \/ _ \ '_ \ 
   ___) | (__| | |  __/  __/ | | |
  |____/ \___|_|  \___|\___|_| |_|
-                                 
+								 
 */
 
 NAN_METHOD(getPixelColor)
@@ -614,7 +614,7 @@ NAN_METHOD(getPixelColor)
 
 	destroyMMBitmap(bitmap);
 
-    info.GetReturnValue().Set(Nan::New(hex).ToLocalChecked());
+	info.GetReturnValue().Set(Nan::New(hex).ToLocalChecked());
 }
 
 NAN_METHOD(getScreenSize)
@@ -633,47 +633,47 @@ NAN_METHOD(getScreenSize)
 
 NAN_MODULE_INIT(InitAll)
 {
-    Nan::Set(target, Nan::New("dragMouse").ToLocalChecked(),
-        Nan::GetFunction(Nan::New<FunctionTemplate>(dragMouse)).ToLocalChecked());
+	Nan::Set(target, Nan::New("dragMouse").ToLocalChecked(),
+		Nan::GetFunction(Nan::New<FunctionTemplate>(dragMouse)).ToLocalChecked());
 
-    Nan::Set(target, Nan::New("moveMouse").ToLocalChecked(),
-        Nan::GetFunction(Nan::New<FunctionTemplate>(moveMouse)).ToLocalChecked());
+	Nan::Set(target, Nan::New("moveMouse").ToLocalChecked(),
+		Nan::GetFunction(Nan::New<FunctionTemplate>(moveMouse)).ToLocalChecked());
 
-    Nan::Set(target, Nan::New("moveMouseSmooth").ToLocalChecked(),
-        Nan::GetFunction(Nan::New<FunctionTemplate>(moveMouseSmooth)).ToLocalChecked());
+	Nan::Set(target, Nan::New("moveMouseSmooth").ToLocalChecked(),
+		Nan::GetFunction(Nan::New<FunctionTemplate>(moveMouseSmooth)).ToLocalChecked());
 
-    Nan::Set(target, Nan::New("getMousePos").ToLocalChecked(),
-        Nan::GetFunction(Nan::New<FunctionTemplate>(getMousePos)).ToLocalChecked());
+	Nan::Set(target, Nan::New("getMousePos").ToLocalChecked(),
+		Nan::GetFunction(Nan::New<FunctionTemplate>(getMousePos)).ToLocalChecked());
 
-    Nan::Set(target, Nan::New("mouseClick").ToLocalChecked(),
-        Nan::GetFunction(Nan::New<FunctionTemplate>(mouseClick)).ToLocalChecked());
+	Nan::Set(target, Nan::New("mouseClick").ToLocalChecked(),
+		Nan::GetFunction(Nan::New<FunctionTemplate>(mouseClick)).ToLocalChecked());
 
-    Nan::Set(target, Nan::New("mouseToggle").ToLocalChecked(),
-        Nan::GetFunction(Nan::New<FunctionTemplate>(mouseToggle)).ToLocalChecked());
+	Nan::Set(target, Nan::New("mouseToggle").ToLocalChecked(),
+		Nan::GetFunction(Nan::New<FunctionTemplate>(mouseToggle)).ToLocalChecked());
 		
 	Nan::Set(target, Nan::New("scrollMouse").ToLocalChecked(),
 		Nan::GetFunction(Nan::New<FunctionTemplate>(scrollMouse)).ToLocalChecked());
 
-    Nan::Set(target, Nan::New("setMouseDelay").ToLocalChecked(),
-        Nan::GetFunction(Nan::New<FunctionTemplate>(setMouseDelay)).ToLocalChecked());
+	Nan::Set(target, Nan::New("setMouseDelay").ToLocalChecked(),
+		Nan::GetFunction(Nan::New<FunctionTemplate>(setMouseDelay)).ToLocalChecked());
 
-    Nan::Set(target, Nan::New("keyTap").ToLocalChecked(),
-        Nan::GetFunction(Nan::New<FunctionTemplate>(keyTap)).ToLocalChecked());
+	Nan::Set(target, Nan::New("keyTap").ToLocalChecked(),
+		Nan::GetFunction(Nan::New<FunctionTemplate>(keyTap)).ToLocalChecked());
 
-    Nan::Set(target, Nan::New("keyToggle").ToLocalChecked(),
-        Nan::GetFunction(Nan::New<FunctionTemplate>(keyToggle)).ToLocalChecked());
+	Nan::Set(target, Nan::New("keyToggle").ToLocalChecked(),
+		Nan::GetFunction(Nan::New<FunctionTemplate>(keyToggle)).ToLocalChecked());
 
-    Nan::Set(target, Nan::New("typeString").ToLocalChecked(),
-        Nan::GetFunction(Nan::New<FunctionTemplate>(typeString)).ToLocalChecked());
+	Nan::Set(target, Nan::New("typeString").ToLocalChecked(),
+		Nan::GetFunction(Nan::New<FunctionTemplate>(typeString)).ToLocalChecked());
 
-    Nan::Set(target, Nan::New("setKeyboardDelay").ToLocalChecked(),
-        Nan::GetFunction(Nan::New<FunctionTemplate>(setKeyboardDelay)).ToLocalChecked());
+	Nan::Set(target, Nan::New("setKeyboardDelay").ToLocalChecked(),
+		Nan::GetFunction(Nan::New<FunctionTemplate>(setKeyboardDelay)).ToLocalChecked());
 
-    Nan::Set(target, Nan::New("getPixelColor").ToLocalChecked(),
-        Nan::GetFunction(Nan::New<FunctionTemplate>(getPixelColor)).ToLocalChecked());
+	Nan::Set(target, Nan::New("getPixelColor").ToLocalChecked(),
+		Nan::GetFunction(Nan::New<FunctionTemplate>(getPixelColor)).ToLocalChecked());
 
-    Nan::Set(target, Nan::New("getScreenSize").ToLocalChecked(),
-        Nan::GetFunction(Nan::New<FunctionTemplate>(getScreenSize)).ToLocalChecked());
+	Nan::Set(target, Nan::New("getScreenSize").ToLocalChecked(),
+		Nan::GetFunction(Nan::New<FunctionTemplate>(getScreenSize)).ToLocalChecked());
 }
 
 NODE_MODULE(robotjs, InitAll)
