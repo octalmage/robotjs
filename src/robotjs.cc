@@ -125,8 +125,8 @@ NAN_METHOD(getMousePos)
 
  	//Return object with .x and .y.
 	Local<Object> obj = Nan::New<Object>();
-    Nan::Set(obj, Nan::New("x").ToLocalChecked(), Nan::New((int)pos.x));
-    Nan::Set(obj, Nan::New("y").ToLocalChecked(), Nan::New((int)pos.y));
+	Nan::Set(obj, Nan::New("x").ToLocalChecked(), Nan::New((int)pos.x));
+	Nan::Set(obj, Nan::New("y").ToLocalChecked(), Nan::New((int)pos.y));
 	info.GetReturnValue().Set(obj);
 }
 
@@ -383,27 +383,27 @@ int CheckKeyFlags(char* f, MMKeyFlags* flags)
 
 	if (strcmp(f, "alt") == 0)
 	{
-    	*flags = MOD_ALT;
+		*flags = MOD_ALT;
   	}
   	else if(strcmp(f, "command") == 0)
 	{
-    	*flags = MOD_META;
+		*flags = MOD_META;
   	}
   	else if(strcmp(f, "control") == 0)
 	{
-    	*flags = MOD_CONTROL;
+		*flags = MOD_CONTROL;
   	}
   	else if(strcmp(f, "shift") == 0)
 	{
-    	*flags = MOD_SHIFT;
+		*flags = MOD_SHIFT;
 	}
 	else if(strcmp(f, "none") == 0)
 	{
-    	*flags = MOD_NONE;
+		*flags = MOD_NONE;
   	}
  	else
 	{
-    	return -2;
+		return -2;
   	}
 
 	return 0;
