@@ -573,6 +573,20 @@ NAN_METHOD(typeString)
 	info.GetReturnValue().Set(Nan::New(1));
 }
 
+NAN_METHOD(typeStringDelayed)
+{
+	char *str;
+	Nan::Utf8String string(info[0]);
+	
+	str = *string;
+	
+	size_t cpm = info[1]->Int32Value();
+
+	typeStringDelayed(str, cpm);
+
+	info.GetReturnValue().Set(Nan::New(1));
+}
+
 NAN_METHOD(setKeyboardDelay)
 {
 	if (info.Length() != 1)
@@ -665,6 +679,9 @@ NAN_MODULE_INIT(InitAll)
 
 	Nan::Set(target, Nan::New("typeString").ToLocalChecked(),
 		Nan::GetFunction(Nan::New<FunctionTemplate>(typeString)).ToLocalChecked());
+
+	Nan::Set(target, Nan::New("typeStringDelayed").ToLocalChecked(),
+		Nan::GetFunction(Nan::New<FunctionTemplate>(typeStringDelayed)).ToLocalChecked());
 
 	Nan::Set(target, Nan::New("setKeyboardDelay").ToLocalChecked(),
 		Nan::GetFunction(Nan::New<FunctionTemplate>(setKeyboardDelay)).ToLocalChecked());
