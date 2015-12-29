@@ -15,7 +15,7 @@ extern "C"
 #include <ApplicationServices/ApplicationServices.h>
 
 enum _MMKeyCode {
-	K_NOT_A_KEY = -1,
+	K_NOT_A_KEY = 9999,
 	K_BACKSPACE = kVK_Delete,
 	K_DELETE = kVK_ForwardDelete,
 	K_RETURN = kVK_Return,
@@ -77,7 +77,7 @@ typedef CGKeyCode MMKeyCode;
 #include <X11/XF86keysym.h>
 
 enum _MMKeyCode {
-	K_NOT_A_KEY = -1,
+	K_NOT_A_KEY = 9999,
 	K_BACKSPACE = XK_BackSpace,
 	K_DELETE = XK_Delete,
 	K_RETURN = XK_Return,
@@ -136,7 +136,7 @@ typedef KeySym MMKeyCode;
 #elif defined(IS_WINDOWS)
 
 enum _MMKeyCode {
-	K_NOT_A_KEY = -1,
+	K_NOT_A_KEY = 9999,
 	K_BACKSPACE = VK_BACK,
 	K_DELETE = VK_DELETE,
 	K_RETURN = VK_RETURN,
