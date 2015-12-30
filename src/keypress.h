@@ -51,6 +51,11 @@ extern "C"
 
 #endif
 
+#if defined(IS_WINDOWS)
+/* Send win32 key event for given key. */
+void win32KeyEvent(int key, MMKeyFlags flags);
+#endif
+
 /* Toggles the given key down or up. */
 void toggleKeyCode(MMKeyCode code, const bool down, MMKeyFlags flags);
 

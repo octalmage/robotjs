@@ -13,9 +13,8 @@
 
 /* Convenience wrappers around ugly APIs. */
 #if defined(IS_WINDOWS)
-	#define WIN32_KEY_EVENT(key, flags) keybd_event(key, 0, flags, 0)
 	#define WIN32_KEY_EVENT_WAIT(key, flags) \
-		(WIN32_KEY_EVENT(key, flags), Sleep(DEADBEEF_RANDRANGE(0, 63)))
+		(win32KeyEvent(key, flags), Sleep(DEADBEEF_RANDRANGE(0, 63)))
 #elif defined(USE_X11)
 	#define X_KEY_EVENT(display, key, is_press) \
 		(XTestFakeKeyEvent(display, \
@@ -25,6 +24,20 @@
 	#define X_KEY_EVENT_WAIT(display, key, is_press) \
 		(X_KEY_EVENT(display, key, is_press), \
 		 microsleep(DEADBEEF_UNIFORM(0.0, 62.5)))
+#endif
+
+#if defined(IS_WINDOWS)
+void win32KeyEvent(int key, MMKeyFlags flags)
+{
+	int scan = MapVirtualKey(key & 0xff, 0);
+
+	/* Set the scancode for keyup */
+	if ( flags & KEYEVENTF_KEYUP ) {
+		scan = scan | 0x80;
+	}
+
+	keybd_event(key, scan, flags, 0);
+}
 #endif
 
 void toggleKeyCode(MMKeyCode code, const bool down, MMKeyFlags flags)
@@ -47,7 +60,7 @@ void toggleKeyCode(MMKeyCode code, const bool down, MMKeyFlags flags)
 	if (flags & MOD_CONTROL) WIN32_KEY_EVENT_WAIT(K_CONTROL, dwFlags);
 	if (flags & MOD_SHIFT) WIN32_KEY_EVENT_WAIT(K_SHIFT, dwFlags);
 
-	WIN32_KEY_EVENT(code, dwFlags);
+	win32KeyEvent(code, dwFlags);
 #elif defined(USE_X11)
 	Display *display = XGetMainDisplay();
 	const Bool is_press = down ? True : False; /* Just to be safe. */
