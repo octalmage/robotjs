@@ -693,12 +693,6 @@ NAN_METHOD(getColor)
 
 	bitmap = createMMBitmap(data, width, height, byteWidth, bitsPerPixel, bytesPerPixel);
 
-	/*if (bitmap != NULL) 
-	{
-		bitmap->imageBuffer = malloc(bitmap->bytewidth * bitmap->height);
-		memcpy(bitmap->imageBuffer, buf, bitmap->bytewidth * bitmap->height);
-	}*/
-
 	color = MMRGBHexAtPoint(bitmap, x, y);
 
 	char hex[7];
