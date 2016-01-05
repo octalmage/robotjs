@@ -4,7 +4,7 @@ module.exports = robotjs;
 
 module.exports.screen = {};
 
-function bitmap (width, height, byteWidth, bitsPerPixel, bytesPerPixel, image) 
+function bitmap(width, height, byteWidth, bitsPerPixel, bytesPerPixel, image) 
 {
     this.width = width;
     this.height = height;
