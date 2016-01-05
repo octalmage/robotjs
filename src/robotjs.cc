@@ -642,10 +642,36 @@ NAN_METHOD(getScreenSize)
 }
 
 NAN_METHOD(captureScreen) 
-{	
-	MMSize displaySize = getMainDisplaySize();
+{
+	size_t x;
+	size_t y;
+	size_t w;
+	size_t h;
 	
-	MMBitmapRef bitmap = copyMMBitmapFromDisplayInRect(MMRectMake(0, 0, displaySize.width, displaySize.height));
+	//If user has provided screen coords, use them! 
+	if (info.Length() == 4)
+	{
+		//TODO: Make sure requested coords are within the screen bounds, or we get a seg fault.
+		// 		An error message is much nicer! 
+
+		x = info[0]->Int32Value();
+		y = info[1]->Int32Value();
+		w = info[2]->Int32Value();
+		h = info[3]->Int32Value();
+	}
+	else
+	{
+		//We're getting the full screen.
+		x = 0;
+		y = 0;
+		
+		//Get screen size.
+		MMSize displaySize = getMainDisplaySize();
+		w = displaySize.width;
+		h = displaySize.height;
+	}
+	
+	MMBitmapRef bitmap = copyMMBitmapFromDisplayInRect(MMRectMake(x, y, w, h));
 	
 	uint32_t bufferSize = bitmap->bytesPerPixel * bitmap->width * bitmap->height;
 	Local<Object> buffer = Nan::NewBuffer((char*)bitmap->imageBuffer, bufferSize, destroyMMBitmapBuffer, NULL).ToLocalChecked();
