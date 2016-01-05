@@ -673,7 +673,7 @@ NAN_METHOD(captureScreen)
 	
 	MMBitmapRef bitmap = copyMMBitmapFromDisplayInRect(MMRectMake(x, y, w, h));
 	
-	uint32_t bufferSize = bitmap->bytesPerPixel * bitmap->width * bitmap->height;
+	uint32_t bufferSize = bitmap->bytewidth * bitmap->height;
 	Local<Object> buffer = Nan::NewBuffer((char*)bitmap->imageBuffer, bufferSize, destroyMMBitmapBuffer, NULL).ToLocalChecked();
 
 	Local<Object> obj = Nan::New<Object>();
