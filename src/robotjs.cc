@@ -10,6 +10,8 @@
 #include "MMBitmap.h"
 #include "snprintf.h"
 #include "microsleep.h"
+#include "io.h"
+#include "bmp_io.h"
 
 using namespace v8;
 
@@ -695,6 +697,40 @@ NAN_METHOD(captureScreen)
 |____/|_|\__|_| |_| |_|\__,_| .__/ 
 						   |_|    
  */
+
+class BMP
+{
+	public:
+		size_t width;
+		size_t height;
+		size_t byteWidth;
+		uint8_t bitsPerPixel;
+		uint8_t bytesPerPixel;
+		uint8_t *image;
+};
+
+//Convert object from Javascript to a C++ class (BMP).
+BMP buildBMP(Local<Object> info) 
+{
+	Local<Object> obj = Nan::To<v8::Object>(info).ToLocalChecked();
+	
+	BMP img;
+    
+	img.width = obj->Get(Nan::New("width").ToLocalChecked())->Uint32Value();
+	img.height = obj->Get(Nan::New("height").ToLocalChecked())->Uint32Value();
+	img.byteWidth = obj->Get(Nan::New("byteWidth").ToLocalChecked())->Uint32Value();
+	img.bitsPerPixel = obj->Get(Nan::New("bitsPerPixel").ToLocalChecked())->Uint32Value();
+	img.bytesPerPixel = obj->Get(Nan::New("bytesPerPixel").ToLocalChecked())->Uint32Value();
+	
+	char* buf = node::Buffer::Data(obj->Get(Nan::New("image").ToLocalChecked()));
+	
+	//Convert the buffer to a uint8_t which createMMBitmap requires. 
+	img.image = (uint8_t *)malloc(img.byteWidth * img.height);
+	memcpy(img.image, buf, img.byteWidth * img.height);
+
+	return img;
+}
+
 NAN_METHOD(getColor) 
 {	
 	MMBitmapRef bitmap;
@@ -704,23 +740,13 @@ NAN_METHOD(getColor)
 	size_t y = info[1]->Int32Value();
 	
 	//Get our image object from JavaScript.
-	Local<Object> obj = Nan::To<v8::Object>(info[0]).ToLocalChecked();
+	BMP img = buildBMP(Nan::To<v8::Object>(info[0]).ToLocalChecked());
 
-	size_t width = obj->Get(Nan::New("width").ToLocalChecked())->Uint32Value();
-	size_t height = obj->Get(Nan::New("height").ToLocalChecked())->Uint32Value();
-	size_t byteWidth = obj->Get(Nan::New("byteWidth").ToLocalChecked())->Uint32Value();
-	uint8_t bitsPerPixel = obj->Get(Nan::New("bitsPerPixel").ToLocalChecked())->Uint32Value();
-	uint8_t bytesPerPixel = obj->Get(Nan::New("bytesPerPixel").ToLocalChecked())->Uint32Value();
+	//Create the bitmap.
+	bitmap = createMMBitmap(img.image, img.width, img.height, img.byteWidth, img.bitsPerPixel, img.bytesPerPixel);
 	
-	char* buf = node::Buffer::Data(obj->Get(Nan::New("image").ToLocalChecked()));
-	
-	uint8_t *data = (uint8_t *)malloc(byteWidth * height);
-	memcpy(data, buf, byteWidth * height);
-
-	bitmap = createMMBitmap(data, width, height, byteWidth, bitsPerPixel, bytesPerPixel);
-
 	color = MMRGBHexAtPoint(bitmap, x, y);
-
+	
 	char hex[7];
 	
 	padHex(color, hex);
@@ -728,6 +754,32 @@ NAN_METHOD(getColor)
 	destroyMMBitmap(bitmap);
 	
 	info.GetReturnValue().Set(Nan::New(hex).ToLocalChecked());
+	
+}
+
+NAN_METHOD(saveBitmap) 
+{	
+	MMBitmapRef bitmap;
+	MMImageType type = kBMPImageType;
+	
+	//Get our image object from JavaScript.
+	BMP img = buildBMP(Nan::To<v8::Object>(info[0]).ToLocalChecked());
+	
+	char *path;
+	Nan::Utf8String string(info[1]);
+
+	path = *string;
+
+	//Create the bitmap.
+	bitmap = createMMBitmap(img.image, img.width, img.height, img.byteWidth, img.bitsPerPixel, img.bytesPerPixel);
+	
+	if (saveMMBitmapToFile(bitmap, path, type) != 0) {
+		return Nan::ThrowError("Could not save image to file.");
+	}
+
+	destroyMMBitmap(bitmap);
+	
+	info.GetReturnValue().Set(Nan::New(1));
 	
 }
 
@@ -780,6 +832,9 @@ NAN_MODULE_INIT(InitAll)
 		
 	Nan::Set(target, Nan::New("getColor").ToLocalChecked(),
 		Nan::GetFunction(Nan::New<FunctionTemplate>(getColor)).ToLocalChecked());
+		
+	Nan::Set(target, Nan::New("saveBitmap").ToLocalChecked(),
+		Nan::GetFunction(Nan::New<FunctionTemplate>(saveBitmap)).ToLocalChecked());
 }
 
 NODE_MODULE(robotjs, InitAll)

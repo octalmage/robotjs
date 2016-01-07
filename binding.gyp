@@ -60,7 +60,9 @@
       'src/screen.c',
       'src/screengrab.c',
       'src/snprintf.c',
-      'src/MMBitmap.c'
+      'src/MMBitmap.c',
+      'src/io.c',
+      'src/bmp_io.c'
     ]
   }]
 }
