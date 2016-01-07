@@ -695,6 +695,40 @@ NAN_METHOD(captureScreen)
 |____/|_|\__|_| |_| |_|\__,_| .__/ 
 						   |_|    
  */
+
+class BMP
+{
+	public:
+		size_t width;
+		size_t height;
+		size_t byteWidth;
+		uint8_t bitsPerPixel;
+		uint8_t bytesPerPixel;
+		uint8_t *image;
+};
+
+//Convert object from Javascript to a C++ class (BMP).
+BMP buildBMP(Local<Object> info) 
+{
+	Local<Object> obj = Nan::To<v8::Object>(info).ToLocalChecked();
+
+	BMP img;
+
+	img.width = obj->Get(Nan::New("width").ToLocalChecked())->Uint32Value();
+	img.height = obj->Get(Nan::New("height").ToLocalChecked())->Uint32Value();
+	img.byteWidth = obj->Get(Nan::New("byteWidth").ToLocalChecked())->Uint32Value();
+	img.bitsPerPixel = obj->Get(Nan::New("bitsPerPixel").ToLocalChecked())->Uint32Value();
+	img.bytesPerPixel = obj->Get(Nan::New("bytesPerPixel").ToLocalChecked())->Uint32Value();
+
+	char* buf = node::Buffer::Data(obj->Get(Nan::New("image").ToLocalChecked()));
+
+	//Convert the buffer to a uint8_t which createMMBitmap requires. 
+	img.image = (uint8_t *)malloc(img.byteWidth * img.height);
+	memcpy(img.image, buf, img.byteWidth * img.height);
+
+	return img;
+ }
+
 NAN_METHOD(getColor) 
 {	
 	MMBitmapRef bitmap;
@@ -704,20 +738,10 @@ NAN_METHOD(getColor)
 	size_t y = info[1]->Int32Value();
 	
 	//Get our image object from JavaScript.
-	Local<Object> obj = Nan::To<v8::Object>(info[0]).ToLocalChecked();
-
-	size_t width = obj->Get(Nan::New("width").ToLocalChecked())->Uint32Value();
-	size_t height = obj->Get(Nan::New("height").ToLocalChecked())->Uint32Value();
-	size_t byteWidth = obj->Get(Nan::New("byteWidth").ToLocalChecked())->Uint32Value();
-	uint8_t bitsPerPixel = obj->Get(Nan::New("bitsPerPixel").ToLocalChecked())->Uint32Value();
-	uint8_t bytesPerPixel = obj->Get(Nan::New("bytesPerPixel").ToLocalChecked())->Uint32Value();
+	BMP img = buildBMP(Nan::To<v8::Object>(info[0]).ToLocalChecked());
 	
-	char* buf = node::Buffer::Data(obj->Get(Nan::New("image").ToLocalChecked()));
-	
-	uint8_t *data = (uint8_t *)malloc(byteWidth * height);
-	memcpy(data, buf, byteWidth * height);
-
-	bitmap = createMMBitmap(data, width, height, byteWidth, bitsPerPixel, bytesPerPixel);
+	//Create the bitmap.
+	bitmap = createMMBitmap(img.image, img.width, img.height, img.byteWidth, img.bitsPerPixel, img.bytesPerPixel);
 
 	color = MMRGBHexAtPoint(bitmap, x, y);
 
