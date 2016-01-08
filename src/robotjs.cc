@@ -610,6 +610,11 @@ NAN_METHOD(setKeyboardDelay)
 
 NAN_METHOD(getPixelColor)
 {
+	if (info.Length() != 2)
+	{
+		return Nan::ThrowError("Invalid number of arguments.");
+	}
+	
 	MMBitmapRef bitmap;
 	MMRGBHex color;
 
