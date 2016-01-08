@@ -104,7 +104,7 @@ NAN_METHOD(moveMouse)
 
 NAN_METHOD(moveMouseSmooth)
 {
-	if (info.Length() < 2)
+	if (info.Length() != 2)
 	{
 		return Nan::ThrowError("Invalid number of arguments.");
 	}
