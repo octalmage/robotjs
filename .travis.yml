@@ -4,11 +4,16 @@ env:
 language: node_js
 
 node_js:
+  - 0.8
   - 0.10
-  - 0.12
-  - 4
-  - iojs-v2
-  - iojs-v3
+  - 0 #Latest 0.x.x build.
+  - 3 #Latest io.js build.
+  - 4.2.4 #LTS
+  - stable
+  
+matrix:
+  allow_failures:
+    - node_js: 0.8
 
 addons:
   apt:
