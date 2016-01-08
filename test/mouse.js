@@ -15,12 +15,26 @@ test('Get the initial mouse position.', function(t)
 
 test('Move the mouse.', function(t) 
 {
-	t.plan(3);
+	t.plan(6);
 	lastKnownPos = robot.moveMouse(0, 0);
-	t.ok(robot.moveMouse(100, 100), 'successfully moved the mouse.');
+	t.ok(robot.moveMouse(100, 100) === 1, 'successfully moved the mouse.');
 	currentPos = robot.getMousePos();
 	t.ok(currentPos.x === 100, 'mousepos.x is correct.');
 	t.ok(currentPos.y === 100, 'mousepos.y is correct.');
+	
+	t.throws(function()
+	{
+		robot.moveMouse(0, 1, 2, 3);
+	}, /Invalid number/, 'move mouse to (0, 1, 2, 3).');
+	
+	t.throws(function()
+	{
+		robot.moveMouse(0);
+	}, /Invalid number/, 'move mouse to (0).');
+	
+	t.ok(robot.moveMouse("0", "0") === 1, 'move mouse to ("0", "0").');
+
+});
 });
 
 test('Drag the mouse.', function(t) 
