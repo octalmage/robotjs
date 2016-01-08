@@ -108,3 +108,6 @@ test('Drag the mouse.', function(t)
 	}, /Invalid mouse/, 'drag an incorrect mouse button (party).');
 	
 });
+
+//TODO: Need tests for mouseToggle, and scrollMouse. 
+
