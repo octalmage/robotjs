@@ -22,3 +22,26 @@ test('Move the mouse.', function(t)
 	t.ok(currentPos.x === 100, 'mousepos.x is correct.');
 	t.ok(currentPos.y === 100, 'mousepos.y is correct.');
 });
+
+test('Drag the mouse.', function(t) 
+{
+	t.plan(4);
+	
+	t.ok(robot.dragMouse(5, 5) === 1, 'successfully dragged the mouse.');
+	
+	t.throws(function()
+	{
+		robot.dragMouse(0);
+	}, /Invalid number/, 'drag mouse to (0).');
+	
+	t.throws(function()
+	{
+		robot.dragMouse(1, 1, "left", 5);
+	}, /Invalid number/, 'drag mouse with extra argument.');
+	
+	t.throws(function()
+	{
+		robot.dragMouse(2, 2, "party");
+	}, /Invalid mouse/, 'drag an incorrect mouse button (party).');
+	
+});
