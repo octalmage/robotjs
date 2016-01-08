@@ -87,7 +87,7 @@ NAN_METHOD(dragMouse)
 
 NAN_METHOD(moveMouse)
 {
-	if (info.Length() < 2)
+	if (info.Length() != 2)
 	{
 		return Nan::ThrowError("Invalid number of arguments.");
 	}
