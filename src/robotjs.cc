@@ -621,6 +621,11 @@ NAN_METHOD(getPixelColor)
 	size_t x = info[0]->Int32Value();
 	size_t y = info[1]->Int32Value();
 
+	if (!pointVisibleOnMainDisplay(MMPointMake(x, y)))
+	{
+		return Nan::ThrowError("Requested coordinates are outside the main screen's dimensions.");
+	}
+
 	bitmap = copyMMBitmapFromDisplayInRect(MMRectMake(x, y, 1, 1));
 
 	color = MMRGBHexAtPoint(bitmap, 0, 0);
