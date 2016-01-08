@@ -58,6 +58,32 @@ test('Move the mouse smoothly.', function(t)
 	t.ok(robot.moveMouseSmooth("0", "0") === 1, 'move mouse to ("0", "0").');
 
 });
+
+test('Click the mouse.', function(t) 
+{
+	t.plan(8);
+	t.ok(robot.mouseClick(), 'click the mouse (no button specified).');
+	t.ok(robot.mouseClick("left") === 1, 'click the left mouse button.');
+	t.ok(robot.mouseClick("middle") === 1, 'click the middle mouse button.');
+	t.ok(robot.mouseClick("right") === 1, 'click the right mouse button.');
+	
+	t.ok(robot.mouseClick("left", 1), 'double click the left mouse button.');
+	
+	t.throws(function()
+	{
+		robot.mouseClick("party");
+	}, /Invalid mouse/, 'click an incorrect mouse button (party).');
+	
+	t.throws(function()
+	{
+		robot.mouseClick("0");
+	}, /Invalid mouse/, 'click an incorrect mouse button (0).');
+	
+	t.throws(function()
+	{
+		robot.mouseClick("left", 0, "test");
+	}, /Invalid number/, 'click the mouse with an extra argument.');
+	
 });
 
 test('Drag the mouse.', function(t) 
