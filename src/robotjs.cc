@@ -52,7 +52,7 @@ int CheckMouseButton(const char * const b, MMMouseButton * const button)
 
 NAN_METHOD(dragMouse)
 {
-	if (info.Length() < 2)
+	if (info.Length() < 2 || info.Length() > 3)
 	{
 		return Nan::ThrowError("Invalid number of arguments.");
 	}
@@ -61,7 +61,7 @@ NAN_METHOD(dragMouse)
 	const size_t y = info[1]->Int32Value();
 	MMMouseButton button = LEFT_BUTTON;
 
-	if (info.Length() >= 3)
+	if (info.Length() == 3)
 	{
 		Nan::Utf8String bstr(info[2]);
 		const char * const b = *bstr;
