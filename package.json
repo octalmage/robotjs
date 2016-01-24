@@ -4,7 +4,7 @@
   "description": "Node.js Desktop Automation.",
   "main": "index.js",
   "scripts": {
-    "test": "node test/all.js",
+    "test": "xterm -e node test/all.js",
     "install": "node-gyp rebuild"
   },
   "repository": {
