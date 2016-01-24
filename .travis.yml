@@ -21,6 +21,7 @@ addons:
       - libxtst-dev
       - g++-4.8
       - gcc-4.8
+      - xterm
 
 before_script:
   - export DISPLAY=:99.0
