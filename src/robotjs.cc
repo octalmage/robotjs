@@ -123,7 +123,7 @@ NAN_METHOD(getMousePos)
 {
 	MMPoint pos = getMousePos();
 
-	 //Return object with .x and .y.
+	//Return object with .x and .y.
 	Local<Object> obj = Nan::New<Object>();
 	Nan::Set(obj, Nan::New("x").ToLocalChecked(), Nan::New((int)pos.x));
 	Nan::Set(obj, Nan::New("y").ToLocalChecked(), Nan::New((int)pos.y));
@@ -608,6 +608,18 @@ NAN_METHOD(setKeyboardDelay)
 								 
 */
 
+/**
+ * Pad hex color code with leading zeros.
+ * @param color Hex value to pad.
+ * @param hex   Hex value to output.
+ */
+void padHex(MMRGBHex color, char* hex)
+{
+	//Length needs to be 7 because snprintf includes a terminating null.
+	//Use %06x to pad hex value with leading 0s.
+	snprintf(hex, 7, "%06x", color);
+}
+
 NAN_METHOD(getPixelColor)
 {
 	if (info.Length() != 2)
@@ -629,12 +641,10 @@ NAN_METHOD(getPixelColor)
 	bitmap = copyMMBitmapFromDisplayInRect(MMRectMake(x, y, 1, 1));
 
 	color = MMRGBHexAtPoint(bitmap, 0, 0);
-
-	char hex [7];
-
-	//Length needs to be 7 because snprintf includes a terminating null.
-	//Use %06x to pad hex value with leading 0s.
-	snprintf(hex, 7, "%06x", color);
+	
+	char hex[7];
+	
+	padHex(color, hex);
 
 	destroyMMBitmap(bitmap);
 
@@ -653,6 +663,120 @@ NAN_METHOD(getScreenSize)
 
 	//Return our object with .width and .height.
 	info.GetReturnValue().Set(obj);
+}
+
+NAN_METHOD(captureScreen) 
+{
+	size_t x;
+	size_t y;
+	size_t w;
+	size_t h;
+	
+	//If user has provided screen coords, use them! 
+	if (info.Length() == 4)
+	{
+		//TODO: Make sure requested coords are within the screen bounds, or we get a seg fault.
+		// 		An error message is much nicer! 
+
+		x = info[0]->Int32Value();
+		y = info[1]->Int32Value();
+		w = info[2]->Int32Value();
+		h = info[3]->Int32Value();
+	}
+	else
+	{
+		//We're getting the full screen.
+		x = 0;
+		y = 0;
+		
+		//Get screen size.
+		MMSize displaySize = getMainDisplaySize();
+		w = displaySize.width;
+		h = displaySize.height;
+	}
+	
+	MMBitmapRef bitmap = copyMMBitmapFromDisplayInRect(MMRectMake(x, y, w, h));
+	
+	uint32_t bufferSize = bitmap->bytewidth * bitmap->height;
+	Local<Object> buffer = Nan::NewBuffer((char*)bitmap->imageBuffer, bufferSize, destroyMMBitmapBuffer, NULL).ToLocalChecked();
+
+	Local<Object> obj = Nan::New<Object>();
+	Nan::Set(obj, Nan::New("width").ToLocalChecked(), Nan::New<Number>(bitmap->width));
+	Nan::Set(obj, Nan::New("height").ToLocalChecked(), Nan::New<Number>(bitmap->height));
+	Nan::Set(obj, Nan::New("byteWidth").ToLocalChecked(), Nan::New<Number>(bitmap->bytewidth));
+	Nan::Set(obj, Nan::New("bitsPerPixel").ToLocalChecked(), Nan::New<Number>(bitmap->bitsPerPixel));
+	Nan::Set(obj, Nan::New("bytesPerPixel").ToLocalChecked(), Nan::New<Number>(bitmap->bytesPerPixel));
+	Nan::Set(obj, Nan::New("image").ToLocalChecked(), buffer);
+	
+	info.GetReturnValue().Set(obj);
+}
+
+/*
+ ____  _ _                         
+| __ )(_) |_ _ __ ___   __ _ _ __  
+|  _ \| | __| '_ ` _ \ / _` | '_ \ 
+| |_) | | |_| | | | | | (_| | |_) |
+|____/|_|\__|_| |_| |_|\__,_| .__/ 
+						   |_|    
+ */
+
+class BMP
+{
+	public:
+		size_t width;
+		size_t height;
+		size_t byteWidth;
+		uint8_t bitsPerPixel;
+		uint8_t bytesPerPixel;
+		uint8_t *image;
+};
+
+//Convert object from Javascript to a C++ class (BMP).
+BMP buildBMP(Local<Object> info) 
+{
+	Local<Object> obj = Nan::To<v8::Object>(info).ToLocalChecked();
+
+	BMP img;
+
+	img.width = obj->Get(Nan::New("width").ToLocalChecked())->Uint32Value();
+	img.height = obj->Get(Nan::New("height").ToLocalChecked())->Uint32Value();
+	img.byteWidth = obj->Get(Nan::New("byteWidth").ToLocalChecked())->Uint32Value();
+	img.bitsPerPixel = obj->Get(Nan::New("bitsPerPixel").ToLocalChecked())->Uint32Value();
+	img.bytesPerPixel = obj->Get(Nan::New("bytesPerPixel").ToLocalChecked())->Uint32Value();
+
+	char* buf = node::Buffer::Data(obj->Get(Nan::New("image").ToLocalChecked()));
+
+	//Convert the buffer to a uint8_t which createMMBitmap requires. 
+	img.image = (uint8_t *)malloc(img.byteWidth * img.height);
+	memcpy(img.image, buf, img.byteWidth * img.height);
+
+	return img;
+ }
+
+NAN_METHOD(getColor) 
+{	
+	MMBitmapRef bitmap;
+	MMRGBHex color;
+	
+	size_t x = info[0]->Int32Value();
+	size_t y = info[1]->Int32Value();
+	
+	//Get our image object from JavaScript.
+	BMP img = buildBMP(Nan::To<v8::Object>(info[0]).ToLocalChecked());
+	
+	//Create the bitmap.
+	bitmap = createMMBitmap(img.image, img.width, img.height, img.byteWidth, img.bitsPerPixel, img.bytesPerPixel);
+
+	color = MMRGBHexAtPoint(bitmap, x, y);
+
+	char hex[7];
+	
+	padHex(color, hex);
+
+	destroyMMBitmap(bitmap);
+	
+	info.GetReturnValue().Set(Nan::New(hex).ToLocalChecked());
+	
 }
 
 NAN_MODULE_INIT(InitAll)
@@ -701,6 +825,12 @@ NAN_MODULE_INIT(InitAll)
 
 	Nan::Set(target, Nan::New("getScreenSize").ToLocalChecked(),
 		Nan::GetFunction(Nan::New<FunctionTemplate>(getScreenSize)).ToLocalChecked());
+		
+	Nan::Set(target, Nan::New("captureScreen").ToLocalChecked(),
+		Nan::GetFunction(Nan::New<FunctionTemplate>(captureScreen)).ToLocalChecked());
+		
+	Nan::Set(target, Nan::New("getColor").ToLocalChecked(),
+		Nan::GetFunction(Nan::New<FunctionTemplate>(getColor)).ToLocalChecked());
 }
 
 NODE_MODULE(robotjs, InitAll)
