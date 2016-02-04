@@ -52,7 +52,7 @@ int CheckMouseButton(const char * const b, MMMouseButton * const button)
 
 NAN_METHOD(dragMouse)
 {
-	if (info.Length() < 2)
+	if (info.Length() < 2 || info.Length() > 3)
 	{
 		return Nan::ThrowError("Invalid number of arguments.");
 	}
@@ -61,7 +61,7 @@ NAN_METHOD(dragMouse)
 	const size_t y = info[1]->Int32Value();
 	MMMouseButton button = LEFT_BUTTON;
 
-	if (info.Length() >= 3)
+	if (info.Length() == 3)
 	{
 		Nan::Utf8String bstr(info[2]);
 		const char * const b = *bstr;
@@ -87,7 +87,7 @@ NAN_METHOD(dragMouse)
 
 NAN_METHOD(moveMouse)
 {
-	if (info.Length() < 2)
+	if (info.Length() != 2)
 	{
 		return Nan::ThrowError("Invalid number of arguments.");
 	}
@@ -104,7 +104,7 @@ NAN_METHOD(moveMouse)
 
 NAN_METHOD(moveMouseSmooth)
 {
-	if (info.Length() < 2)
+	if (info.Length() != 2)
 	{
 		return Nan::ThrowError("Invalid number of arguments.");
 	}
@@ -610,11 +610,21 @@ NAN_METHOD(setKeyboardDelay)
 
 NAN_METHOD(getPixelColor)
 {
+	if (info.Length() != 2)
+	{
+		return Nan::ThrowError("Invalid number of arguments.");
+	}
+	
 	MMBitmapRef bitmap;
 	MMRGBHex color;
 
 	size_t x = info[0]->Int32Value();
 	size_t y = info[1]->Int32Value();
+
+	if (!pointVisibleOnMainDisplay(MMPointMake(x, y)))
+	{
+		return Nan::ThrowError("Requested coordinates are outside the main screen's dimensions.");
+	}
 
 	bitmap = copyMMBitmapFromDisplayInRect(MMRectMake(x, y, 1, 1));
 
