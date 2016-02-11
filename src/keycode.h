@@ -15,6 +15,7 @@ extern "C"
 #include <ApplicationServices/ApplicationServices.h>
 
 enum _MMKeyCode {
+	K_NOT_A_KEY = 9999,
 	K_BACKSPACE = kVK_Delete,
 	K_DELETE = kVK_ForwardDelete,
 	K_RETURN = kVK_Return,
@@ -45,7 +46,27 @@ enum _MMKeyCode {
 	K_CONTROL = kVK_Control,
 	K_SHIFT = kVK_Shift,
 	K_CAPSLOCK = kVK_CapsLock,
-	K_SPACE = kVK_Space
+	K_SPACE = kVK_Space,
+	K_PRINTSCREEN = K_NOT_A_KEY,
+
+	K_AUDIO_VOLUME_MUTE = kVK_Mute,
+	K_AUDIO_VOLUME_DOWN = kVK_VolumeDown,
+	K_AUDIO_VOLUME_UP = kVK_VolumeUp,
+	K_AUDIO_PLAY = K_NOT_A_KEY,
+	K_AUDIO_STOP = K_NOT_A_KEY,
+	K_AUDIO_PAUSE = K_NOT_A_KEY,
+	K_AUDIO_PREV = K_NOT_A_KEY,
+	K_AUDIO_NEXT = K_NOT_A_KEY,
+	K_AUDIO_REWIND = K_NOT_A_KEY,
+	K_AUDIO_FORWARD = K_NOT_A_KEY,
+	K_AUDIO_REPEAT = K_NOT_A_KEY,
+	K_AUDIO_RANDOM = K_NOT_A_KEY,
+
+	K_LIGHTS_MON_UP = K_NOT_A_KEY,
+	K_LIGHTS_MON_DOWN = K_NOT_A_KEY,
+	K_LIGHTS_KBD_TOGGLE = K_NOT_A_KEY,
+	K_LIGHTS_KBD_UP = K_NOT_A_KEY,
+	K_LIGHTS_KBD_DOWN = K_NOT_A_KEY
 };
 
 typedef CGKeyCode MMKeyCode;
@@ -53,8 +74,10 @@ typedef CGKeyCode MMKeyCode;
 #elif defined(USE_X11)
 
 #include <X11/Xutil.h>
+#include <X11/XF86keysym.h>
 
 enum _MMKeyCode {
+	K_NOT_A_KEY = 9999,
 	K_BACKSPACE = XK_BackSpace,
 	K_DELETE = XK_Delete,
 	K_RETURN = XK_Return,
@@ -85,7 +108,27 @@ enum _MMKeyCode {
 	K_CONTROL = XK_Control_L,
 	K_SHIFT = XK_Shift_L,
 	K_CAPSLOCK = XK_Shift_Lock,
-	K_SPACE = XK_space
+	K_SPACE = XK_space,
+	K_PRINTSCREEN = XK_Print,
+
+	K_AUDIO_VOLUME_MUTE = XF86XK_AudioMute,
+	K_AUDIO_VOLUME_DOWN = XF86XK_AudioLowerVolume,
+	K_AUDIO_VOLUME_UP = XF86XK_AudioRaiseVolume,
+	K_AUDIO_PLAY = XF86XK_AudioPlay,
+	K_AUDIO_STOP = XF86XK_AudioStop,
+	K_AUDIO_PAUSE = XF86XK_AudioPause,
+	K_AUDIO_PREV = XF86XK_AudioPrev,
+	K_AUDIO_NEXT = XF86XK_AudioNext,
+	K_AUDIO_REWIND = XF86XK_AudioRewind,
+	K_AUDIO_FORWARD = XF86XK_AudioForward,
+	K_AUDIO_REPEAT = XF86XK_AudioRepeat,
+	K_AUDIO_RANDOM = XF86XK_AudioRandomPlay,
+
+	K_LIGHTS_MON_UP = XF86XK_MonBrightnessUp,
+	K_LIGHTS_MON_DOWN = XF86XK_MonBrightnessDown,
+	K_LIGHTS_KBD_TOGGLE = XF86XK_KbdLightOnOff,
+	K_LIGHTS_KBD_UP = XF86XK_KbdBrightnessUp,
+	K_LIGHTS_KBD_DOWN = XF86XK_KbdBrightnessDown
 };
 
 typedef KeySym MMKeyCode;
@@ -93,6 +136,7 @@ typedef KeySym MMKeyCode;
 #elif defined(IS_WINDOWS)
 
 enum _MMKeyCode {
+	K_NOT_A_KEY = 9999,
 	K_BACKSPACE = VK_BACK,
 	K_DELETE = VK_DELETE,
 	K_RETURN = VK_RETURN,
@@ -114,7 +158,7 @@ enum _MMKeyCode {
 	K_F6 = VK_F6,
 	K_F7 = VK_F7,
 	K_F8 = VK_F8,
-	K_F9 = VK_F19,
+	K_F9 = VK_F9,
 	K_F10 = VK_F10,
 	K_F11 = VK_F11,
 	K_F12 = VK_F12,
@@ -124,7 +168,26 @@ enum _MMKeyCode {
 	K_ALT = VK_MENU,
 	K_CAPSLOCK = VK_CAPITAL,
 	K_SPACE = VK_SPACE,
-	K_PRINTSCREEN = VK_SNAPSHOT
+	K_PRINTSCREEN = VK_SNAPSHOT,
+
+	K_AUDIO_VOLUME_MUTE = VK_VOLUME_MUTE,
+	K_AUDIO_VOLUME_DOWN = VK_VOLUME_DOWN,
+	K_AUDIO_VOLUME_UP = VK_VOLUME_UP,
+	K_AUDIO_PLAY = VK_MEDIA_PLAY_PAUSE,
+	K_AUDIO_STOP = VK_MEDIA_STOP,
+	K_AUDIO_PAUSE = VK_MEDIA_PLAY_PAUSE,
+	K_AUDIO_PREV = VK_MEDIA_PREV_TRACK,
+	K_AUDIO_NEXT = VK_MEDIA_NEXT_TRACK,
+	K_AUDIO_REWIND = K_NOT_A_KEY,
+	K_AUDIO_FORWARD = K_NOT_A_KEY,
+	K_AUDIO_REPEAT = K_NOT_A_KEY,
+	K_AUDIO_RANDOM = K_NOT_A_KEY,
+
+	K_LIGHTS_MON_UP = K_NOT_A_KEY,
+	K_LIGHTS_MON_DOWN = K_NOT_A_KEY,
+	K_LIGHTS_KBD_TOGGLE = K_NOT_A_KEY,
+	K_LIGHTS_KBD_UP = K_NOT_A_KEY,
+	K_LIGHTS_KBD_DOWN = K_NOT_A_KEY
 };
 
 typedef int MMKeyCode;

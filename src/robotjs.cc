@@ -52,7 +52,7 @@ int CheckMouseButton(const char * const b, MMMouseButton * const button)
 
 NAN_METHOD(dragMouse)
 {
-	if (info.Length() < 2)
+	if (info.Length() < 2 || info.Length() > 3)
 	{
 		return Nan::ThrowError("Invalid number of arguments.");
 	}
@@ -61,7 +61,7 @@ NAN_METHOD(dragMouse)
 	const size_t y = info[1]->Int32Value();
 	MMMouseButton button = LEFT_BUTTON;
 
-	if (info.Length() >= 3)
+	if (info.Length() == 3)
 	{
 		Nan::Utf8String bstr(info[2]);
 		const char * const b = *bstr;
@@ -87,7 +87,7 @@ NAN_METHOD(dragMouse)
 
 NAN_METHOD(moveMouse)
 {
-	if (info.Length() < 2)
+	if (info.Length() != 2)
 	{
 		return Nan::ThrowError("Invalid number of arguments.");
 	}
@@ -104,7 +104,7 @@ NAN_METHOD(moveMouse)
 
 NAN_METHOD(moveMouseSmooth)
 {
-	if (info.Length() < 2)
+	if (info.Length() != 2)
 	{
 		return Nan::ThrowError("Invalid number of arguments.");
 	}
@@ -123,10 +123,10 @@ NAN_METHOD(getMousePos)
 {
 	MMPoint pos = getMousePos();
 
- 	//Return object with .x and .y.
+	//Return object with .x and .y.
 	Local<Object> obj = Nan::New<Object>();
-    Nan::Set(obj, Nan::New("x").ToLocalChecked(), Nan::New((int)pos.x));
-    Nan::Set(obj, Nan::New("y").ToLocalChecked(), Nan::New((int)pos.y));
+	Nan::Set(obj, Nan::New("x").ToLocalChecked(), Nan::New((int)pos.x));
+	Nan::Set(obj, Nan::New("y").ToLocalChecked(), Nan::New((int)pos.y));
 	info.GetReturnValue().Set(obj);
 }
 
@@ -171,7 +171,7 @@ NAN_METHOD(mouseClick)
 
 	microsleep(mouseDelay);
 
-    info.GetReturnValue().Set(Nan::New(1));
+	info.GetReturnValue().Set(Nan::New(1));
 }
 
 NAN_METHOD(mouseToggle)
@@ -235,7 +235,7 @@ NAN_METHOD(setMouseDelay)
 
 	mouseDelay = info[0]->Int32Value();
 
-    info.GetReturnValue().Set(Nan::New(1));
+	info.GetReturnValue().Set(Nan::New(1));
 }
 
 NAN_METHOD(scrollMouse) 
@@ -282,146 +282,94 @@ NAN_METHOD(scrollMouse)
 | ' // _ \ | | | '_ \ / _ \ / _` | '__/ _` |
 | . \  __/ |_| | |_) | (_) | (_| | | | (_| |
 |_|\_\___|\__, |_.__/ \___/ \__,_|_|  \__,_|
-          |___/           
+		  |___/           
 */
+struct KeyNames 
+{
+	const char* name;
+	MMKeyCode   key;
+};
+
+static KeyNames key_names[] =
+{
+	{ "backspace",      K_BACKSPACE },
+	{ "delete",         K_DELETE },
+	{ "enter",          K_RETURN },
+	{ "tab",            K_TAB },
+	{ "escape",         K_ESCAPE },
+	{ "up",             K_UP },
+	{ "down",           K_DOWN },
+	{ "right",          K_RIGHT },
+	{ "left",           K_LEFT },
+	{ "home",           K_HOME },
+	{ "end",            K_END },
+	{ "pageup",         K_PAGEUP },
+	{ "pagedown",       K_PAGEDOWN },
+	{ "f1",             K_F1 },
+	{ "f2",             K_F2 },
+	{ "f3",             K_F3 },
+	{ "f4",             K_F4 },
+	{ "f5",             K_F5 },
+	{ "f6",             K_F6 },
+	{ "f7",             K_F7 },
+	{ "f8",             K_F8 },
+	{ "f9",             K_F9 },
+	{ "f10",            K_F10 },
+	{ "f11",            K_F11 },
+	{ "f12",            K_F12 },
+	{ "command",        K_META },
+	{ "alt",            K_ALT },
+	{ "control",        K_CONTROL },
+	{ "shift",          K_SHIFT },
+	{ "space",          K_SPACE },
+	{ "printscreen",    K_PRINTSCREEN },
+				  
+	{ "audio_mute",     K_AUDIO_VOLUME_MUTE },
+	{ "audio_vol_down", K_AUDIO_VOLUME_DOWN },
+	{ "audio_vol_up",   K_AUDIO_VOLUME_UP },
+	{ "audio_play",     K_AUDIO_PLAY },
+	{ "audio_stop",     K_AUDIO_STOP },
+	{ "audio_pause",    K_AUDIO_PAUSE },
+	{ "audio_prev",     K_AUDIO_PREV },
+	{ "audio_next",     K_AUDIO_NEXT },
+	{ "audio_rewind",   K_AUDIO_REWIND },
+	{ "audio_forward",  K_AUDIO_FORWARD },
+	{ "audio_repeat",   K_AUDIO_REPEAT },
+	{ "audio_random",   K_AUDIO_RANDOM },
+				   
+	{ "lights_mon_up",    K_LIGHTS_MON_UP },
+	{ "lights_mon_down",  K_LIGHTS_MON_DOWN },
+	{ "lights_kbd_toggle",K_LIGHTS_KBD_TOGGLE },
+	{ "lights_kbd_up",    K_LIGHTS_KBD_UP },
+	{ "lights_kbd_down",  K_LIGHTS_KBD_DOWN },
+
+	{ NULL,               K_NOT_A_KEY } /* end marker */
+};
 
 int CheckKeyCodes(char* k, MMKeyCode *key)
 {
 	if (!key) return -1;
 
-	if (strcmp(k, "alt") == 0)
-	{
-		*key = K_ALT;
-	}
-  	else if (strcmp(k, "command") == 0)
-	{
-		*key = K_META;
-	}
-  	else if (strcmp(k, "control") == 0)
-	{
-		*key = K_CONTROL;
-	}
-  	else if (strcmp(k, "shift") == 0)
-	{
-		*key = K_SHIFT;
-	}
-	else if (strcmp(k, "backspace") == 0)
-	{
-		*key = K_BACKSPACE;
-	}
-	else if (strcmp(k, "enter") == 0)
-	{
-		*key = K_RETURN;
-	}
-	else if (strcmp(k, "tab") == 0)
-	{
-		*key = K_TAB;
-	}
-	else if (strcmp(k, "up") == 0)
-	{
-		*key = K_UP;
-	}
-	else if (strcmp(k, "down") == 0)
-	{
-		*key = K_DOWN;
-	}
-	else if (strcmp(k, "left") == 0)
-	{
-		*key = K_LEFT;
-	}
-	else if (strcmp(k, "right") == 0)
-	{
-		*key = K_RIGHT;
-	}
-	else if (strcmp(k, "escape") == 0)
-	{
-		*key = K_ESCAPE;
-	}
-	else if (strcmp(k, "delete") == 0)
-	{
-		*key = K_DELETE;
-	}
-	else if (strcmp(k, "home") == 0)
-	{
-		*key = K_HOME;
-	}
-	else if (strcmp(k, "end") == 0)
-	{
-		*key = K_END;
-	}
-	else if (strcmp(k, "pageup") == 0)
-	{
-		*key = K_PAGEUP;
-	}
-	else if (strcmp(k, "pagedown") == 0)
-	{
-		*key = K_PAGEDOWN;
-	}
-	else if (strcmp(k, "space") == 0)
-	{
-		*key = K_SPACE;
-	}
-	else if (strcmp(k, "f1") == 0)
-	{
-		*key = K_F1;
-	}
-	else if (strcmp(k, "f2") == 0)
-	{
-		*key = K_F2;
-	}
-	else if (strcmp(k, "f3") == 0)
-	{
-		*key = K_F3;
-	}
-	else if (strcmp(k, "f4") == 0)
-	{
-		*key = K_F4;
-	}
-	else if (strcmp(k, "f5") == 0)
-	{
-		*key = K_F5;
-	}
-	else if (strcmp(k, "f6") == 0)
-	{
-		*key = K_F6;
-	}
-	else if (strcmp(k, "f7") == 0)
-	{
-		*key = K_F7;
-	}
-	else if (strcmp(k, "f8") == 0)
-	{
-		*key = K_F8;
-	}
-	else if (strcmp(k, "f9") == 0)
-	{
-		*key = K_F9;
-	}
-	else if (strcmp(k, "f10") == 0)
-	{
-		*key = K_F10;
-	}
-	else if (strcmp(k, "f11") == 0)
-	{
-		*key = K_F11;
-	}
-	else if (strcmp(k, "f12") == 0)
-	{
-		*key = K_F12;
-	}
-	else if (strcmp(k, "printscreen") == 0)
-	{
-		#if defined(IS_WINDOWS)
-			*key = K_PRINTSCREEN;
-		#else
-	 		Nan::ThrowError("printscreen is only supported on Windows.");
-	 	#endif
-	}
-	else if (strlen(k) == 1)
+	if (strlen(k) == 1)
 	{
 		*key = keyCodeForChar(*k);
+		return 0;
 	}
-	else
+
+	*key = K_NOT_A_KEY;
+
+	KeyNames* kn = key_names;
+	while (kn->name) 
+	{
+		if (strcmp(k, kn->name) == 0)
+		{
+			*key = kn->key;
+			break;
+		}
+		kn++;
+	}
+
+	if (*key == K_NOT_A_KEY) 
 	{
 		return -2;
 	}
@@ -435,28 +383,28 @@ int CheckKeyFlags(char* f, MMKeyFlags* flags)
 
 	if (strcmp(f, "alt") == 0)
 	{
-    	*flags = MOD_ALT;
-  	}
-  	else if(strcmp(f, "command") == 0)
+		*flags = MOD_ALT;
+	}
+	else if(strcmp(f, "command") == 0)
 	{
-    	*flags = MOD_META;
-  	}
-  	else if(strcmp(f, "control") == 0)
+		*flags = MOD_META;
+	}
+	else if(strcmp(f, "control") == 0)
 	{
-    	*flags = MOD_CONTROL;
-  	}
-  	else if(strcmp(f, "shift") == 0)
+		*flags = MOD_CONTROL;
+	}
+	else if(strcmp(f, "shift") == 0)
 	{
-    	*flags = MOD_SHIFT;
+		*flags = MOD_SHIFT;
 	}
 	else if(strcmp(f, "none") == 0)
 	{
-    	*flags = MOD_NONE;
-  	}
- 	else
+		*flags = MOD_NONE;
+	}
+	else
 	{
-    	return -2;
-  	}
+		return -2;
+	}
 
 	return 0;
 }
@@ -498,10 +446,10 @@ NAN_METHOD(keyTap)
 	MMKeyFlags flags = MOD_NONE;
 	MMKeyCode key;
 
-  	char *k;
+	char *k;
 
-  	v8::String::Utf8Value kstr(info[0]->ToString());
-  	k = *kstr;
+	v8::String::Utf8Value kstr(info[0]->ToString());
+	k = *kstr;
 
 	switch (info.Length())
 	{
@@ -600,14 +548,14 @@ NAN_METHOD(keyToggle)
 	switch(CheckKeyCodes(k, &key))
 	{
 		case -1:
-    		return Nan::ThrowError("Null pointer in key code.");
+			return Nan::ThrowError("Null pointer in key code.");
 			break;
 		case -2:
 			return Nan::ThrowError("Invalid key code specified.");
 			break;
 		default:
 			toggleKeyCode(key, down, flags);
-      		microsleep(keyboardDelay);
+			  microsleep(keyboardDelay);
 	}
 
 	info.GetReturnValue().Set(Nan::New(1));
@@ -621,6 +569,20 @@ NAN_METHOD(typeString)
 	str = *string;
 
 	typeString(str);
+
+	info.GetReturnValue().Set(Nan::New(1));
+}
+
+NAN_METHOD(typeStringDelayed)
+{
+	char *str;
+	Nan::Utf8String string(info[0]);
+	
+	str = *string;
+	
+	size_t cpm = info[1]->Int32Value();
+
+	typeStringDelayed(str, cpm);
 
 	info.GetReturnValue().Set(Nan::New(1));
 }
@@ -643,30 +605,50 @@ NAN_METHOD(setKeyboardDelay)
  \___ \ / __| '__/ _ \/ _ \ '_ \ 
   ___) | (__| | |  __/  __/ | | |
  |____/ \___|_|  \___|\___|_| |_|
-                                 
+								 
 */
+
+/**
+ * Pad hex color code with leading zeros.
+ * @param color Hex value to pad.
+ * @param hex   Hex value to output.
+ */
+void padHex(MMRGBHex color, char* hex)
+{
+	//Length needs to be 7 because snprintf includes a terminating null.
+	//Use %06x to pad hex value with leading 0s.
+	snprintf(hex, 7, "%06x", color);
+}
 
 NAN_METHOD(getPixelColor)
 {
+	if (info.Length() != 2)
+	{
+		return Nan::ThrowError("Invalid number of arguments.");
+	}
+	
 	MMBitmapRef bitmap;
 	MMRGBHex color;
 
 	size_t x = info[0]->Int32Value();
 	size_t y = info[1]->Int32Value();
 
+	if (!pointVisibleOnMainDisplay(MMPointMake(x, y)))
+	{
+		return Nan::ThrowError("Requested coordinates are outside the main screen's dimensions.");
+	}
+
 	bitmap = copyMMBitmapFromDisplayInRect(MMRectMake(x, y, 1, 1));
 
 	color = MMRGBHexAtPoint(bitmap, 0, 0);
-
-	char hex [7];
-
-	//Length needs to be 7 because snprintf includes a terminating null.
-	//Use %06x to pad hex value with leading 0s.
-	snprintf(hex, 7, "%06x", color);
+	
+	char hex[7];
+	
+	padHex(color, hex);
 
 	destroyMMBitmap(bitmap);
 
-    info.GetReturnValue().Set(Nan::New(hex).ToLocalChecked());
+	info.GetReturnValue().Set(Nan::New(hex).ToLocalChecked());
 }
 
 NAN_METHOD(getScreenSize)
@@ -683,49 +665,172 @@ NAN_METHOD(getScreenSize)
 	info.GetReturnValue().Set(obj);
 }
 
+NAN_METHOD(captureScreen) 
+{
+	size_t x;
+	size_t y;
+	size_t w;
+	size_t h;
+	
+	//If user has provided screen coords, use them! 
+	if (info.Length() == 4)
+	{
+		//TODO: Make sure requested coords are within the screen bounds, or we get a seg fault.
+		// 		An error message is much nicer! 
+
+		x = info[0]->Int32Value();
+		y = info[1]->Int32Value();
+		w = info[2]->Int32Value();
+		h = info[3]->Int32Value();
+	}
+	else
+	{
+		//We're getting the full screen.
+		x = 0;
+		y = 0;
+		
+		//Get screen size.
+		MMSize displaySize = getMainDisplaySize();
+		w = displaySize.width;
+		h = displaySize.height;
+	}
+	
+	MMBitmapRef bitmap = copyMMBitmapFromDisplayInRect(MMRectMake(x, y, w, h));
+	
+	uint32_t bufferSize = bitmap->bytewidth * bitmap->height;
+	Local<Object> buffer = Nan::NewBuffer((char*)bitmap->imageBuffer, bufferSize, destroyMMBitmapBuffer, NULL).ToLocalChecked();
+
+	Local<Object> obj = Nan::New<Object>();
+	Nan::Set(obj, Nan::New("width").ToLocalChecked(), Nan::New<Number>(bitmap->width));
+	Nan::Set(obj, Nan::New("height").ToLocalChecked(), Nan::New<Number>(bitmap->height));
+	Nan::Set(obj, Nan::New("byteWidth").ToLocalChecked(), Nan::New<Number>(bitmap->bytewidth));
+	Nan::Set(obj, Nan::New("bitsPerPixel").ToLocalChecked(), Nan::New<Number>(bitmap->bitsPerPixel));
+	Nan::Set(obj, Nan::New("bytesPerPixel").ToLocalChecked(), Nan::New<Number>(bitmap->bytesPerPixel));
+	Nan::Set(obj, Nan::New("image").ToLocalChecked(), buffer);
+	
+	info.GetReturnValue().Set(obj);
+}
+
+/*
+ ____  _ _                         
+| __ )(_) |_ _ __ ___   __ _ _ __  
+|  _ \| | __| '_ ` _ \ / _` | '_ \ 
+| |_) | | |_| | | | | | (_| | |_) |
+|____/|_|\__|_| |_| |_|\__,_| .__/ 
+						   |_|    
+ */
+
+class BMP
+{
+	public:
+		size_t width;
+		size_t height;
+		size_t byteWidth;
+		uint8_t bitsPerPixel;
+		uint8_t bytesPerPixel;
+		uint8_t *image;
+};
+
+//Convert object from Javascript to a C++ class (BMP).
+BMP buildBMP(Local<Object> info) 
+{
+	Local<Object> obj = Nan::To<v8::Object>(info).ToLocalChecked();
+
+	BMP img;
+
+	img.width = obj->Get(Nan::New("width").ToLocalChecked())->Uint32Value();
+	img.height = obj->Get(Nan::New("height").ToLocalChecked())->Uint32Value();
+	img.byteWidth = obj->Get(Nan::New("byteWidth").ToLocalChecked())->Uint32Value();
+	img.bitsPerPixel = obj->Get(Nan::New("bitsPerPixel").ToLocalChecked())->Uint32Value();
+	img.bytesPerPixel = obj->Get(Nan::New("bytesPerPixel").ToLocalChecked())->Uint32Value();
+
+	char* buf = node::Buffer::Data(obj->Get(Nan::New("image").ToLocalChecked()));
+
+	//Convert the buffer to a uint8_t which createMMBitmap requires. 
+	img.image = (uint8_t *)malloc(img.byteWidth * img.height);
+	memcpy(img.image, buf, img.byteWidth * img.height);
+
+	return img;
+ }
+
+NAN_METHOD(getColor) 
+{	
+	MMBitmapRef bitmap;
+	MMRGBHex color;
+	
+	size_t x = info[0]->Int32Value();
+	size_t y = info[1]->Int32Value();
+	
+	//Get our image object from JavaScript.
+	BMP img = buildBMP(Nan::To<v8::Object>(info[0]).ToLocalChecked());
+	
+	//Create the bitmap.
+	bitmap = createMMBitmap(img.image, img.width, img.height, img.byteWidth, img.bitsPerPixel, img.bytesPerPixel);
+
+	color = MMRGBHexAtPoint(bitmap, x, y);
+
+	char hex[7];
+	
+	padHex(color, hex);
+
+	destroyMMBitmap(bitmap);
+	
+	info.GetReturnValue().Set(Nan::New(hex).ToLocalChecked());
+	
+}
+
 NAN_MODULE_INIT(InitAll)
 {
-    Nan::Set(target, Nan::New("dragMouse").ToLocalChecked(),
-        Nan::GetFunction(Nan::New<FunctionTemplate>(dragMouse)).ToLocalChecked());
+	Nan::Set(target, Nan::New("dragMouse").ToLocalChecked(),
+		Nan::GetFunction(Nan::New<FunctionTemplate>(dragMouse)).ToLocalChecked());
 
-    Nan::Set(target, Nan::New("moveMouse").ToLocalChecked(),
-        Nan::GetFunction(Nan::New<FunctionTemplate>(moveMouse)).ToLocalChecked());
+	Nan::Set(target, Nan::New("moveMouse").ToLocalChecked(),
+		Nan::GetFunction(Nan::New<FunctionTemplate>(moveMouse)).ToLocalChecked());
 
-    Nan::Set(target, Nan::New("moveMouseSmooth").ToLocalChecked(),
-        Nan::GetFunction(Nan::New<FunctionTemplate>(moveMouseSmooth)).ToLocalChecked());
+	Nan::Set(target, Nan::New("moveMouseSmooth").ToLocalChecked(),
+		Nan::GetFunction(Nan::New<FunctionTemplate>(moveMouseSmooth)).ToLocalChecked());
 
-    Nan::Set(target, Nan::New("getMousePos").ToLocalChecked(),
-        Nan::GetFunction(Nan::New<FunctionTemplate>(getMousePos)).ToLocalChecked());
+	Nan::Set(target, Nan::New("getMousePos").ToLocalChecked(),
+		Nan::GetFunction(Nan::New<FunctionTemplate>(getMousePos)).ToLocalChecked());
 
-    Nan::Set(target, Nan::New("mouseClick").ToLocalChecked(),
-        Nan::GetFunction(Nan::New<FunctionTemplate>(mouseClick)).ToLocalChecked());
+	Nan::Set(target, Nan::New("mouseClick").ToLocalChecked(),
+		Nan::GetFunction(Nan::New<FunctionTemplate>(mouseClick)).ToLocalChecked());
 
-    Nan::Set(target, Nan::New("mouseToggle").ToLocalChecked(),
-        Nan::GetFunction(Nan::New<FunctionTemplate>(mouseToggle)).ToLocalChecked());
+	Nan::Set(target, Nan::New("mouseToggle").ToLocalChecked(),
+		Nan::GetFunction(Nan::New<FunctionTemplate>(mouseToggle)).ToLocalChecked());
 		
 	Nan::Set(target, Nan::New("scrollMouse").ToLocalChecked(),
 		Nan::GetFunction(Nan::New<FunctionTemplate>(scrollMouse)).ToLocalChecked());
 
-    Nan::Set(target, Nan::New("setMouseDelay").ToLocalChecked(),
-        Nan::GetFunction(Nan::New<FunctionTemplate>(setMouseDelay)).ToLocalChecked());
+	Nan::Set(target, Nan::New("setMouseDelay").ToLocalChecked(),
+		Nan::GetFunction(Nan::New<FunctionTemplate>(setMouseDelay)).ToLocalChecked());
 
-    Nan::Set(target, Nan::New("keyTap").ToLocalChecked(),
-        Nan::GetFunction(Nan::New<FunctionTemplate>(keyTap)).ToLocalChecked());
+	Nan::Set(target, Nan::New("keyTap").ToLocalChecked(),
+		Nan::GetFunction(Nan::New<FunctionTemplate>(keyTap)).ToLocalChecked());
 
-    Nan::Set(target, Nan::New("keyToggle").ToLocalChecked(),
-        Nan::GetFunction(Nan::New<FunctionTemplate>(keyToggle)).ToLocalChecked());
+	Nan::Set(target, Nan::New("keyToggle").ToLocalChecked(),
+		Nan::GetFunction(Nan::New<FunctionTemplate>(keyToggle)).ToLocalChecked());
 
-    Nan::Set(target, Nan::New("typeString").ToLocalChecked(),
-        Nan::GetFunction(Nan::New<FunctionTemplate>(typeString)).ToLocalChecked());
+	Nan::Set(target, Nan::New("typeString").ToLocalChecked(),
+		Nan::GetFunction(Nan::New<FunctionTemplate>(typeString)).ToLocalChecked());
 
-    Nan::Set(target, Nan::New("setKeyboardDelay").ToLocalChecked(),
-        Nan::GetFunction(Nan::New<FunctionTemplate>(setKeyboardDelay)).ToLocalChecked());
+	Nan::Set(target, Nan::New("typeStringDelayed").ToLocalChecked(),
+		Nan::GetFunction(Nan::New<FunctionTemplate>(typeStringDelayed)).ToLocalChecked());
 
-    Nan::Set(target, Nan::New("getPixelColor").ToLocalChecked(),
-        Nan::GetFunction(Nan::New<FunctionTemplate>(getPixelColor)).ToLocalChecked());
+	Nan::Set(target, Nan::New("setKeyboardDelay").ToLocalChecked(),
+		Nan::GetFunction(Nan::New<FunctionTemplate>(setKeyboardDelay)).ToLocalChecked());
 
-    Nan::Set(target, Nan::New("getScreenSize").ToLocalChecked(),
-        Nan::GetFunction(Nan::New<FunctionTemplate>(getScreenSize)).ToLocalChecked());
+	Nan::Set(target, Nan::New("getPixelColor").ToLocalChecked(),
+		Nan::GetFunction(Nan::New<FunctionTemplate>(getPixelColor)).ToLocalChecked());
+
+	Nan::Set(target, Nan::New("getScreenSize").ToLocalChecked(),
+		Nan::GetFunction(Nan::New<FunctionTemplate>(getScreenSize)).ToLocalChecked());
+		
+	Nan::Set(target, Nan::New("captureScreen").ToLocalChecked(),
+		Nan::GetFunction(Nan::New<FunctionTemplate>(captureScreen)).ToLocalChecked());
+		
+	Nan::Set(target, Nan::New("getColor").ToLocalChecked(),
+		Nan::GetFunction(Nan::New<FunctionTemplate>(getColor)).ToLocalChecked());
 }
 
 NODE_MODULE(robotjs, InitAll)
