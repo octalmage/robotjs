@@ -66,7 +66,25 @@ void moveMouse(MMPoint point)
 	CGEventRef move = CGEventCreateMouseEvent(NULL, kCGEventMouseMoved,
 	                                          CGPointFromMMPoint(point),
 	                                          kCGMouseButtonLeft);
+
+
+	/**
+	 * The next few lines are a workaround for games not detecting mouse moves.
+	 * See this issue for more information:
+	 * https://github.com/octalmage/robotjs/issues/159
+	 */
+	CGEventRef get = CGEventCreate(NULL);
+	CGPoint mouse = CGEventGetLocation(get);
+
+	// Calculate the deltas.
+	int64_t deltaX = point.x -  mouse.x;
+	int64_t deltaY = point.y -mouse.y;
+
+	CGEventSetIntegerValueField(move, kCGMouseEventDeltaY, deltaX);
+	CGEventSetIntegerValueField(move, kCGMouseEventDeltaX, deltaY);
+
 	CGEventPost(kCGSessionEventTap, move);
+	CFRelease(get);
 	CFRelease(move);
 #elif defined(USE_X11)
 	Display *display = XGetMainDisplay();
