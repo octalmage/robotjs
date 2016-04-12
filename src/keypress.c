@@ -7,7 +7,7 @@
 #if defined(IS_MACOSX)
 	#include <ApplicationServices/ApplicationServices.h>
 	#import <IOKit/hidsystem/IOHIDLib.h>
-    #import <IOKit/hidsystem/ev_keymap.h>
+	#import <IOKit/hidsystem/ev_keymap.h>
 #elif defined(USE_X11)
 	#include <X11/extensions/XTest.h>
 	#include "xdisplay.h"
@@ -30,40 +30,38 @@
 
 #if defined(IS_MACOSX)
 bool keyCodeRequiresSystemDefinedEvent(MMKeyCode code) {
-    return code == NX_KEYTYPE_SOUND_UP ||
-           code == NX_KEYTYPE_SOUND_DOWN ||
-           code == NX_KEYTYPE_MUTE ||
-           code == NX_KEYTYPE_PLAY ||
-           code == NX_KEYTYPE_BRIGHTNESS_UP ||
-           code == NX_KEYTYPE_BRIGHTNESS_DOWN ||
-           code == NX_KEYTYPE_PLAY ||
-           code == NX_KEYTYPE_PREVIOUS ||
-           code == NX_KEYTYPE_NEXT ||
-           code == NX_KEYTYPE_ILLUMINATION_UP ||
-           code == NX_KEYTYPE_ILLUMINATION_DOWN ||
-           code == NX_KEYTYPE_ILLUMINATION_TOGGLE
-           ;
+	return  code == NX_KEYTYPE_SOUND_UP ||
+		code == NX_KEYTYPE_SOUND_DOWN ||
+		code == NX_KEYTYPE_MUTE ||
+		code == NX_KEYTYPE_PLAY ||
+		code == NX_KEYTYPE_BRIGHTNESS_UP ||
+		code == NX_KEYTYPE_BRIGHTNESS_DOWN ||
+		code == NX_KEYTYPE_PLAY ||
+		code == NX_KEYTYPE_PREVIOUS ||
+		code == NX_KEYTYPE_NEXT ||
+		code == NX_KEYTYPE_ILLUMINATION_UP ||
+		code == NX_KEYTYPE_ILLUMINATION_DOWN ||
+		code == NX_KEYTYPE_ILLUMINATION_TOGGLE;
 }
 static io_connect_t _getAuxiliaryKeyDriver(void)
 {
-    static mach_port_t sEventDrvrRef = 0;
-    mach_port_t masterPort, service, iter;
-    kern_return_t kr;
+	static mach_port_t sEventDrvrRef = 0;
+	mach_port_t masterPort, service, iter;
+	kern_return_t kr;
 
-    if (!sEventDrvrRef)
-    {
-        kr = IOMasterPort( bootstrap_port, &masterPort );
-        assert(KERN_SUCCESS == kr);
-        kr = IOServiceGetMatchingServices(masterPort, IOServiceMatching( kIOHIDSystemClass), &iter );
-        assert(KERN_SUCCESS == kr);
-        service = IOIteratorNext( iter );
-        assert(service);
-        kr = IOServiceOpen(service, mach_task_self(), kIOHIDParamConnectType, &sEventDrvrRef );
-        assert(KERN_SUCCESS == kr);
-        IOObjectRelease(service);
-        IOObjectRelease(iter);
-    }
-    return sEventDrvrRef;
+	if (!sEventDrvrRef) {
+		kr = IOMasterPort( bootstrap_port, &masterPort );
+		assert(KERN_SUCCESS == kr);
+		kr = IOServiceGetMatchingServices(masterPort, IOServiceMatching( kIOHIDSystemClass), &iter );
+		assert(KERN_SUCCESS == kr);
+		service = IOIteratorNext( iter );
+		assert(service);
+		kr = IOServiceOpen(service, mach_task_self(), kIOHIDParamConnectType, &sEventDrvrRef );
+		assert(KERN_SUCCESS == kr);
+		IOObjectRelease(service);
+		IOObjectRelease(iter);
+	}
+	return sEventDrvrRef;
 }
 #endif
 
@@ -85,9 +83,9 @@ void toggleKeyCode(MMKeyCode code, const bool down, MMKeyFlags flags)
 {
 #if defined(IS_MACOSX)
 	if (keyCodeRequiresSystemDefinedEvent(code)) {
-	    NXEventData   event;
-        kern_return_t kr;
-        IOGPoint loc = { 0, 0 };
+		NXEventData   event;
+		kern_return_t kr;
+		IOGPoint loc = { 0, 0 };
 		UInt32 evtInfo = code << 16 | (down?NX_KEYDOWN:NX_KEYUP) << 8;
 		bzero(&event, sizeof(NXEventData));
 		event.compound.subType = NX_SUBTYPE_AUX_CONTROL_BUTTONS;
