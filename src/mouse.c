@@ -56,6 +56,7 @@
 
 #endif
 
+#if defined(IS_MACOSX)
 /**
  * Calculate the delta for a mouse move and add them to the event.
  * @param event The mouse move event (by ref).
@@ -80,6 +81,7 @@ void calculateDeltas(CGEventRef *event, MMPoint point)
 
 	CFRelease(get);
 }
+#endif
 
 
 /**
