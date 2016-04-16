@@ -746,37 +746,37 @@ BMP buildBMP(Local<Object> info)
 
 	char* buf = node::Buffer::Data(obj->Get(Nan::New("image").ToLocalChecked()));
 
-	//Convert the buffer to a uint8_t which createMMBitmap requires. 
+	//Convert the buffer to a uint8_t which createMMBitmap requires.
 	img.image = (uint8_t *)malloc(img.byteWidth * img.height);
 	memcpy(img.image, buf, img.byteWidth * img.height);
 
 	return img;
  }
 
-NAN_METHOD(getColor) 
-{	
+NAN_METHOD(getColor)
+{
 	MMBitmapRef bitmap;
 	MMRGBHex color;
-	
-	size_t x = info[0]->Int32Value();
-	size_t y = info[1]->Int32Value();
-	
+
+	size_t x = info[1]->Int32Value();
+	size_t y = info[2]->Int32Value();
+
 	//Get our image object from JavaScript.
 	BMP img = buildBMP(Nan::To<v8::Object>(info[0]).ToLocalChecked());
-	
+
 	//Create the bitmap.
 	bitmap = createMMBitmap(img.image, img.width, img.height, img.byteWidth, img.bitsPerPixel, img.bytesPerPixel);
 
 	color = MMRGBHexAtPoint(bitmap, x, y);
 
 	char hex[7];
-	
+
 	padHex(color, hex);
 
 	destroyMMBitmap(bitmap);
-	
+
 	info.GetReturnValue().Set(Nan::New(hex).ToLocalChecked());
-	
+
 }
 
 NAN_MODULE_INIT(InitAll)
