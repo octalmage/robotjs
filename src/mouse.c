@@ -57,17 +57,12 @@
 #endif
 
 /**
- * Move the mouse to a specific point.
- * @param point The coordinates to move the mouse to (x, y).
+ * Calculate the delta for a mouse move and add them to the event.
+ * @param event The mouse move event (by ref).
+ * @param point The new mouse x and y.
  */
-void moveMouse(MMPoint point)
+void calculateDeltas(CGEventRef *event, MMPoint point)
 {
-#if defined(IS_MACOSX)
-	CGEventRef move = CGEventCreateMouseEvent(NULL, kCGEventMouseMoved,
-	                                          CGPointFromMMPoint(point),
-	                                          kCGMouseButtonLeft);
-
-
 	/**
 	 * The next few lines are a workaround for games not detecting mouse moves.
 	 * See this issue for more information:
@@ -80,11 +75,27 @@ void moveMouse(MMPoint point)
 	int64_t deltaX = point.x - mouse.x;
 	int64_t deltaY = point.y - mouse.y;
 
-	CGEventSetIntegerValueField(move, kCGMouseEventDeltaX, deltaX);
-	CGEventSetIntegerValueField(move, kCGMouseEventDeltaY, deltaY);
+	CGEventSetIntegerValueField(*event, kCGMouseEventDeltaX, deltaX);
+	CGEventSetIntegerValueField(*event, kCGMouseEventDeltaY, deltaY);
+
+	CFRelease(get);
+}
+
+
+/**
+ * Move the mouse to a specific point.
+ * @param point The coordinates to move the mouse to (x, y).
+ */
+void moveMouse(MMPoint point)
+{
+#if defined(IS_MACOSX)
+	CGEventRef move = CGEventCreateMouseEvent(NULL, kCGEventMouseMoved,
+	                                          CGPointFromMMPoint(point),
+	                                          kCGMouseButtonLeft);
+
+	calculateDeltas(&move, point);
 
 	CGEventPost(kCGSessionEventTap, move);
-	CFRelease(get);
 	CFRelease(move);
 #elif defined(USE_X11)
 	Display *display = XGetMainDisplay();
@@ -104,9 +115,11 @@ void dragMouse(MMPoint point, const MMMouseButton button)
 {
 #if defined(IS_MACOSX)
 	const CGEventType dragType = MMMouseDragToCGEventType(button);
-	const CGEventRef drag = CGEventCreateMouseEvent(NULL, dragType,
+	CGEventRef drag = CGEventCreateMouseEvent(NULL, dragType,
 	                                                CGPointFromMMPoint(point),
 	                                                (CGMouseButton)button);
+	calculateDeltas(&drag, point);
+
 	CGEventPost(kCGSessionEventTap, drag);
 	CFRelease(drag);
 #else
