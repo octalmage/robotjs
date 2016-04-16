@@ -77,11 +77,11 @@ void moveMouse(MMPoint point)
 	CGPoint mouse = CGEventGetLocation(get);
 
 	// Calculate the deltas.
-	int64_t deltaX = point.x -  mouse.x;
-	int64_t deltaY = point.y -mouse.y;
+	int64_t deltaX = point.x - mouse.x;
+	int64_t deltaY = point.y - mouse.y;
 
-	CGEventSetIntegerValueField(move, kCGMouseEventDeltaY, deltaX);
-	CGEventSetIntegerValueField(move, kCGMouseEventDeltaX, deltaY);
+	CGEventSetIntegerValueField(move, kCGMouseEventDeltaX, deltaX);
+	CGEventSetIntegerValueField(move, kCGMouseEventDeltaY, deltaY);
 
 	CGEventPost(kCGSessionEventTap, move);
 	CFRelease(get);
