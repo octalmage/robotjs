@@ -29,11 +29,52 @@
 #if defined(IS_WINDOWS)
 void win32KeyEvent(int key, MMKeyFlags flags)
 {
-	int scan = MapVirtualKey(key & 0xff, 0);
+	int scan = MapVirtualKey(key & 0xff, MAPVK_VK_TO_VSC);
 
-	/* Set the scancode for keyup */
+	/* Set the scan code for extended keys */
+	switch (key)
+	{
+		case VK_RCONTROL:
+		case VK_SNAPSHOT: /* Print Screen */
+		case VK_RMENU: /* Right Alt / Alt Gr */
+		case VK_PAUSE: /* Pause / Break */
+		case VK_HOME:
+		case VK_UP:
+		case VK_PRIOR: /* Page up */
+		case VK_LEFT:
+		case VK_RIGHT:
+		case VK_END:
+		case VK_DOWN:
+		case VK_NEXT: /* 'Page Down' */
+		case VK_INSERT:
+		case VK_DELETE:
+		case VK_LWIN:
+		case VK_RWIN:
+		case VK_APPS: /* Application */
+		case VK_VOLUME_MUTE:
+		case VK_VOLUME_DOWN:
+		case VK_VOLUME_UP:
+		case VK_MEDIA_NEXT_TRACK:
+		case VK_MEDIA_PREV_TRACK:
+		case VK_MEDIA_STOP:
+		case VK_MEDIA_PLAY_PAUSE:
+		case VK_BROWSER_BACK:
+		case VK_BROWSER_FORWARD:
+		case VK_BROWSER_REFRESH:
+		case VK_BROWSER_STOP:
+		case VK_BROWSER_SEARCH:
+		case VK_BROWSER_FAVORITES:
+		case VK_BROWSER_HOME:
+		case VK_LAUNCH_MAIL:
+		{
+			flags |= KEYEVENTF_EXTENDEDKEY;
+			break;
+		}
+	}
+
+	/* Set the scan code for keyup */
 	if ( flags & KEYEVENTF_KEYUP ) {
-		scan = scan | 0x80;
+		scan |= 0x80;
 	}
 
 	keybd_event(key, scan, flags, 0);
