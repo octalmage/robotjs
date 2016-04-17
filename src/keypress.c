@@ -29,20 +29,6 @@
 #endif
 
 #if defined(IS_MACOSX)
-bool keyCodeRequiresSystemDefinedEvent(MMKeyCode code) {
-	return  code == NX_KEYTYPE_SOUND_UP ||
-		code == NX_KEYTYPE_SOUND_DOWN ||
-		code == NX_KEYTYPE_MUTE ||
-		code == NX_KEYTYPE_PLAY ||
-		code == NX_KEYTYPE_BRIGHTNESS_UP ||
-		code == NX_KEYTYPE_BRIGHTNESS_DOWN ||
-		code == NX_KEYTYPE_PLAY ||
-		code == NX_KEYTYPE_PREVIOUS ||
-		code == NX_KEYTYPE_NEXT ||
-		code == NX_KEYTYPE_ILLUMINATION_UP ||
-		code == NX_KEYTYPE_ILLUMINATION_DOWN ||
-		code == NX_KEYTYPE_ILLUMINATION_TOGGLE;
-}
 static io_connect_t _getAuxiliaryKeyDriver(void)
 {
 	static mach_port_t sEventDrvrRef = 0;
@@ -123,7 +109,9 @@ void win32KeyEvent(int key, MMKeyFlags flags)
 void toggleKeyCode(MMKeyCode code, const bool down, MMKeyFlags flags)
 {
 #if defined(IS_MACOSX)
-	if (keyCodeRequiresSystemDefinedEvent(code)) {
+	/* The media keys all have 1000 added to them to help us detect them. */
+	if (code >= 1000) {
+		code = code - 1000; /* Get the real keycode. */
 		NXEventData   event;
 		kern_return_t kr;
 		IOGPoint loc = { 0, 0 };
