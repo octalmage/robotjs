@@ -734,9 +734,9 @@ class BMP
 //Convert object from Javascript to a C++ class (BMP).
 BMP buildBMP(Local<Object> info) 
 {
-	char * buf = NULL;
-	BMP img;
 	Local<Object> obj = Nan::To<v8::Object>(info).ToLocalChecked();
+
+	BMP img;
 
 	img.width = obj->Get(Nan::New("width").ToLocalChecked())->Uint32Value();
 	img.height = obj->Get(Nan::New("height").ToLocalChecked())->Uint32Value();
@@ -744,7 +744,7 @@ BMP buildBMP(Local<Object> info)
 	img.bitsPerPixel = obj->Get(Nan::New("bitsPerPixel").ToLocalChecked())->Uint32Value();
 	img.bytesPerPixel = obj->Get(Nan::New("bytesPerPixel").ToLocalChecked())->Uint32Value();
 
-	buf = node::Buffer::Data(obj->Get(Nan::New("image").ToLocalChecked()));
+	char* buf = node::Buffer::Data(obj->Get(Nan::New("image").ToLocalChecked()));
 
 	//Convert the buffer to a uint8_t which createMMBitmap requires.
 	img.image = (uint8_t *)malloc(img.byteWidth * img.height);
