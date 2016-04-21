@@ -767,6 +767,12 @@ NAN_METHOD(getColor)
 	//Create the bitmap.
 	bitmap = createMMBitmap(img.image, img.width, img.height, img.byteWidth, img.bitsPerPixel, img.bytesPerPixel);
 
+	// Make sure the requested pixel is inside the bitmap.
+	if (!MMBitmapPointInBounds(bitmap, MMPointMake(x, y)))
+	{
+		return Nan::ThrowError("Requested coordinates are outside the bitmap's dimensions.");
+	}
+
 	color = MMRGBHexAtPoint(bitmap, x, y);
 
 	char hex[7];

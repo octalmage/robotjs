@@ -13,7 +13,8 @@ extern "C"
 
 #include <Carbon/Carbon.h> /* Really only need <HIToolbox/Events.h> */
 #include <ApplicationServices/ApplicationServices.h>
-
+#import <IOKit/hidsystem/ev_keymap.h>
+	
 enum _MMKeyCode {
 	K_NOT_A_KEY = 9999,
 	K_BACKSPACE = kVK_Delete,
@@ -49,24 +50,24 @@ enum _MMKeyCode {
 	K_SPACE = kVK_Space,
 	K_PRINTSCREEN = K_NOT_A_KEY,
 
-	K_AUDIO_VOLUME_MUTE = kVK_Mute,
-	K_AUDIO_VOLUME_DOWN = kVK_VolumeDown,
-	K_AUDIO_VOLUME_UP = kVK_VolumeUp,
-	K_AUDIO_PLAY = K_NOT_A_KEY,
+	K_AUDIO_VOLUME_MUTE = 1007,
+	K_AUDIO_VOLUME_DOWN = 1001,
+	K_AUDIO_VOLUME_UP = 1000,
+	K_AUDIO_PLAY = 1016,
 	K_AUDIO_STOP = K_NOT_A_KEY,
-	K_AUDIO_PAUSE = K_NOT_A_KEY,
-	K_AUDIO_PREV = K_NOT_A_KEY,
-	K_AUDIO_NEXT = K_NOT_A_KEY,
+	K_AUDIO_PAUSE = 1016,
+	K_AUDIO_PREV = 1018,
+	K_AUDIO_NEXT = 1017,
 	K_AUDIO_REWIND = K_NOT_A_KEY,
 	K_AUDIO_FORWARD = K_NOT_A_KEY,
 	K_AUDIO_REPEAT = K_NOT_A_KEY,
 	K_AUDIO_RANDOM = K_NOT_A_KEY,
 
-	K_LIGHTS_MON_UP = K_NOT_A_KEY,
-	K_LIGHTS_MON_DOWN = K_NOT_A_KEY,
-	K_LIGHTS_KBD_TOGGLE = K_NOT_A_KEY,
-	K_LIGHTS_KBD_UP = K_NOT_A_KEY,
-	K_LIGHTS_KBD_DOWN = K_NOT_A_KEY
+	K_LIGHTS_MON_UP = 1002,
+	K_LIGHTS_MON_DOWN = 1003,
+	K_LIGHTS_KBD_TOGGLE = 1023,
+	K_LIGHTS_KBD_UP = 1021,
+	K_LIGHTS_KBD_DOWN = 1022
 };
 
 typedef CGKeyCode MMKeyCode;

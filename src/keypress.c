@@ -6,6 +6,8 @@
 
 #if defined(IS_MACOSX)
 	#include <ApplicationServices/ApplicationServices.h>
+	#import <IOKit/hidsystem/IOHIDLib.h>
+	#import <IOKit/hidsystem/ev_keymap.h>
 #elif defined(USE_X11)
 	#include <X11/extensions/XTest.h>
 	#include "xdisplay.h"
@@ -24,6 +26,29 @@
 	#define X_KEY_EVENT_WAIT(display, key, is_press) \
 		(X_KEY_EVENT(display, key, is_press), \
 		 microsleep(DEADBEEF_UNIFORM(0.0, 62.5)))
+#endif
+
+#if defined(IS_MACOSX)
+static io_connect_t _getAuxiliaryKeyDriver(void)
+{
+	static mach_port_t sEventDrvrRef = 0;
+	mach_port_t masterPort, service, iter;
+	kern_return_t kr;
+
+	if (!sEventDrvrRef) {
+		kr = IOMasterPort( bootstrap_port, &masterPort );
+		assert(KERN_SUCCESS == kr);
+		kr = IOServiceGetMatchingServices(masterPort, IOServiceMatching( kIOHIDSystemClass), &iter );
+		assert(KERN_SUCCESS == kr);
+		service = IOIteratorNext( iter );
+		assert(service);
+		kr = IOServiceOpen(service, mach_task_self(), kIOHIDParamConnectType, &sEventDrvrRef );
+		assert(KERN_SUCCESS == kr);
+		IOObjectRelease(service);
+		IOObjectRelease(iter);
+	}
+	return sEventDrvrRef;
+}
 #endif
 
 #if defined(IS_WINDOWS)
@@ -84,14 +109,28 @@ void win32KeyEvent(int key, MMKeyFlags flags)
 void toggleKeyCode(MMKeyCode code, const bool down, MMKeyFlags flags)
 {
 #if defined(IS_MACOSX)
-	CGEventRef keyEvent = CGEventCreateKeyboardEvent(NULL,
-	                                                 (CGKeyCode)code, down);
-	assert(keyEvent != NULL);
+	/* The media keys all have 1000 added to them to help us detect them. */
+	if (code >= 1000) {
+		code = code - 1000; /* Get the real keycode. */
+		NXEventData   event;
+		kern_return_t kr;
+		IOGPoint loc = { 0, 0 };
+		UInt32 evtInfo = code << 16 | (down?NX_KEYDOWN:NX_KEYUP) << 8;
+		bzero(&event, sizeof(NXEventData));
+		event.compound.subType = NX_SUBTYPE_AUX_CONTROL_BUTTONS;
+		event.compound.misc.L[0] = evtInfo;
+		kr = IOHIDPostEvent( _getAuxiliaryKeyDriver(), NX_SYSDEFINED, loc, &event, kNXEventDataVersion, 0, FALSE );
+		assert( KERN_SUCCESS == kr );
+	} else {
+		CGEventRef keyEvent = CGEventCreateKeyboardEvent(NULL,
+		                                                 (CGKeyCode)code, down);
+		assert(keyEvent != NULL);
 
-	CGEventSetType(keyEvent, down ? kCGEventKeyDown : kCGEventKeyUp);
-	CGEventSetFlags(keyEvent, flags);
-	CGEventPost(kCGSessionEventTap, keyEvent);
-	CFRelease(keyEvent);
+		CGEventSetType(keyEvent, down ? kCGEventKeyDown : kCGEventKeyUp);
+		CGEventSetFlags(keyEvent, flags);
+		CGEventPost(kCGSessionEventTap, keyEvent);
+		CFRelease(keyEvent);
+	}
 #elif defined(IS_WINDOWS)
 	const DWORD dwFlags = down ? 0 : KEYEVENTF_KEYUP;
 
