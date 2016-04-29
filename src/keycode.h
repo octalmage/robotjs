@@ -111,6 +111,7 @@ enum _MMKeyCode {
 	K_SHIFT = XK_Shift_L,
 	K_CAPSLOCK = XK_Shift_Lock,
 	K_SPACE = XK_space,
+	K_INSERT = XK_Insert,
 	K_PRINTSCREEN = XK_Print,
 
 	K_AUDIO_VOLUME_MUTE = XF86XK_AudioMute,
