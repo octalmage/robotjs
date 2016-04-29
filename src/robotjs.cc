@@ -323,7 +323,7 @@ static KeyNames key_names[] =
 	{ "shift",          K_SHIFT },
 	{ "space",          K_SPACE },
 	{ "printscreen",    K_PRINTSCREEN },
-	{ "insert",					K_INSERT },
+	{ "insert",         K_INSERT },
 
 	{ "audio_mute",     K_AUDIO_VOLUME_MUTE },
 	{ "audio_vol_down", K_AUDIO_VOLUME_DOWN },
