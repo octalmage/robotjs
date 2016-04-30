@@ -91,8 +91,12 @@ void calculateDeltas(CGEventRef *event, MMPoint point)
 void moveMouse(MMPoint point)
 {
 #if defined(IS_MACOSX)
+
+	CGEventRef get = CGEventCreate(NULL);
+	CGPoint mouse = CGEventGetLocation(get);
+
 	CGEventRef move = CGEventCreateMouseEvent(NULL, kCGEventMouseMoved,
-	                                          CGPointFromMMPoint(point),
+	                                          CGPointFromMMPoint(mouse),
 	                                          kCGMouseButtonLeft);
 
 	calculateDeltas(&move, point);
