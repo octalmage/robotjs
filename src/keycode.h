@@ -48,7 +48,7 @@ enum _MMKeyCode {
 	K_SHIFT = kVK_Shift,
 	K_CAPSLOCK = kVK_CapsLock,
 	K_SPACE = kVK_Space,
-	K_INSERT = kVK_Insert,
+	K_INSERT = K_NOT_A_KEY,
 	K_PRINTSCREEN = K_NOT_A_KEY,
 
 	K_AUDIO_VOLUME_MUTE = 1007,
