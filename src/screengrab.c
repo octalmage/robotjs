@@ -37,6 +37,9 @@ MMBitmapRef copyMMBitmapFromDisplayInRect(MMRect rect)
 	else if(CFStringCompare(pixEnc, CFSTR(IO8BitIndexedPixels), kCFCompareCaseInsensitive) == kCFCompareEqualTo)
 		depth = 8;
 
+	CGDisplayModeRelease(mode);
+	CFRelease(pixEnc);
+
 	bitsPerPixel = (uint8_t) depth;
 	bytesPerPixel = bitsPerPixel / 8;
 	/* Align width to padding. */
