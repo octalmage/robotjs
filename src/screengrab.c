@@ -31,14 +31,17 @@ MMBitmapRef copyMMBitmapFromDisplayInRect(MMRect rect)
 			rect.size.width,
 			rect.size.height));
 
+	if (!image) { return NULL; }
+
 	CFDataRef imageData = CGDataProviderCopyData(CGImageGetDataProvider(image));
+
+	if (!imageData) { return NULL; }
 
 	bufferSize = CFDataGetLength(imageData);
 	buffer = malloc(bufferSize);
 
 	CFDataGetBytes(imageData, CFRangeMake(0,bufferSize), buffer);
 
-	/* Use image size because it can differ from specified size */
 	bitmap = createMMBitmap(buffer,
 		CGImageGetWidth(image),
 		CGImageGetHeight(image),
