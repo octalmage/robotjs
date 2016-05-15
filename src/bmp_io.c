@@ -3,14 +3,8 @@
 #include "endian.h"
 #include <stdio.h> /* fopen() */
 #include <string.h> /* memcpy() */
-
-#if defined(_MSC_VER)
-	#include "ms_stdbool.h"
-	#include "ms_stdint.h"
-#else
-	#include <stdbool.h>
-	#include <stdint.h>
-#endif
+#include <stdbool.h>
+#include <stdint.h>
 
 #pragma pack(push, 1) /* The following structs should be continguous, so we can
                        * copy them in one read. */
