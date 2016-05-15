@@ -777,7 +777,7 @@ NAN_METHOD(getColor)
 	}
 
 	color = MMRGBHexAtPoint(bitmap, x, y);
-	
+
 	char hex[7];
 
 	padHex(color, hex);
