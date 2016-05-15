@@ -793,7 +793,7 @@ NAN_METHOD(saveBitmap)
 	MMBitmapRef bitmap;
 	MMImageType type = kBMPImageType;
 	
-	//Get our image object from JavaScript.
+	// Get our image object from JavaScript.
 	BMP img = buildBMP(Nan::To<v8::Object>(info[0]).ToLocalChecked());
 	
 	char *path;
@@ -801,7 +801,7 @@ NAN_METHOD(saveBitmap)
 
 	path = *string;
 
-	//Create the bitmap.
+	// Create the bitmap.
 	bitmap = createMMBitmap(img.image, img.width, img.height, img.byteWidth, img.bitsPerPixel, img.bytesPerPixel);
 	
 	if (saveMMBitmapToFile(bitmap, path, type) != 0) {
