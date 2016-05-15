@@ -54,7 +54,7 @@ int CheckMouseButton(const char * const b, MMMouseButton * const button)
 
 NAN_METHOD(dragMouse)
 {
-	if (info.Length() < 2)
+	if (info.Length() < 2 || info.Length() > 3)
 	{
 		return Nan::ThrowError("Invalid number of arguments.");
 	}
@@ -63,7 +63,7 @@ NAN_METHOD(dragMouse)
 	const size_t y = info[1]->Int32Value();
 	MMMouseButton button = LEFT_BUTTON;
 
-	if (info.Length() >= 3)
+	if (info.Length() == 3)
 	{
 		Nan::Utf8String bstr(info[2]);
 		const char * const b = *bstr;
@@ -89,7 +89,7 @@ NAN_METHOD(dragMouse)
 
 NAN_METHOD(moveMouse)
 {
-	if (info.Length() < 2)
+	if (info.Length() != 2)
 	{
 		return Nan::ThrowError("Invalid number of arguments.");
 	}
@@ -106,7 +106,7 @@ NAN_METHOD(moveMouse)
 
 NAN_METHOD(moveMouseSmooth)
 {
-	if (info.Length() < 2)
+	if (info.Length() != 2)
 	{
 		return Nan::ThrowError("Invalid number of arguments.");
 	}
@@ -325,6 +325,7 @@ static KeyNames key_names[] =
 	{ "shift",          K_SHIFT },
 	{ "space",          K_SPACE },
 	{ "printscreen",    K_PRINTSCREEN },
+	{ "insert",         K_INSERT },
 				  
 	{ "audio_mute",     K_AUDIO_VOLUME_MUTE },
 	{ "audio_vol_down", K_AUDIO_VOLUME_DOWN },
@@ -575,6 +576,20 @@ NAN_METHOD(typeString)
 	info.GetReturnValue().Set(Nan::New(1));
 }
 
+NAN_METHOD(typeStringDelayed)
+{
+	char *str;
+	Nan::Utf8String string(info[0]);
+	
+	str = *string;
+	
+	size_t cpm = info[1]->Int32Value();
+
+	typeStringDelayed(str, cpm);
+
+	info.GetReturnValue().Set(Nan::New(1));
+}
+
 NAN_METHOD(setKeyboardDelay)
 {
 	if (info.Length() != 1)
@@ -610,11 +625,21 @@ void padHex(MMRGBHex color, char* hex)
 
 NAN_METHOD(getPixelColor)
 {
+	if (info.Length() != 2)
+	{
+		return Nan::ThrowError("Invalid number of arguments.");
+	}
+	
 	MMBitmapRef bitmap;
 	MMRGBHex color;
 
 	size_t x = info[0]->Int32Value();
 	size_t y = info[1]->Int32Value();
+
+	if (!pointVisibleOnMainDisplay(MMPointMake(x, y)))
+	{
+		return Nan::ThrowError("Requested coordinates are outside the main screen's dimensions.");
+	}
 
 	bitmap = copyMMBitmapFromDisplayInRect(MMRectMake(x, y, 1, 1));
 
@@ -713,48 +738,54 @@ class BMP
 BMP buildBMP(Local<Object> info) 
 {
 	Local<Object> obj = Nan::To<v8::Object>(info).ToLocalChecked();
-	
+
 	BMP img;
-    
+
 	img.width = obj->Get(Nan::New("width").ToLocalChecked())->Uint32Value();
 	img.height = obj->Get(Nan::New("height").ToLocalChecked())->Uint32Value();
 	img.byteWidth = obj->Get(Nan::New("byteWidth").ToLocalChecked())->Uint32Value();
 	img.bitsPerPixel = obj->Get(Nan::New("bitsPerPixel").ToLocalChecked())->Uint32Value();
 	img.bytesPerPixel = obj->Get(Nan::New("bytesPerPixel").ToLocalChecked())->Uint32Value();
-	
+
 	char* buf = node::Buffer::Data(obj->Get(Nan::New("image").ToLocalChecked()));
-	
-	//Convert the buffer to a uint8_t which createMMBitmap requires. 
+
+	//Convert the buffer to a uint8_t which createMMBitmap requires.
 	img.image = (uint8_t *)malloc(img.byteWidth * img.height);
 	memcpy(img.image, buf, img.byteWidth * img.height);
 
 	return img;
-}
+ }
 
-NAN_METHOD(getColor) 
-{	
+NAN_METHOD(getColor)
+{
 	MMBitmapRef bitmap;
 	MMRGBHex color;
-	
-	size_t x = info[0]->Int32Value();
-	size_t y = info[1]->Int32Value();
-	
+
+	size_t x = info[1]->Int32Value();
+	size_t y = info[2]->Int32Value();
+
 	//Get our image object from JavaScript.
 	BMP img = buildBMP(Nan::To<v8::Object>(info[0]).ToLocalChecked());
 
 	//Create the bitmap.
 	bitmap = createMMBitmap(img.image, img.width, img.height, img.byteWidth, img.bitsPerPixel, img.bytesPerPixel);
-	
+
+	// Make sure the requested pixel is inside the bitmap.
+	if (!MMBitmapPointInBounds(bitmap, MMPointMake(x, y)))
+	{
+		return Nan::ThrowError("Requested coordinates are outside the bitmap's dimensions.");
+	}
+
 	color = MMRGBHexAtPoint(bitmap, x, y);
 	
 	char hex[7];
-	
+
 	padHex(color, hex);
 
 	destroyMMBitmap(bitmap);
-	
+
 	info.GetReturnValue().Set(Nan::New(hex).ToLocalChecked());
-	
+
 }
 
 NAN_METHOD(saveBitmap) 
@@ -817,6 +848,9 @@ NAN_MODULE_INIT(InitAll)
 
 	Nan::Set(target, Nan::New("typeString").ToLocalChecked(),
 		Nan::GetFunction(Nan::New<FunctionTemplate>(typeString)).ToLocalChecked());
+
+	Nan::Set(target, Nan::New("typeStringDelayed").ToLocalChecked(),
+		Nan::GetFunction(Nan::New<FunctionTemplate>(typeStringDelayed)).ToLocalChecked());
 
 	Nan::Set(target, Nan::New("setKeyboardDelay").ToLocalChecked(),
 		Nan::GetFunction(Nan::New<FunctionTemplate>(setKeyboardDelay)).ToLocalChecked());

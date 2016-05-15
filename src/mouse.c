@@ -56,6 +56,34 @@
 
 #endif
 
+#if defined(IS_MACOSX)
+/**
+ * Calculate the delta for a mouse move and add them to the event.
+ * @param event The mouse move event (by ref).
+ * @param point The new mouse x and y.
+ */
+void calculateDeltas(CGEventRef *event, MMPoint point)
+{
+	/**
+	 * The next few lines are a workaround for games not detecting mouse moves.
+	 * See this issue for more information:
+	 * https://github.com/octalmage/robotjs/issues/159
+	 */
+	CGEventRef get = CGEventCreate(NULL);
+	CGPoint mouse = CGEventGetLocation(get);
+
+	// Calculate the deltas.
+	int64_t deltaX = point.x - mouse.x;
+	int64_t deltaY = point.y - mouse.y;
+
+	CGEventSetIntegerValueField(*event, kCGMouseEventDeltaX, deltaX);
+	CGEventSetIntegerValueField(*event, kCGMouseEventDeltaY, deltaY);
+
+	CFRelease(get);
+}
+#endif
+
+
 /**
  * Move the mouse to a specific point.
  * @param point The coordinates to move the mouse to (x, y).
@@ -66,6 +94,9 @@ void moveMouse(MMPoint point)
 	CGEventRef move = CGEventCreateMouseEvent(NULL, kCGEventMouseMoved,
 	                                          CGPointFromMMPoint(point),
 	                                          kCGMouseButtonLeft);
+
+	calculateDeltas(&move, point);
+
 	CGEventPost(kCGSessionEventTap, move);
 	CFRelease(move);
 #elif defined(USE_X11)
@@ -74,11 +105,20 @@ void moveMouse(MMPoint point)
 	             0, 0, 0, 0, point.x, point.y);
 	XFlush(display);
 #elif defined(IS_WINDOWS)
+	//Mouse motion is now done using SendInput with MOUSEINPUT. We use Absolute mouse positioning
 	#define MOUSE_COORD_TO_ABS(coord, width_or_height) (((65536 * coord) / width_or_height) + (coord < 0 ? -1 : 1))
 	point.x = MOUSE_COORD_TO_ABS(point.x, GetSystemMetrics(SM_CXSCREEN));
 	point.y = MOUSE_COORD_TO_ABS(point.y, GetSystemMetrics(SM_CYSCREEN));
-	mouse_event(MOUSEEVENTF_ABSOLUTE | MOUSEEVENTF_MOVE,
-	            (DWORD)point.x, (DWORD)point.y, 0, 0);
+	INPUT mouseInput;
+	mouseInput.type = INPUT_MOUSE;
+	mouseInput.mi.dx = point.x;
+	mouseInput.mi.dy = point.y;
+	mouseInput.mi.dwFlags = MOUSEEVENTF_ABSOLUTE | MOUSEEVENTF_MOVE;
+	mouseInput.mi.time = 0; //System will provide the timestamp
+	mouseInput.mi.dwExtraInfo = 0;
+	mouseInput.mi.mouseData = 0;
+	SendInput(1, &mouseInput, sizeof(mouseInput));
+	
 #endif
 }
 
@@ -86,9 +126,11 @@ void dragMouse(MMPoint point, const MMMouseButton button)
 {
 #if defined(IS_MACOSX)
 	const CGEventType dragType = MMMouseDragToCGEventType(button);
-	const CGEventRef drag = CGEventCreateMouseEvent(NULL, dragType,
+	CGEventRef drag = CGEventCreateMouseEvent(NULL, dragType,
 	                                                CGPointFromMMPoint(point),
 	                                                (CGMouseButton)button);
+	calculateDeltas(&drag, point);
+
 	CGEventPost(kCGSessionEventTap, drag);
 	CFRelease(drag);
 #else
@@ -195,8 +237,14 @@ void doubleClick(MMMouseButton button)
  * This uses the magnitude to scroll the required amount in the direction. 
  * TODO Requires further fine tuning based on the requirements.
  */
-void scrollMouse(int scrollMagnitude, MMMouseWheelDirection scrollDirection)	
+void scrollMouse(int scrollMagnitude, MMMouseWheelDirection scrollDirection)
 {
+	#if defined(IS_WINDOWS)
+		// Fix for #97 https://github.com/octalmage/robotjs/issues/97,
+		// C89 needs variables declared on top of functions (mouseScrollInput)
+		INPUT mouseScrollInput;
+	#endif
+
 	/* Direction should only be considered based on the scrollDirection. This
 	 * Should not interfere. */
 	int cleanScrollMagnitude = abs(scrollMagnitude);
@@ -204,41 +252,40 @@ void scrollMouse(int scrollMagnitude, MMMouseWheelDirection scrollDirection)
 	{
 		return;
 	}
-	
+
 	/* Set up the OS specific solution */
 	#if defined(__APPLE__)
-	
+
 		CGWheelCount wheel = 1;
 		CGEventRef event;
-	
+
 		/* Make scroll magnitude negative if we're scrolling down. */
 		cleanScrollMagnitude = cleanScrollMagnitude * scrollDirection;
-		
+
 		event = CGEventCreateScrollWheelEvent(NULL, kCGScrollEventUnitLine, wheel, cleanScrollMagnitude, 0);
 		CGEventPost(kCGHIDEventTap, event);
-		
+
 	#elif defined(USE_X11)
 
 		int x;
 		int dir = 4; /* Button 4 is up, 5 is down. */
 		Display *display = XGetMainDisplay();
-		
+
 		if (scrollDirection == DIRECTION_DOWN)
 		{
 			dir = 5;
 		}
-	
+
 		for (x = 0; x < cleanScrollMagnitude; x++)
 		{
 			XTestFakeButtonEvent(display, dir, 1, CurrentTime);
 			XTestFakeButtonEvent(display, dir, 0, CurrentTime);
 		}
-		
+
 		XFlush(display);
-		
+
 	#elif defined(IS_WINDOWS)
-		//FIXME: Need to figure out why this code doesn't work on Windows XP.
-		/*INPUT mouseScrollInput;
+
 		mouseScrollInput.type = INPUT_MOUSE;
 		mouseScrollInput.mi.dx = 0;
 		mouseScrollInput.mi.dy = 0;
@@ -246,7 +293,9 @@ void scrollMouse(int scrollMagnitude, MMMouseWheelDirection scrollDirection)
 		mouseScrollInput.mi.time = 0;
 		mouseScrollInput.mi.dwExtraInfo = 0;
 		mouseScrollInput.mi.mouseData = WHEEL_DELTA * scrollDirection * cleanScrollMagnitude;
-		SendInput(1, &mouseScrollInput, sizeof(mouseScrollInput));*/
+
+		SendInput(1, &mouseScrollInput, sizeof(mouseScrollInput));
+
 	#endif
 }
 
