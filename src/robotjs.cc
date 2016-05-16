@@ -756,6 +756,11 @@ BMP buildBMP(Local<Object> info)
 	return img;
  }
 
+ MMBitmapRef buildMMBitmap(BMP img)
+ {
+	return createMMBitmap(img.image, img.width, img.height, img.byteWidth, img.bitsPerPixel, img.bytesPerPixel);
+ }
+
 NAN_METHOD(getColor)
 {
 	MMBitmapRef bitmap;
@@ -768,7 +773,7 @@ NAN_METHOD(getColor)
 	BMP img = buildBMP(Nan::To<v8::Object>(info[0]).ToLocalChecked());
 
 	//Create the bitmap.
-	bitmap = createMMBitmap(img.image, img.width, img.height, img.byteWidth, img.bitsPerPixel, img.bytesPerPixel);
+	bitmap = buildMMBitmap(img);
 
 	// Make sure the requested pixel is inside the bitmap.
 	if (!MMBitmapPointInBounds(bitmap, MMPointMake(x, y)))
@@ -802,9 +807,9 @@ NAN_METHOD(saveBitmap)
 	path = *string;
 
 	// Create the bitmap.
-	bitmap = createMMBitmap(img.image, img.width, img.height, img.byteWidth, img.bitsPerPixel, img.bytesPerPixel);
 	
 	if (saveMMBitmapToFile(bitmap, path, type) != 0) {
+	bitmap = buildMMBitmap(img);
 		return Nan::ThrowError("Could not save image to file.");
 	}
 
