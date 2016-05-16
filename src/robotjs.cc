@@ -10,7 +10,6 @@
 #include "MMBitmap.h"
 #include "snprintf.h"
 #include "microsleep.h"
-#include "io.h"
 #include "bmp_io.h"
 
 using namespace v8;
