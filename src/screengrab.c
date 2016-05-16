@@ -18,7 +18,15 @@
 MMBitmapRef copyMMBitmapFromDisplayInRect(MMRect rect)
 {
 #if defined(IS_MACOSX)
-
+	
+	/**
+	 *  Prevent misaligned pixels by rounding down to a multiple of 16.
+	 *  http://stackoverflow.com/a/17389894/2233771
+	 */
+	if (rect.size.width > 16) {
+		rect.size.width &= 0xFFFFFFF0;
+	}
+	
 	MMBitmapRef bitmap = NULL;
 	uint8_t *buffer = NULL;
 	size_t bufferSize = 0;
