@@ -796,27 +796,26 @@ NAN_METHOD(getColor)
 NAN_METHOD(saveBitmap) 
 {	
 	MMBitmapRef bitmap;
-	MMImageType type = kBMPImageType;
-	
+
 	// Get our image object from JavaScript.
 	BMP img = buildBMP(Nan::To<v8::Object>(info[0]).ToLocalChecked());
-	
+
 	char *path;
 	Nan::Utf8String string(info[1]);
 
 	path = *string;
 
 	// Create the bitmap.
-	
-	if (saveMMBitmapToFile(bitmap, path, type) != 0) {
 	bitmap = buildMMBitmap(img);
+
+	if (saveMMBitmapAsBMP(bitmap, path) != 0) {
 		return Nan::ThrowError("Could not save image to file.");
 	}
 
 	destroyMMBitmap(bitmap);
-	
+
 	info.GetReturnValue().Set(Nan::New(1));
-	
+
 }
 
 NAN_MODULE_INIT(InitAll)
