@@ -267,14 +267,14 @@ void scrollMouse(int x, int y)
 			xdir = 7;
 		}
 
-		for (int x = 0; x < abs(scroll.x); x++) {
+		for (int xi = 0; xi < abs(x); xi++) {
 			XTestFakeButtonEvent(display, xdir, 1, CurrentTime);
 			XTestFakeButtonEvent(display, xdir, 0, CurrentTime);
 		}
 
-		for (int y = 0; y < abs(scroll.y); y++) {
-			XTestFakeButtonEvent(display, ydir, 1, CurrentTime);
-			XTestFakeButtonEvent(display, ydir, 0, CurrentTime);
+		for (int yi = 0; yi < abs(y); yi++) {
+			YTestFakeButtonEvent(display, ydir, 1, CurrentTime);
+			YTestFakeButtonEvent(display, ydir, 0, CurrentTime);
 		}
 
 		XFlush(display);
