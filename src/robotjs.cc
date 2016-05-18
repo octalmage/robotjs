@@ -244,12 +244,11 @@ NAN_METHOD(scrollMouse)
   {
     return Nan::ThrowError("Invalid number of arguments.");
   }
-  size_t x = info[0]->Int32Value();
-  size_t y = info[1]->Int32Value();
+  int x = info[0]->Int32Value();
+  int y = info[1]->Int32Value();
   
   MMPoint point;
-  point = MMPointMake(x, y);
-  scrollMouse(point);
+  scrollMouse(x, y);
   microsleep(mouseDelay);
   
   info.GetReturnValue().Set(Nan::New(1));

@@ -232,7 +232,7 @@ void doubleClick(MMMouseButton button)
 #endif
 }
 
-void scrollMouse(MMPoint scroll)
+void scrollMouse(int x, int y)
 {
 #if defined(IS_WINDOWS)
 		// Fix for #97 https://github.com/octalmage/robotjs/issues/97,
@@ -249,7 +249,7 @@ void scrollMouse(MMPoint scroll)
 
 		CGEventRef event;
 
-		event = CGEventCreateScrollWheelEvent(NULL, kCGScrollEventUnitPixel, 2, scroll.y, scroll.x);
+		event = CGEventCreateScrollWheelEvent(NULL, kCGScrollEventUnitPixel, 2, y, x);
 		CGEventPost(kCGHIDEventTap, event);
 
     CFRelease(event);
@@ -260,10 +260,10 @@ void scrollMouse(MMPoint scroll)
 		int xdir = 6;
 		Display *display = XGetMainDisplay();
 
-		if (scroll.y < 0){
+		if (y < 0){
 			ydir = 5;
 		}
-		if (scroll.x < 0){
+		if (x < 0){
 			xdir = 7;
 		}
 
@@ -287,7 +287,7 @@ void scrollMouse(MMPoint scroll)
 		mouseScrollInputH.mi.dwFlags = MOUSEEVENTF_WHEEL;
 		mouseScrollInputH.mi.time = 0;
 		mouseScrollInputH.mi.dwExtraInfo = 0;
-		mouseScrollInputH.mi.mouseData = WHEEL_DELTA * scroll.x;
+		mouseScrollInputH.mi.mouseData = WHEEL_DELTA * x;
 
 		mouseScrollInputV.type = INPUT_MOUSE;
 		mouseScrollInputV.mi.dx = 0;
@@ -295,7 +295,7 @@ void scrollMouse(MMPoint scroll)
 		mouseScrollInputV.mi.dwFlags = MOUSEEVENTF_HWHEEL;
 		mouseScrollInputV.mi.time = 0;
 		mouseScrollInputV.mi.dwExtraInfo = 0;
-		mouseScrollInputV.mi.mouseData = WHEEL_DELTA * scroll.y;
+		mouseScrollInputV.mi.mouseData = WHEEL_DELTA * y;
 
 		SendInput(1, &mouseScrollInputH, sizeof(mouseScrollInputH));
 		SendInput(1, &mouseScrollInputV, sizeof(mouseScrollInputV));
