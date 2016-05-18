@@ -247,7 +247,6 @@ NAN_METHOD(scrollMouse)
   int x = info[0]->Int32Value();
   int y = info[1]->Int32Value();
   
-  MMPoint point;
   scrollMouse(x, y);
   microsleep(mouseDelay);
   
