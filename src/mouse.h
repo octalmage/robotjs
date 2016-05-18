@@ -90,7 +90,7 @@ void doubleClick(MMMouseButton button);
 
 /* Scrolls the mouse in the stated direction. 
  * TODO: Add a smoothly scroll mouse next. */
-void scrollMouse(int scrollMagnitude, MMMouseWheelDirection scrollDirection);
+void scrollMouse(MMPoint scroll);
 
 #endif /* MOUSE_H */
 

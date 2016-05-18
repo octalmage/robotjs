@@ -232,71 +232,74 @@ void doubleClick(MMMouseButton button)
 #endif
 }
 
-/**
- * Function used to scroll the screen in the required direction.
- * This uses the magnitude to scroll the required amount in the direction. 
- * TODO Requires further fine tuning based on the requirements.
- */
-void scrollMouse(int scrollMagnitude, MMMouseWheelDirection scrollDirection)
+void scrollMouse(MMPoint scroll)
 {
-	#if defined(IS_WINDOWS)
+#if defined(IS_WINDOWS)
 		// Fix for #97 https://github.com/octalmage/robotjs/issues/97,
 		// C89 needs variables declared on top of functions (mouseScrollInput)
-		INPUT mouseScrollInput;
-	#endif
+		INPUT mouseScrollInputH;
+		INPUT mouseScrollInputV;
+#endif
 
-	/* Direction should only be considered based on the scrollDirection. This
-	 * Should not interfere. */
-	int cleanScrollMagnitude = abs(scrollMagnitude);
-	if (!(scrollDirection == DIRECTION_UP || scrollDirection == DIRECTION_DOWN))
-	{
-		return;
-	}
+  /* Direction should only be considered based on the scrollDirection. This
+   * Should not interfere. */
 
-	/* Set up the OS specific solution */
-	#if defined(__APPLE__)
+  /* Set up the OS specific solution */
+#if defined(__APPLE__)
 
-		CGWheelCount wheel = 1;
 		CGEventRef event;
 
-		/* Make scroll magnitude negative if we're scrolling down. */
-		cleanScrollMagnitude = cleanScrollMagnitude * scrollDirection;
-
-		event = CGEventCreateScrollWheelEvent(NULL, kCGScrollEventUnitLine, wheel, cleanScrollMagnitude, 0);
+		event = CGEventCreateScrollWheelEvent(NULL, kCGScrollEventUnitPixel, 2, scroll.y, scroll.x);
 		CGEventPost(kCGHIDEventTap, event);
 
-	#elif defined(USE_X11)
+    CFRelease(event);
 
-		int x;
-		int dir = 4; /* Button 4 is up, 5 is down. */
+#elif defined(USE_X11)
+
+		int ydir = 4; /* Button 4 is up, 5 is down. */
+		int xdir = 6;
 		Display *display = XGetMainDisplay();
 
-		if (scrollDirection == DIRECTION_DOWN)
-		{
-			dir = 5;
+		if (scroll.y < 0){
+			ydir = 5;
+		}
+		if (scroll.x < 0){
+			xdir = 7;
 		}
 
-		for (x = 0; x < cleanScrollMagnitude; x++)
-		{
-			XTestFakeButtonEvent(display, dir, 1, CurrentTime);
-			XTestFakeButtonEvent(display, dir, 0, CurrentTime);
+		for (int x = 0; x < abs(scroll.x); x++) {
+			XTestFakeButtonEvent(display, xdir, 1, CurrentTime);
+			XTestFakeButtonEvent(display, xdir, 0, CurrentTime);
+		}
+
+		for (int y = 0; y < abs(scroll.y); y++) {
+			XTestFakeButtonEvent(display, ydir, 1, CurrentTime);
+			XTestFakeButtonEvent(display, ydir, 0, CurrentTime);
 		}
 
 		XFlush(display);
 
-	#elif defined(IS_WINDOWS)
+#elif defined(IS_WINDOWS)
 
-		mouseScrollInput.type = INPUT_MOUSE;
-		mouseScrollInput.mi.dx = 0;
-		mouseScrollInput.mi.dy = 0;
-		mouseScrollInput.mi.dwFlags = MOUSEEVENTF_WHEEL;
-		mouseScrollInput.mi.time = 0;
-		mouseScrollInput.mi.dwExtraInfo = 0;
-		mouseScrollInput.mi.mouseData = WHEEL_DELTA * scrollDirection * cleanScrollMagnitude;
+		mouseScrollInputH.type = INPUT_MOUSE;
+		mouseScrollInputH.mi.dx = 0;
+		mouseScrollInputH.mi.dy = 0;
+		mouseScrollInputH.mi.dwFlags = MOUSEEVENTF_WHEEL;
+		mouseScrollInputH.mi.time = 0;
+		mouseScrollInputH.mi.dwExtraInfo = 0;
+		mouseScrollInputH.mi.mouseData = WHEEL_DELTA * scroll.x;
 
-		SendInput(1, &mouseScrollInput, sizeof(mouseScrollInput));
+		mouseScrollInputV.type = INPUT_MOUSE;
+		mouseScrollInputV.mi.dx = 0;
+		mouseScrollInputV.mi.dy = 0;
+		mouseScrollInputV.mi.dwFlags = MOUSEEVENTF_HWHEEL;
+		mouseScrollInputV.mi.time = 0;
+		mouseScrollInputV.mi.dwExtraInfo = 0;
+		mouseScrollInputV.mi.mouseData = WHEEL_DELTA * scroll.y;
 
-	#endif
+		SendInput(1, &mouseScrollInputH, sizeof(mouseScrollInputH));
+		SendInput(1, &mouseScrollInputV, sizeof(mouseScrollInputV));
+#endif
 }
 
 /*
