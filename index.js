@@ -1,3 +1,5 @@
+// Rebuild RobotJS on the fly if needed.
+require('require-rebuild')();
 var robotjs = require('./build/Release/robotjs.node');
 
 module.exports = robotjs;
