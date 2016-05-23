@@ -337,6 +337,17 @@ static KeyNames key_names[] =
 	{ "audio_forward",  K_AUDIO_FORWARD },
 	{ "audio_repeat",   K_AUDIO_REPEAT },
 	{ "audio_random",   K_AUDIO_RANDOM },
+
+	{ "numpad_0",		K_NUMPAD_0 },
+	{ "numpad_1",		K_NUMPAD_1 },
+	{ "numpad_2",		K_NUMPAD_2 },
+	{ "numpad_3",		K_NUMPAD_3 },
+	{ "numpad_4",		K_NUMPAD_4 },
+	{ "numpad_5",		K_NUMPAD_5 },
+	{ "numpad_6",		K_NUMPAD_6 },
+	{ "numpad_7",		K_NUMPAD_7 },
+	{ "numpad_8",		K_NUMPAD_8 },
+	{ "numpad_9",		K_NUMPAD_9 },
 				   
 	{ "lights_mon_up",    K_LIGHTS_MON_UP },
 	{ "lights_mon_down",  K_LIGHTS_MON_DOWN },
