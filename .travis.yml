@@ -22,7 +22,7 @@ addons:
       - g++-4.8
       - gcc-4.8
 
-before_script:
+before_install:
   # reinstall latest nvm
   - rm -rf ~/.nvm && git clone https://github.com/creationix/nvm.git ~/.nvm && (cd ~/.nvm && git checkout `git describe --abbrev=0 --tags`) && source ~/.nvm/nvm.sh
   - nvm install $TRAVIS_NODE_VERSION
@@ -36,6 +36,7 @@ before_script:
   - if [[ $TRAVIS_OS_NAME == "linux" ]]; then export CXX=g++-4.8; fi
   - $CXX --version
 
+before_script:
   # Start xvfb
   - export DISPLAY=:99.0
   - sh -e /etc/init.d/xvfb start
