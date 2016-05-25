@@ -4,17 +4,13 @@
 environment:
   matrix:
   # node.js
-    - nodejs_version: "0.8"
     - nodejs_version: "0.10"
-    - nodejs_version: "0" #Latest 0.x.x build.
-    - nodejs_version: "3" #Latest io.js build.
-    - nodejs_version: "4.2.4" #LTS
+    - nodejs_version: "0.12"
+    - nodejs_version: "4"
+    - nodejs_version: "5"
+    - nodejs_version: "6"
     - nodejs_version: "Stable"
 
-matrix:
-  allow_failures:
-    - nodejs_version: "0.8" #Allow Node.js 0.8.x to fail.
-    
 # Install scripts. (runs after repo cloning)
 install:
   # Get the latest stable version of Node 0.STABLE.latest
