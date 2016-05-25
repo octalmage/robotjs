@@ -1,5 +1,6 @@
 var test = require('tape');
 var robot = require('..');
+var os = require('os');
 
 //TODO: Need tests for keyToggle, typeString, typeStringDelayed, and setKeyboardDelay.
 
@@ -36,6 +37,12 @@ test('Tap all keys.', function(t)
 // This test won't fail if there's an issue, but it will help you identify an issue if ran locally.
 test('Tap all numpad keys.', function(t)
 {
+	if (os.platform() === 'linux')
+	{
+		t.skip("No numpad keycodes on Linux.");
+		t.end();
+	}
+
 	var nums = '0123456789'.split('');
 
 	for (var x in nums)
