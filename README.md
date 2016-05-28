@@ -50,7 +50,7 @@ I [plan on](https://github.com/octalmage/robotjs/issues/64) using node-pre-gyp t
 
 ##### [Mouse](https://github.com/octalmage/robotjs/wiki/Syntax#mouse)
 
-![](https://cloudup.com/cw5JY2cusx3+)
+<p align="center"><img src="https://cldup.com/lugVjjAkEi.gif"></p>
 
 ```JavaScript
 //Move the mouse across the screen as a sine wave.
