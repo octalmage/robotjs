@@ -37,23 +37,23 @@ test('Tap all keys.', function(t)
 // This test won't fail if there's an issue, but it will help you identify an issue if ran locally.
 test('Tap all numpad keys.', function(t)
 {
-		var nums = '0123456789'.split('');
+	var nums = '0123456789'.split('');
 
-		for (var x in nums)
+	for (var x in nums)
+	{
+		if (os.platform() === 'linux')
 		{
-			if (os.platform() === 'linux')
+			/* jshint loopfunc:true */
+			t.throws(function()
 			{
-				/* jshint loopfunc:true */
-				t.throws(function()
-				{
-					robot.keyTap('numpad_' + nums[x]);
-				}, /Invalid key code/, 'tap ' + 'numpad_' + nums[x] + ' threw an error.');
-			}
-			else
-			{
-				t.ok(robot.keyTap('numpad_' + nums[x]), 'tap ' + 'numpad_' + nums[x] + '.');
-			}
+				robot.keyTap('numpad_' + nums[x]);
+			}, /Invalid key code/, 'tap ' + 'numpad_' + nums[x] + ' threw an error.');
 		}
+		else
+		{
+			t.ok(robot.keyTap('numpad_' + nums[x]), 'tap ' + 'numpad_' + nums[x] + '.');
+		}
+	}
 
 	t.end();
 });
