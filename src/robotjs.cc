@@ -321,6 +321,7 @@ static KeyNames key_names[] =
 	{ "alt",            K_ALT },
 	{ "control",        K_CONTROL },
 	{ "shift",          K_SHIFT },
+	{ "right_shift",    K_RIGHTSHIFT },
 	{ "space",          K_SPACE },
 	{ "printscreen",    K_PRINTSCREEN },
 	{ "insert",         K_INSERT },
