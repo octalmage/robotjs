@@ -10,6 +10,7 @@
 #include "MMBitmap.h"
 #include "snprintf.h"
 #include "microsleep.h"
+#include "bmp_io.h"
 
 using namespace v8;
 
@@ -766,6 +767,11 @@ BMP buildBMP(Local<Object> info)
 	return img;
  }
 
+ MMBitmapRef buildMMBitmap(BMP img)
+ {
+	return createMMBitmap(img.image, img.width, img.height, img.byteWidth, img.bitsPerPixel, img.bytesPerPixel);
+ }
+
 NAN_METHOD(getColor)
 {
 	MMBitmapRef bitmap;
@@ -778,7 +784,7 @@ NAN_METHOD(getColor)
 	BMP img = buildBMP(Nan::To<v8::Object>(info[0]).ToLocalChecked());
 
 	//Create the bitmap.
-	bitmap = createMMBitmap(img.image, img.width, img.height, img.byteWidth, img.bitsPerPixel, img.bytesPerPixel);
+	bitmap = buildMMBitmap(img);
 
 	// Make sure the requested pixel is inside the bitmap.
 	if (!MMBitmapPointInBounds(bitmap, MMPointMake(x, y)))
@@ -795,6 +801,31 @@ NAN_METHOD(getColor)
 	destroyMMBitmap(bitmap);
 
 	info.GetReturnValue().Set(Nan::New(hex).ToLocalChecked());
+
+}
+
+NAN_METHOD(saveBitmap) 
+{	
+	MMBitmapRef bitmap;
+
+	// Get our image object from JavaScript.
+	BMP img = buildBMP(Nan::To<v8::Object>(info[0]).ToLocalChecked());
+
+	char *path;
+	Nan::Utf8String string(info[1]);
+
+	path = *string;
+
+	// Create the bitmap.
+	bitmap = buildMMBitmap(img);
+
+	if (saveMMBitmapAsBMP(bitmap, path) != 0) {
+		return Nan::ThrowError("Could not save image to file.");
+	}
+
+	destroyMMBitmap(bitmap);
+
+	info.GetReturnValue().Set(Nan::New(1));
 
 }
 
@@ -850,6 +881,9 @@ NAN_MODULE_INIT(InitAll)
 		
 	Nan::Set(target, Nan::New("getColor").ToLocalChecked(),
 		Nan::GetFunction(Nan::New<FunctionTemplate>(getColor)).ToLocalChecked());
+		
+	Nan::Set(target, Nan::New("saveBitmap").ToLocalChecked(),
+		Nan::GetFunction(Nan::New<FunctionTemplate>(saveBitmap)).ToLocalChecked());
 }
 
 NODE_MODULE(robotjs, InitAll)

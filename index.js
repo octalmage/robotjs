@@ -17,6 +17,11 @@ function bitmap(width, height, byteWidth, bitsPerPixel, bytesPerPixel, image)
     {
         return robotjs.getColor(this, x, y);
     };
+    
+    this.save = function(path)
+    {
+        return robotjs.saveBitmap(this, path);
+    };
 }
 
 module.exports.screen.capture = function(x, y, width, height)

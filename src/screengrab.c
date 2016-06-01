@@ -18,55 +18,51 @@
 MMBitmapRef copyMMBitmapFromDisplayInRect(MMRect rect)
 {
 #if defined(IS_MACOSX)
-
-	size_t bytewidth;
-	uint8_t bitsPerPixel, bytesPerPixel;
-	//uint8_t *buffer;
+	
+	/**
+	 *  Prevent misaligned pixels by rounding down to a multiple of 16.
+	 *  http://stackoverflow.com/a/17389894/2233771
+	 */
+	if (rect.size.width > 16) {
+		rect.size.width &= 0xFFFFFFF0;
+	}
+	
+	MMBitmapRef bitmap = NULL;
+	uint8_t *buffer = NULL;
+	size_t bufferSize = 0;
 
 	CGDirectDisplayID displayID = CGMainDisplayID();
 
-	//Replacement for CGDisplayBitsPerPixel.
-	CGDisplayModeRef mode = CGDisplayCopyDisplayMode(displayID);
-	size_t depth = 0;
+	CGImageRef image = CGDisplayCreateImageForRect(displayID,
+		CGRectMake(rect.origin.x,
+			rect.origin.y,
+			rect.size.width,
+			rect.size.height));
 
-	CFStringRef pixEnc = CGDisplayModeCopyPixelEncoding(mode);
-	if(CFStringCompare(pixEnc, CFSTR(IO32BitDirectPixels), kCFCompareCaseInsensitive) == kCFCompareEqualTo)
-		depth = 32;
-	else if(CFStringCompare(pixEnc, CFSTR(IO16BitDirectPixels), kCFCompareCaseInsensitive) == kCFCompareEqualTo)
-		depth = 16;
-	else if(CFStringCompare(pixEnc, CFSTR(IO8BitIndexedPixels), kCFCompareCaseInsensitive) == kCFCompareEqualTo)
-		depth = 8;
+	if (!image) { return NULL; }
 
-	CGDisplayModeRelease(mode);
-	CFRelease(pixEnc);
+	CFDataRef imageData = CGDataProviderCopyData(CGImageGetDataProvider(image));
 
-	bitsPerPixel = (uint8_t) depth;
-	bytesPerPixel = bitsPerPixel / 8;
-	/* Align width to padding. */
-	//bytewidth = ADD_PADDING(rect.size.width * bytesPerPixel);
-	bytewidth = rect.size.width * bytesPerPixel;
+	if (!imageData) { return NULL; }
 
-	/* Convert Quartz point to postscript point. */
-	//rect.origin.y = CGDisplayPixelsHigh(displayID) - rect.origin.y - rect.size.height;
+	bufferSize = CFDataGetLength(imageData);
+	buffer = malloc(bufferSize);
 
-	CGImageRef image = CGDisplayCreateImageForRect(displayID, CGRectMake(rect.origin.x, rect.origin.y, rect.size.width, rect.size.height));
+	CFDataGetBytes(imageData, CFRangeMake(0,bufferSize), buffer);
 
-    // Request access to the raw pixel data via the image's DataProvider.
-    CGDataProviderRef provider = CGImageGetDataProvider(image);
-    CFDataRef data = CGDataProviderCopyData(provider);
+	bitmap = createMMBitmap(buffer,
+		CGImageGetWidth(image),
+		CGImageGetHeight(image),
+		CGImageGetBytesPerRow(image),
+		CGImageGetBitsPerPixel(image),
+		CGImageGetBitsPerPixel(image) / 8);
 
-    size_t width, height;
-    width = CGImageGetWidth(image);
-    height = CGImageGetHeight(image);
-    size_t bpp = CGImageGetBitsPerPixel(image) / 8;
+	CFRelease(imageData);
 
-    uint8 *pixels = malloc(width * height * bpp);
-    memcpy(pixels, CFDataGetBytePtr(data), width * height * bpp);
-    CFRelease(data);
-   	CGImageRelease(image);
+	CGImageRelease(image);
 
-	return createMMBitmap(pixels, rect.size.width, rect.size.height, bytewidth,
-	                      bitsPerPixel, bytesPerPixel);
+	return bitmap;
+
 #elif defined(USE_X11)
 	MMBitmapRef bitmap;
 
