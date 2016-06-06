@@ -1,19 +1,18 @@
 sudo: false
+language: cpp
+
+os:
+  - linux
+  - osx
+
 env:
-  - CXX=g++-4.8
-language: node_js
-
-node_js:
-  - 0.8
-  - 0.10
-  - 0 #Latest 0.x.x build.
-  - 3 #Latest io.js build.
-  - 4.2.4 #LTS
-  - stable
-
-matrix:
-  allow_failures:
-    - node_js: 0.8
+  matrix:
+  - TRAVIS_NODE_VERSION="0.10"
+  - TRAVIS_NODE_VERSION="0.12"
+  - TRAVIS_NODE_VERSION="4"
+  - TRAVIS_NODE_VERSION="5"
+  - TRAVIS_NODE_VERSION="6"
+  - TRAVIS_NODE_VERSION="stable"
 
 addons:
   apt:
@@ -27,9 +26,30 @@ addons:
       - g++-4.8
       - gcc-4.8
 
+before_install:
+  # reinstall latest nvm
+  - rm -rf ~/.nvm && git clone https://github.com/creationix/nvm.git ~/.nvm && (cd ~/.nvm && git checkout `git describe --abbrev=0 --tags`) && source ~/.nvm/nvm.sh
+  - nvm install $TRAVIS_NODE_VERSION
+  - PATH=$PATH:`pwd`/node_modules/.bin
+
+  # print versions
+  - node --version
+  - npm --version
+
+  # use g++-4.8 on Linux
+  - if [[ $TRAVIS_OS_NAME == "linux" ]]; then export CXX=g++-4.8; fi
+  - $CXX --version
+
 before_script:
-  - export DISPLAY=:99.0
-  - sh -e /etc/init.d/xvfb start
+  # Start xvfb
+  - if [[ $TRAVIS_OS_NAME == "linux" ]]; then export DISPLAY=:99.0; fi
+  - if [[ $TRAVIS_OS_NAME == "linux" ]]; then sh -e /etc/init.d/xvfb start; fi
+
+install:
+  - npm install
+
+script:
+  - npm test
 
 notifications:
   webhooks:

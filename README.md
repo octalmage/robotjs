@@ -26,31 +26,22 @@ This is a work in progress so the exported functions could change at any time be
 
 ## Installation
 
-Please ensure you have the [required dependencies](https://github.com/nodejs/node-gyp#installation) before installing:
-
-* Windows
-  * Visual Studio 2013 (Express works fine).
-  * Python (v2.7.3 recommended, v3.x.x is not supported).
-* Mac
-  * Xcode Command Line Tools.
-* Linux
-  * Python (v2.7 recommended, v3.x.x is not supported).
-  * make.
-  * A C/C++ compiler like GCC.
-  * libxtst-dev and libpng++-dev (`sudo apt-get install libxtst-dev libpng++-dev`).
-
-Then install RobotJS using npm:
+Install RobotJS using npm:
 
 ```
 npm install robotjs
 ```
-I [plan on](https://github.com/octalmage/robotjs/issues/64) using node-pre-gyp to make this process easier.
+It's that easy! npm will download one of the prebuilt [binaries](https://github.com/octalmage/robotjs/releases/latest) for your OS.
+
+You can get npm [here](https://nodejs.org/en/download/) if you don't have it installed.
+
+If you need to build RobotJS, see the [building](#building) section.
 
 ## Examples
 
 ##### [Mouse](https://github.com/octalmage/robotjs/wiki/Syntax#mouse)
 
-![](https://cloudup.com/cw5JY2cusx3+)
+<p align="center"><img src="https://cldup.com/lugVjjAkEi.gif"></p>
 
 ```JavaScript
 //Move the mouse across the screen as a sine wave.
@@ -105,7 +96,18 @@ The [RobotJS API](https://github.com/octalmage/robotjs/wiki/Syntax) is contained
 
 ## Building
 
-node-gyp is required to build RobotJS.
+Please ensure you have the required dependencies before installing:
+
+* Windows
+  * Visual Studio 2013 (Express works fine).
+  * Python (v2.7.3 recommended, v3.x.x is not supported).
+* Mac
+  * Xcode Command Line Tools.
+* Linux
+  * Python (v2.7 recommended, v3.x.x is not supported).
+  * make.
+  * A C/C++ compiler like GCC.
+  * libxtst-dev and libpng++-dev (`sudo apt-get install libxtst-dev libpng++-dev`).
 
 Install node-gyp using npm:
 
@@ -113,20 +115,21 @@ Install node-gyp using npm:
 npm install -g node-gyp
 ```
 
-Then configure and build: 
+Then build:
 
 ```
-node-gyp configure
-node-gyp build
+node-gyp rebuild
 ```
+
+See the [node-gyp readme](https://github.com/nodejs/node-gyp#installation) for more details.
 
 ## Plans
 
-* Control the mouse by changing the mouse position, left/right clicking, and dragging. 
-* Control the keyboard by pressing keys, holding keys down, and typing words.
-* Read pixel color from the screen and capture the screen. 
-* Find image on screen, read pixels from image.
-* Possibly include window management? 
+* √ Control the mouse by changing the mouse position, left/right clicking, and dragging.
+* √ Control the keyboard by pressing keys, holding keys down, and typing words.
+* √ Read pixel color from the screen and capture the screen.
+* Find an image on screen, read pixels from an image.
+* Possibly include window management?
 
 ## Progress
 
@@ -134,7 +137,8 @@ node-gyp build
 | ------------- |-------------: | ------- |
 | Mouse         | 100%           | All planned features implemented.       |
 | Keyboard      | 100%           | All planned features implemented.       |
-| Screen        | 10%            | Screenshot, image search.   |
+| Screen        | 85%            | Image search, pixel search. |
+| Bitmap        | 0%             |  Saving/opening, png support.  |
 
 ## FAQ
 
