@@ -118,7 +118,7 @@ void moveMouse(MMPoint point)
 	mouseInput.mi.dwExtraInfo = 0;
 	mouseInput.mi.mouseData = 0;
 	SendInput(1, &mouseInput, sizeof(mouseInput));
-	
+
 #endif
 }
 
@@ -202,7 +202,7 @@ void clickMouse(MMMouseButton button)
  */
 void doubleClick(MMMouseButton button)
 {
-	
+
 #if defined(IS_MACOSX)
 
 	/* Double click for Mac. */
@@ -210,17 +210,17 @@ void doubleClick(MMMouseButton button)
 	const CGEventType mouseTypeDown = MMMouseToCGEventType(true, button);
 	const CGEventType mouseTypeUP = MMMouseToCGEventType(false, button);
 
-	CGEventRef event = CGEventCreateMouseEvent(NULL, mouseTypeDown, currentPos, kCGMouseButtonLeft);  
-	
-	/* Set event to double click. */						
-	CGEventSetIntegerValueField(event, kCGMouseEventClickState, 2);
-											
-	CGEventPost(kCGHIDEventTap, event);  
-																
-	CGEventSetType(event, mouseTypeUP);  
-	CGEventPost(kCGHIDEventTap, event);  
+	CGEventRef event = CGEventCreateMouseEvent(NULL, mouseTypeDown, currentPos, kCGMouseButtonLeft);
 
-	CFRelease(event); 
+	/* Set event to double click. */
+	CGEventSetIntegerValueField(event, kCGMouseEventClickState, 2);
+
+	CGEventPost(kCGHIDEventTap, event);
+
+	CGEventSetType(event, mouseTypeUP);
+	CGEventPost(kCGHIDEventTap, event);
+
+	CFRelease(event);
 
 #else
 
@@ -228,17 +228,17 @@ void doubleClick(MMMouseButton button)
 	clickMouse(button);
 	microsleep(200);
 	clickMouse(button);
-	
+
 #endif
 }
 
 void scrollMouse(int x, int y)
 {
 #if defined(IS_WINDOWS)
-		// Fix for #97 https://github.com/octalmage/robotjs/issues/97,
-		// C89 needs variables declared on top of functions (mouseScrollInput)
-		INPUT mouseScrollInputH;
-		INPUT mouseScrollInputV;
+	// Fix for #97 https://github.com/octalmage/robotjs/issues/97,
+	// C89 needs variables declared on top of functions (mouseScrollInput)
+	INPUT mouseScrollInputH;
+	INPUT mouseScrollInputV;
 #endif
 
   /* Direction should only be considered based on the scrollDirection. This
@@ -247,59 +247,59 @@ void scrollMouse(int x, int y)
   /* Set up the OS specific solution */
 #if defined(__APPLE__)
 
-		CGEventRef event;
+	CGEventRef event;
 
-		event = CGEventCreateScrollWheelEvent(NULL, kCGScrollEventUnitPixel, 2, y, x);
-		CGEventPost(kCGHIDEventTap, event);
+	event = CGEventCreateScrollWheelEvent(NULL, kCGScrollEventUnitPixel, 2, y, x);
+	CGEventPost(kCGHIDEventTap, event);
 
-    CFRelease(event);
+  CFRelease(event);
 
 #elif defined(USE_X11)
 
-		int ydir = 4; /* Button 4 is up, 5 is down. */
-		int xdir = 6;
-		Display *display = XGetMainDisplay();
+	int ydir = 4; /* Button 4 is up, 5 is down. */
+	int xdir = 6;
+	Display *display = XGetMainDisplay();
 
-		if (y < 0){
-			ydir = 5;
-		}
-		if (x < 0){
-			xdir = 7;
-		}
-  
-    int xi;
-    int yi;
-		for (xi = 0; xi < abs(x); xi++) {
-			XTestFakeButtonEvent(display, xdir, 1, CurrentTime);
-			XTestFakeButtonEvent(display, xdir, 0, CurrentTime);
-		}
-		for (yi = 0; yi < abs(y); yi++) {
-			YTestFakeButtonEvent(display, ydir, 1, CurrentTime);
-			YTestFakeButtonEvent(display, ydir, 0, CurrentTime);
-		}
+	if (y < 0){
+		ydir = 5;
+	}
+	if (x < 0){
+		xdir = 7;
+	}
 
-		XFlush(display);
+  int xi;
+  int yi;
+	for (xi = 0; xi < abs(x); xi++) {
+		XTestFakeButtonEvent(display, xdir, 1, CurrentTime);
+		XTestFakeButtonEvent(display, xdir, 0, CurrentTime);
+	}
+	for (yi = 0; yi < abs(y); yi++) {
+		YTestFakeButtonEvent(display, ydir, 1, CurrentTime);
+		YTestFakeButtonEvent(display, ydir, 0, CurrentTime);
+	}
+
+	XFlush(display);
 
 #elif defined(IS_WINDOWS)
 
-		mouseScrollInputH.type = INPUT_MOUSE;
-		mouseScrollInputH.mi.dx = 0;
-		mouseScrollInputH.mi.dy = 0;
-		mouseScrollInputH.mi.dwFlags = MOUSEEVENTF_WHEEL;
-		mouseScrollInputH.mi.time = 0;
-		mouseScrollInputH.mi.dwExtraInfo = 0;
-		mouseScrollInputH.mi.mouseData = WHEEL_DELTA * x;
+	mouseScrollInputH.type = INPUT_MOUSE;
+	mouseScrollInputH.mi.dx = 0;
+	mouseScrollInputH.mi.dy = 0;
+	mouseScrollInputH.mi.dwFlags = MOUSEEVENTF_WHEEL;
+	mouseScrollInputH.mi.time = 0;
+	mouseScrollInputH.mi.dwExtraInfo = 0;
+	mouseScrollInputH.mi.mouseData = WHEEL_DELTA * x;
 
-		mouseScrollInputV.type = INPUT_MOUSE;
-		mouseScrollInputV.mi.dx = 0;
-		mouseScrollInputV.mi.dy = 0;
-		mouseScrollInputV.mi.dwFlags = MOUSEEVENTF_HWHEEL;
-		mouseScrollInputV.mi.time = 0;
-		mouseScrollInputV.mi.dwExtraInfo = 0;
-		mouseScrollInputV.mi.mouseData = WHEEL_DELTA * y;
+	mouseScrollInputV.type = INPUT_MOUSE;
+	mouseScrollInputV.mi.dx = 0;
+	mouseScrollInputV.mi.dy = 0;
+	mouseScrollInputV.mi.dwFlags = MOUSEEVENTF_HWHEEL;
+	mouseScrollInputV.mi.time = 0;
+	mouseScrollInputV.mi.dwExtraInfo = 0;
+	mouseScrollInputV.mi.mouseData = WHEEL_DELTA * y;
 
-		SendInput(1, &mouseScrollInputH, sizeof(mouseScrollInputH));
-		SendInput(1, &mouseScrollInputV, sizeof(mouseScrollInputV));
+	SendInput(1, &mouseScrollInputH, sizeof(mouseScrollInputH));
+	SendInput(1, &mouseScrollInputV, sizeof(mouseScrollInputV));
 #endif
 }
 
