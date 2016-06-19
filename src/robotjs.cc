@@ -10,6 +10,9 @@
 #include "MMBitmap.h"
 #include "snprintf.h"
 #include "microsleep.h"
+#if defined(USE_X11)
+	#include "xdisplay.h"
+#endif
 
 using namespace v8;
 
@@ -690,6 +693,27 @@ NAN_METHOD(getScreenSize)
 	info.GetReturnValue().Set(obj);
 }
 
+NAN_METHOD(getXDisplayName)
+{
+	#if defined(USE_X11)
+	const char* display = getXDisplay();
+	info.GetReturnValue().Set(Nan::New<String>(display).ToLocalChecked());
+	#else
+	Nan::ThrowError("getXDisplayName is only supported on Linux");
+	#endif
+}
+
+NAN_METHOD(setXDisplayName)
+{
+	#if defined(USE_X11)
+	Nan::Utf8String string(info[0]);
+	setXDisplay(*string);
+	info.GetReturnValue().Set(Nan::New(1));
+	#else
+	Nan::ThrowError("setXDisplayName is only supported on Linux");
+	#endif
+}
+
 NAN_METHOD(captureScreen) 
 {
 	size_t x;
@@ -862,6 +886,12 @@ NAN_MODULE_INIT(InitAll)
 		
 	Nan::Set(target, Nan::New("getColor").ToLocalChecked(),
 		Nan::GetFunction(Nan::New<FunctionTemplate>(getColor)).ToLocalChecked());
+
+	Nan::Set(target, Nan::New("getXDisplayName").ToLocalChecked(),
+		Nan::GetFunction(Nan::New<FunctionTemplate>(getXDisplayName)).ToLocalChecked());
+
+	Nan::Set(target, Nan::New("setXDisplayName").ToLocalChecked(),
+		Nan::GetFunction(Nan::New<FunctionTemplate>(setXDisplayName)).ToLocalChecked());
 }
 
 NODE_MODULE(robotjs, InitAll)
