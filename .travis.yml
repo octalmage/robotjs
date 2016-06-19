@@ -50,7 +50,6 @@ addons:
       - libpng12-dev
       - libxtst-dev
       - g++-4.8
-      - gcc-4.8
       - g++-4.8-multilib
       - gcc-multilib
 
