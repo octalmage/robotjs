@@ -64,6 +64,7 @@ before_install:
   - if [[ "$ARCH" == "x86" ]]; then wget $BASE_URL/$X86_FILE.tar.gz; tar -xf $X86_FILE.tar.gz; export PATH=$X86_FILE/bin:$PATH; fi
 
   # print versions
+  - file `which node`
   - node --version
   - npm --version
   - node -p 'process.platform + "@" + process.arch'
