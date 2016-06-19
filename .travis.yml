@@ -45,10 +45,10 @@ addons:
     sources:
       - ubuntu-toolchain-r-test
     packages:
-      - libx11-dev
+      - lib32-libx11
       - zlib1g-dev
       - libpng12-dev
-      - libxtst-dev
+      - lib32-libxtst
       - g++-4.8
       - g++-4.8-multilib
       - gcc-multilib
