@@ -52,7 +52,7 @@ addons:
       - g++-4.8
       - gcc-4.8
       - g++-4.8-multilib
-      - gcc-4.8-multilib
+      - gcc-multilib
 
 before_install:
   # reinstall latest nvm
