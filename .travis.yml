@@ -1,4 +1,4 @@
-sudo: false
+sudo: true
 language: cpp
 
 os:
@@ -45,10 +45,10 @@ addons:
     sources:
       - ubuntu-toolchain-r-test
     packages:
-      - lib32-libx11
+      - libx11-dev
       - zlib1g-dev
       - libpng12-dev
-      - lib32-libxtst
+      - libxtst-dev
       - g++-4.8
       - g++-4.8-multilib
       - gcc-multilib
@@ -63,6 +63,8 @@ before_install:
   - X86_FILE=$(node -p "'node-' + process.version + '-' + process.platform + '-x86'")
   # download node if testing x86 architecture
   - if [[ "$ARCH" == "x86" ]]; then wget $BASE_URL/$X86_FILE.tar.gz; tar -xf $X86_FILE.tar.gz; export PATH=$X86_FILE/bin:$PATH; fi
+
+  - if [[ "$ARCH" == "x86" ]]; then sudo dpkg --add-architecture i386; sudo apt-get update; sudo apt-get install -f libx11-dev:i386 zlib1g-dev:i386 libpng12-dev:i386 libxtst-dev:i386; fi
 
   # print versions
   - file `which node`
