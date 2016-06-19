@@ -5,7 +5,8 @@
   "main": "index.js",
   "scripts": {
     "test": "node test/all.js",
-    "install": "prebuild --install"
+    "preinstall": "npm install node-pre-gyp",
+    "install": "node-pre-gyp install --fallback-to-build"
   },
   "repository": {
     "type": "git",
@@ -37,9 +38,16 @@
   "homepage": "https://github.com/octalmage/robotjs",
   "dependencies": {
     "nan": "^2.2.1",
-    "prebuild": "^4.1.1"
+    "node-pre-gyp": "0.6.x"
   },
   "devDependencies": {
-    "tape": "^3.5.0"
-  }
+    "tape": "^3.5.0",
+    "aws-sdk": "2.x"
+  },
+  "binary": {
+       "module_name" : "robotjs",
+       "module_path" : "./lib/binding/{configuration}/{node_abi}-{platform}-{arch}/",
+       "remote_path" : "./{module_name}/v{version}/{configuration}/",
+       "host"        : "https://robotjs-builds.s3-us-east-1.amazonaws.com"
+   }
 }
