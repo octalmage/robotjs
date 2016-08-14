@@ -62,6 +62,8 @@ typedef int MMMouseWheelDirection;
  * screen boundaries. */
 void moveMouse(MMPoint point);
 
+void moveMouseGame(MMPoint point);
+
 /* Like moveMouse, moves the mouse to the given point on-screen, but marks
  * the event as the mouse being dragged on platforms where it is supported.
  * It is up to the caller to ensure that this point is within the screen

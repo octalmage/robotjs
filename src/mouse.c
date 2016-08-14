@@ -78,7 +78,13 @@ void calculateDeltas(CGEventRef *event, MMPoint point)
 
 	CGEventSetIntegerValueField(*event, kCGMouseEventDeltaX, deltaX);
 	CGEventSetIntegerValueField(*event, kCGMouseEventDeltaY, deltaY);
-
+	
+	double deltaFX = deltaX;
+	double deltaFY = deltaY;
+	
+	CGEventSetDoubleValueField(*event, kCGMouseEventDeltaX, deltaFX);
+	CGEventSetDoubleValueField(*event, kCGMouseEventDeltaY, deltaFY);
+	
 	CFRelease(get);
 }
 #endif
@@ -136,6 +142,28 @@ void dragMouse(MMPoint point, const MMMouseButton button)
 #else
 	moveMouse(point);
 #endif
+}
+
+/**
+ * Move the mouse to a specific point.
+ * @param point The coordinates to move the mouse to (x, y).
+ */
+void moveMouseGame(MMPoint point)
+{
+	#if defined(IS_MACOSX)
+		CGEventRef get = CGEventCreate(NULL);
+		CGPoint mouse = CGEventGetLocation(get);
+		CGEventRef move = CGEventCreateMouseEvent(NULL, kCGEventMouseMoved,
+			mouse,
+			kCGMouseButtonLeft);
+		
+		calculateDeltas(&move, point);
+		
+		CGEventPost(kCGSessionEventTap, move);
+		CFRelease(move);
+	#else
+		moveMouse(point);
+	#endif
 }
 
 MMPoint getMousePos()
