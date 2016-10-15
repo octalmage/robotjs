@@ -12,16 +12,12 @@ function bitmap(width, height, byteWidth, bitsPerPixel, bytesPerPixel, image)
     this.bitsPerPixel = bitsPerPixel;
     this.bytesPerPixel = bytesPerPixel;
     this.image = image;
-    
+
     this.colorAt = function(x, y)
     {
         return robotjs.getColor(this, x, y);
     };
-    
-    this.save = function(path)
-    {
-        return robotjs.saveBitmap(this, path);
-    };
+
 }
 
 module.exports.screen.capture = function(x, y, width, height)
@@ -35,6 +31,6 @@ module.exports.screen.capture = function(x, y, width, height)
     {
         b = robotjs.captureScreen();
     }
-    
+
     return new bitmap(b.width, b.height, b.byteWidth, b.bitsPerPixel, b.bytesPerPixel, b.image);
 };
