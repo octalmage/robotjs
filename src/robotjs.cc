@@ -10,14 +10,9 @@
 #include "MMBitmap.h"
 #include "snprintf.h"
 #include "microsleep.h"
-<<<<<<< HEAD
-#include "io.h"
-#include "bmp_io.h"
-=======
 #if defined(USE_X11)
 	#include "xdisplay.h"
 #endif
->>>>>>> master
 
 using namespace v8;
 
