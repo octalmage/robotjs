@@ -834,32 +834,6 @@ NAN_METHOD(getColor)
 
 }
 
-NAN_METHOD(saveBitmap)
-{
-	MMBitmapRef bitmap;
-	MMImageType type = kBMPImageType;
-
-	// Get our image object from JavaScript.
-	BMP img = buildBMP(Nan::To<v8::Object>(info[0]).ToLocalChecked());
-
-	char *path;
-	Nan::Utf8String string(info[1]);
-
-	path = *string;
-
-	// Create the bitmap.
-	bitmap = createMMBitmap(img.image, img.width, img.height, img.byteWidth, img.bitsPerPixel, img.bytesPerPixel);
-
-	if (saveMMBitmapToFile(bitmap, path, type) != 0) {
-		return Nan::ThrowError("Could not save image to file.");
-	}
-
-	destroyMMBitmap(bitmap);
-
-	info.GetReturnValue().Set(Nan::New(1));
-
-}
-
 NAN_MODULE_INIT(InitAll)
 {
 	Nan::Set(target, Nan::New("dragMouse").ToLocalChecked(),
