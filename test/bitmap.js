@@ -35,7 +35,8 @@ test('Get a bitmap of a specific size.', function(t)
 	var img = robot.screen.capture(0, 0, size, size);
 	
 	// Support for higher density screens.
-	if (img.width == (size*2)) size = img.width;
+	var multi = img.width / size;
+	var size = size * multi;
 	t.equals(img.height, size, 'make sure image is expected height.');
 	t.equals(img.width, size, 'make sure image is expected width.');
 });
@@ -53,7 +54,9 @@ test('Get a bitmap and make sure the colorAt works as expected.', function(t)
 	var height = screenSize.height;
 	
 	// Support for higher density screens.
-	if (img.width === (width*2)) width = img.width; height = img.height;
+	var multi = img.width / width;
+	width = width * multi; 
+	height = height * multi;
 	
 	t.throws(function()
 	{
