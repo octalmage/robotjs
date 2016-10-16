@@ -5,6 +5,11 @@
 #include "MMBitmap.h"
 #include "io.h"
 
+#ifdef __cplusplus
+extern "C" 
+{
+#endif
+
 enum _BMPReadError {
 	kBMPGenericError = 0,
 	kBMPAccessError,
@@ -50,5 +55,9 @@ int saveMMBitmapAsBMP(MMBitmapRef bitmap, const char *path);
  * (upside-down Cartesian/PostScript/GL <-> right side up QD/CG raster format).
  */
 void flipBitmapData(void *data, size_t width, size_t height, size_t bytewidth);
+
+#ifdef __cplusplus
+}
+#endif
 
 #endif /* BMP_IO_H */

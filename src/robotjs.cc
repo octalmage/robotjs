@@ -21,8 +21,8 @@ int mouseDelay = 10;
 int keyboardDelay = 10;
 
 /*
- __  __                      
-|  \/  | ___  _   _ ___  ___ 
+ __  __
+|  \/  | ___  _   _ ___  ___
 | |\/| |/ _ \| | | / __|/ _ \
 | |  | | (_) | |_| \__ \  __/
 |_|  |_|\___/ \__,_|___/\___|
@@ -241,21 +241,21 @@ NAN_METHOD(setMouseDelay)
 	info.GetReturnValue().Set(Nan::New(1));
 }
 
-NAN_METHOD(scrollMouse) 
+NAN_METHOD(scrollMouse)
 {
 	Nan::HandleScope scope;
 
 	//Get the values of magnitude and direction from the arguments list.
-	if(info.Length() == 2)	
+	if(info.Length() == 2)
 	{
 		int scrollMagnitude = info[0]->Int32Value();
 		char *s;
 
 		Nan::Utf8String sstr(info[1]);
 		s = *sstr;
-		
+
 		MMMouseWheelDirection scrollDirection;
-		
+
 		if (strcmp(s, "up") == 0)
 		{
 			scrollDirection = DIRECTION_UP;
@@ -268,26 +268,26 @@ NAN_METHOD(scrollMouse)
 		{
 			return Nan::ThrowError("Invalid scroll direction specified.");
 		}
-		
+
 		scrollMouse(scrollMagnitude, scrollDirection);
 		microsleep(mouseDelay);
-		
+
 		info.GetReturnValue().Set(Nan::New(1));
-	} 
-	else 
+	}
+	else
 	{
 		return Nan::ThrowError("Invalid number of arguments.");
 	}
 }
 /*
- _  __          _                         _ 
+ _  __          _                         _
 | |/ /___ _   _| |__   ___   __ _ _ __ __| |
 | ' // _ \ | | | '_ \ / _ \ / _` | '__/ _` |
 | . \  __/ |_| | |_) | (_) | (_| | | | (_| |
 |_|\_\___|\__, |_.__/ \___/ \__,_|_|  \__,_|
-		  |___/           
+          |___/
 */
-struct KeyNames 
+struct KeyNames
 {
 	const char* name;
 	MMKeyCode   key;
@@ -340,7 +340,7 @@ static KeyNames key_names[] =
 	{ "space",          K_SPACE },
 	{ "printscreen",    K_PRINTSCREEN },
 	{ "insert",         K_INSERT },
-				  
+
 	{ "audio_mute",     K_AUDIO_VOLUME_MUTE },
 	{ "audio_vol_down", K_AUDIO_VOLUME_DOWN },
 	{ "audio_vol_up",   K_AUDIO_VOLUME_UP },
@@ -364,7 +364,7 @@ static KeyNames key_names[] =
 	{ "numpad_7",		K_NUMPAD_7 },
 	{ "numpad_8",		K_NUMPAD_8 },
 	{ "numpad_9",		K_NUMPAD_9 },
-				   
+
 	{ "lights_mon_up",    K_LIGHTS_MON_UP },
 	{ "lights_mon_down",  K_LIGHTS_MON_DOWN },
 	{ "lights_kbd_toggle",K_LIGHTS_KBD_TOGGLE },
@@ -387,7 +387,7 @@ int CheckKeyCodes(char* k, MMKeyCode *key)
 	*key = K_NOT_A_KEY;
 
 	KeyNames* kn = key_names;
-	while (kn->name) 
+	while (kn->name)
 	{
 		if (strcmp(k, kn->name) == 0)
 		{
@@ -397,7 +397,7 @@ int CheckKeyCodes(char* k, MMKeyCode *key)
 		kn++;
 	}
 
-	if (*key == K_NOT_A_KEY) 
+	if (*key == K_NOT_A_KEY)
 	{
 		return -2;
 	}
@@ -605,9 +605,9 @@ NAN_METHOD(typeStringDelayed)
 {
 	char *str;
 	Nan::Utf8String string(info[0]);
-	
+
 	str = *string;
-	
+
 	size_t cpm = info[1]->Int32Value();
 
 	typeStringDelayed(str, cpm);
@@ -628,12 +628,12 @@ NAN_METHOD(setKeyboardDelay)
 }
 
 /*
-  ____                           
- / ___|  ___ _ __ ___  ___ _ __  
- \___ \ / __| '__/ _ \/ _ \ '_ \ 
+  ____
+ / ___|  ___ _ __ ___  ___ _ __
+ \___ \ / __| '__/ _ \/ _ \ '_ \
   ___) | (__| | |  __/  __/ | | |
  |____/ \___|_|  \___|\___|_| |_|
-								 
+
 */
 
 /**
@@ -654,7 +654,7 @@ NAN_METHOD(getPixelColor)
 	{
 		return Nan::ThrowError("Invalid number of arguments.");
 	}
-	
+
 	MMBitmapRef bitmap;
 	MMRGBHex color;
 
@@ -669,9 +669,9 @@ NAN_METHOD(getPixelColor)
 	bitmap = copyMMBitmapFromDisplayInRect(MMRectMake(x, y, 1, 1));
 
 	color = MMRGBHexAtPoint(bitmap, 0, 0);
-	
+
 	char hex[7];
-	
+
 	padHex(color, hex);
 
 	destroyMMBitmap(bitmap);
@@ -714,18 +714,18 @@ NAN_METHOD(setXDisplayName)
 	#endif
 }
 
-NAN_METHOD(captureScreen) 
+NAN_METHOD(captureScreen)
 {
 	size_t x;
 	size_t y;
 	size_t w;
 	size_t h;
-	
-	//If user has provided screen coords, use them! 
+
+	//If user has provided screen coords, use them!
 	if (info.Length() == 4)
 	{
 		//TODO: Make sure requested coords are within the screen bounds, or we get a seg fault.
-		// 		An error message is much nicer! 
+		// 		An error message is much nicer!
 
 		x = info[0]->Int32Value();
 		y = info[1]->Int32Value();
@@ -737,15 +737,15 @@ NAN_METHOD(captureScreen)
 		//We're getting the full screen.
 		x = 0;
 		y = 0;
-		
+
 		//Get screen size.
 		MMSize displaySize = getMainDisplaySize();
 		w = displaySize.width;
 		h = displaySize.height;
 	}
-	
+
 	MMBitmapRef bitmap = copyMMBitmapFromDisplayInRect(MMRectMake(x, y, w, h));
-	
+
 	uint32_t bufferSize = bitmap->bytewidth * bitmap->height;
 	Local<Object> buffer = Nan::NewBuffer((char*)bitmap->imageBuffer, bufferSize, destroyMMBitmapBuffer, NULL).ToLocalChecked();
 
@@ -756,17 +756,17 @@ NAN_METHOD(captureScreen)
 	Nan::Set(obj, Nan::New("bitsPerPixel").ToLocalChecked(), Nan::New<Number>(bitmap->bitsPerPixel));
 	Nan::Set(obj, Nan::New("bytesPerPixel").ToLocalChecked(), Nan::New<Number>(bitmap->bytesPerPixel));
 	Nan::Set(obj, Nan::New("image").ToLocalChecked(), buffer);
-	
+
 	info.GetReturnValue().Set(obj);
 }
 
 /*
- ____  _ _                         
-| __ )(_) |_ _ __ ___   __ _ _ __  
-|  _ \| | __| '_ ` _ \ / _` | '_ \ 
+ ____  _ _
+| __ )(_) |_ _ __ ___   __ _ _ __
+|  _ \| | __| '_ ` _ \ / _` | '_ \
 | |_) | | |_| | | | | | (_| | |_) |
-|____/|_|\__|_| |_| |_|\__,_| .__/ 
-						   |_|    
+|____/|_|\__|_| |_| |_|\__,_| .__/
+                            |_|
  */
 
 class BMP
@@ -781,7 +781,7 @@ class BMP
 };
 
 //Convert object from Javascript to a C++ class (BMP).
-BMP buildBMP(Local<Object> info) 
+BMP buildBMP(Local<Object> info)
 {
 	Local<Object> obj = Nan::To<v8::Object>(info).ToLocalChecked();
 
@@ -853,7 +853,7 @@ NAN_MODULE_INIT(InitAll)
 
 	Nan::Set(target, Nan::New("mouseToggle").ToLocalChecked(),
 		Nan::GetFunction(Nan::New<FunctionTemplate>(mouseToggle)).ToLocalChecked());
-		
+
 	Nan::Set(target, Nan::New("scrollMouse").ToLocalChecked(),
 		Nan::GetFunction(Nan::New<FunctionTemplate>(scrollMouse)).ToLocalChecked());
 
@@ -880,10 +880,10 @@ NAN_MODULE_INIT(InitAll)
 
 	Nan::Set(target, Nan::New("getScreenSize").ToLocalChecked(),
 		Nan::GetFunction(Nan::New<FunctionTemplate>(getScreenSize)).ToLocalChecked());
-		
+
 	Nan::Set(target, Nan::New("captureScreen").ToLocalChecked(),
 		Nan::GetFunction(Nan::New<FunctionTemplate>(captureScreen)).ToLocalChecked());
-		
+
 	Nan::Set(target, Nan::New("getColor").ToLocalChecked(),
 		Nan::GetFunction(Nan::New<FunctionTemplate>(getColor)).ToLocalChecked());
 
