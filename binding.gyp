@@ -28,9 +28,13 @@
             '-framework ApplicationServices',
             '-framework OpenGL'
           ]
-        }
+        },
+        'xcode_settings': {
+          'OTHER_CPLUSPLUSFLAGS' : ['-std=c++11','-stdlib=libc++'],
+          'OTHER_LDFLAGS': ['-stdlib=libc++'],
+        },
       }],
-      
+
       ['OS == "linux"', {
         'link_settings': {
           'libraries': [
