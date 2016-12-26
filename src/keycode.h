@@ -63,6 +63,7 @@ enum _MMKeyCode {
 	K_SPACE = kVK_Space,
 	K_INSERT = K_NOT_A_KEY,
 	K_PRINTSCREEN = K_NOT_A_KEY,
+	K_MENU = K_NOT_A_KEY,
 
 	K_NUMPAD_0 = kVK_ANSI_Keypad0,
 	K_NUMPAD_1 = kVK_ANSI_Keypad1,
@@ -150,6 +151,7 @@ enum _MMKeyCode {
 	K_SPACE = XK_space,
 	K_INSERT = XK_Insert,
 	K_PRINTSCREEN = XK_Print,
+	K_MENU = K_NOT_A_KEY,
 
 	K_NUMPAD_0 = K_NOT_A_KEY,
 	K_NUMPAD_1 = K_NOT_A_KEY,
