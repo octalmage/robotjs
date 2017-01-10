@@ -1,8 +1,9 @@
 {
   "name": "robotjs",
-  "version": "0.4.4",
+  "version": "0.4.5",
   "description": "Node.js Desktop Automation.",
   "main": "index.js",
+  "typings": "index.d.ts",
   "scripts": {
     "test": "node test/all.js",
     "install": "prebuild --install"

@@ -1,7 +1,7 @@
 <p align="center"><img src="https://cldup.com/1ATDf2JMtv.png"></p>
 ========
 
-<p align="center"><a href="https://travis-ci.org/octalmage/robotjs"><img src="https://api.travis-ci.org/octalmage/robotjs.svg?branch=master"></a> <a href="https://ci.appveyor.com/project/octalmage/robotjs"><img src="https://ci.appveyor.com/api/projects/status/qh2eqb37j7ap6x36?svg=true"></a> <a href="https://www.npmjs.com/package/robotjs"><img src="https://img.shields.io/npm/v/robotjs.svg"></a> <a href="https://gitter.im/octalmage/robotjs?utm_source=badge&utm_medium=badge&utm_campaign=pr-badge&utm_content=badge"><img src="https://img.shields.io/badge/gitter-join%20chat-blue.svg"></a> <a href="https://github.com/dthree/wat"><img src="https://img.shields.io/badge/wat-documented-blue.svg"></a></p>
+<p align="center"><a href="https://travis-ci.org/octalmage/robotjs"><img src="https://api.travis-ci.org/octalmage/robotjs.svg?branch=master"></a> <a href="https://ci.appveyor.com/project/octalmage/robotjs"><img src="https://ci.appveyor.com/api/projects/status/qh2eqb37j7ap6x36?svg=true"></a> <a href="https://www.npmjs.com/package/robotjs"><img src="https://img.shields.io/npm/v/robotjs.svg"></a> <a href="https://gitter.im/octalmage/robotjs?utm_source=badge&utm_medium=badge&utm_campaign=pr-badge&utm_content=badge"><img src="https://img.shields.io/badge/gitter-join%20chat-blue.svg"></a> <a href="http://waffle.io/octalmage/robotjs"><img src="https://img.shields.io/waffle/label/octalmage/robotjs/ready.svg?maxAge=3600"></a></p>
 
 > Node.js Desktop Automation. Control the mouse, keyboard, and read the screen.
 
@@ -35,7 +35,7 @@ It's that easy! npm will download one of the prebuilt [binaries](https://github.
 
 You can get npm [here](https://nodejs.org/en/download/) if you don't have it installed.
 
-If you need to build RobotJS, see the [building](#building) section.
+If you need to build RobotJS, see the [building](#building) section. Instructions for [Electron](https://github.com/octalmage/robotjs/wiki/Electron).
 
 ## Examples
 
@@ -44,10 +44,10 @@ If you need to build RobotJS, see the [building](#building) section.
 <p align="center"><img src="https://cldup.com/lugVjjAkEi.gif"></p>
 
 ```JavaScript
-//Move the mouse across the screen as a sine wave.
+// Move the mouse across the screen as a sine wave.
 var robot = require("robotjs");
 
-//Speed up the mouse.
+// Speed up the mouse.
 robot.setMouseDelay(2);
 
 var twoPI = Math.PI * 2.0;
@@ -65,26 +65,26 @@ for (var x = 0; x < width; x++)
 ##### [Keyboard](https://github.com/octalmage/robotjs/wiki/Syntax#keyboard)
 
 ```JavaScript
-//Type "Hello World" then press enter.
+// Type "Hello World" then press enter.
 var robot = require("robotjs");
 
-//Type "Hello World".
+// Type "Hello World".
 robot.typeString("Hello World");
 
-//Press enter. 
+// Press enter.
 robot.keyTap("enter");
 ```
 
 ##### [Screen](https://github.com/octalmage/robotjs/wiki/Syntax#screen)
 
 ```JavaScript
-//Get pixel color under the mouse. 
+// Get pixel color under the mouse.
 var robot = require("robotjs");
 
-//Get mouse position. 
+// Get mouse position.
 var mouse = robot.getMousePos();
 
-//Get pixel color in hex format. 
+// Get pixel color in hex format.
 var hex = robot.getPixelColor(mouse.x, mouse.y);
 console.log("#" + hex + " at x:" + mouse.x + " y:" + mouse.y);
 ```

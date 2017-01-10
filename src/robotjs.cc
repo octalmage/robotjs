@@ -10,6 +10,9 @@
 #include "MMBitmap.h"
 #include "snprintf.h"
 #include "microsleep.h"
+#if defined(USE_X11)
+	#include "xdisplay.h"
+#endif
 
 using namespace v8;
 
@@ -241,9 +244,38 @@ NAN_METHOD(setMouseDelay)
 NAN_METHOD(scrollMouse)
 {
 	if (info.Length() != 2)
-	{
-		return Nan::ThrowError("Invalid number of arguments.");
+  {
+    return Nan::ThrowError("Invalid number of arguments.");
   }
+	Nan::HandleScope scope;
+
+	//Get the values of magnitude and direction from the arguments list.
+  int scrollMagnitude = info[0]->Int32Value();
+  char *s;
+
+  Nan::Utf8String sstr(info[1]);
+  s = *sstr;
+
+  MMMouseWheelDirection scrollDirection;
+
+  if (strcmp(s, "up") == 0)
+  {
+    scrollDirection = DIRECTION_UP;
+  }
+  else if (strcmp(s, "down") == 0)
+  {
+    scrollDirection = DIRECTION_DOWN;
+  }
+  else
+  {
+    return Nan::ThrowError("Invalid scroll direction specified.");
+  }
+
+  scrollMouse(scrollMagnitude, scrollDirection);
+  microsleep(mouseDelay);
+
+  info.GetReturnValue().Set(Nan::New(1));
+	
 	int x = info[0]->Int32Value();
 	int y = info[1]->Int32Value();
 
@@ -258,7 +290,7 @@ NAN_METHOD(scrollMouse)
 | ' // _ \ | | | '_ \ / _ \ / _` | '__/ _` |
 | . \  __/ |_| | |_) | (_) | (_| | | | (_| |
 |_|\_\___|\__, |_.__/ \___/ \__,_|_|  \__,_|
-		  |___/
+          |___/
 */
 struct KeyNames
 {
@@ -293,6 +325,18 @@ static KeyNames key_names[] =
 	{ "f10",            K_F10 },
 	{ "f11",            K_F11 },
 	{ "f12",            K_F12 },
+	{ "f13",            K_F13 },
+	{ "f14",            K_F14 },
+	{ "f15",            K_F15 },
+	{ "f16",            K_F16 },
+	{ "f17",            K_F17 },
+	{ "f18",            K_F18 },
+	{ "f19",            K_F19 },
+	{ "f20",            K_F20 },
+	{ "f21",            K_F21 },
+	{ "f22",            K_F22 },
+	{ "f23",            K_F23 },
+	{ "f24",            K_F24 },
 	{ "command",        K_META },
 	{ "alt",            K_ALT },
 	{ "control",        K_CONTROL },
@@ -654,6 +698,27 @@ NAN_METHOD(getScreenSize)
 	info.GetReturnValue().Set(obj);
 }
 
+NAN_METHOD(getXDisplayName)
+{
+	#if defined(USE_X11)
+	const char* display = getXDisplay();
+	info.GetReturnValue().Set(Nan::New<String>(display).ToLocalChecked());
+	#else
+	Nan::ThrowError("getXDisplayName is only supported on Linux");
+	#endif
+}
+
+NAN_METHOD(setXDisplayName)
+{
+	#if defined(USE_X11)
+	Nan::Utf8String string(info[0]);
+	setXDisplay(*string);
+	info.GetReturnValue().Set(Nan::New(1));
+	#else
+	Nan::ThrowError("setXDisplayName is only supported on Linux");
+	#endif
+}
+
 NAN_METHOD(captureScreen)
 {
 	size_t x;
@@ -706,7 +771,7 @@ NAN_METHOD(captureScreen)
 |  _ \| | __| '_ ` _ \ / _` | '_ \
 | |_) | | |_| | | | | | (_| | |_) |
 |____/|_|\__|_| |_| |_|\__,_| .__/
-						   |_|
+                            |_|
  */
 
 class BMP
@@ -826,6 +891,12 @@ NAN_MODULE_INIT(InitAll)
 
 	Nan::Set(target, Nan::New("getColor").ToLocalChecked(),
 		Nan::GetFunction(Nan::New<FunctionTemplate>(getColor)).ToLocalChecked());
+
+	Nan::Set(target, Nan::New("getXDisplayName").ToLocalChecked(),
+		Nan::GetFunction(Nan::New<FunctionTemplate>(getXDisplayName)).ToLocalChecked());
+
+	Nan::Set(target, Nan::New("setXDisplayName").ToLocalChecked(),
+		Nan::GetFunction(Nan::New<FunctionTemplate>(setXDisplayName)).ToLocalChecked());
 }
 
 NODE_MODULE(robotjs, InitAll)
