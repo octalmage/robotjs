@@ -244,38 +244,38 @@ NAN_METHOD(setMouseDelay)
 NAN_METHOD(scrollMouse)
 {
 	if (info.Length() != 2)
-  {
-    return Nan::ThrowError("Invalid number of arguments.");
-  }
+	{
+    	return Nan::ThrowError("Invalid number of arguments.");
+	}
 	Nan::HandleScope scope;
 
 	//Get the values of magnitude and direction from the arguments list.
-  int scrollMagnitude = info[0]->Int32Value();
-  char *s;
+	int scrollMagnitude = info[0]->Int32Value();
+	char *s;
 
-  Nan::Utf8String sstr(info[1]);
-  s = *sstr;
+	Nan::Utf8String sstr(info[1]);
+	s = *sstr;
 
-  MMMouseWheelDirection scrollDirection;
+	MMMouseWheelDirection scrollDirection;
 
-  if (strcmp(s, "up") == 0)
-  {
-    scrollDirection = DIRECTION_UP;
-  }
-  else if (strcmp(s, "down") == 0)
-  {
-    scrollDirection = DIRECTION_DOWN;
-  }
-  else
-  {
-    return Nan::ThrowError("Invalid scroll direction specified.");
-  }
+	if (strcmp(s, "up") == 0)
+	{
+		scrollDirection = DIRECTION_UP;
+	}
+	else if (strcmp(s, "down") == 0)
+	{
+		scrollDirection = DIRECTION_DOWN;
+	}
+	else
+	{
+		return Nan::ThrowError("Invalid scroll direction specified.");
+	}
 
-  scrollMouse(scrollMagnitude, scrollDirection);
-  microsleep(mouseDelay);
+	scrollMouse(scrollMagnitude, scrollDirection);
+	microsleep(mouseDelay);
 
-  info.GetReturnValue().Set(Nan::New(1));
-	
+	info.GetReturnValue().Set(Nan::New(1));
+  
 	int x = info[0]->Int32Value();
 	int y = info[1]->Int32Value();
 
