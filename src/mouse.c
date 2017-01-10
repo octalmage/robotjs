@@ -252,7 +252,7 @@ void scrollMouse(int x, int y)
 	event = CGEventCreateScrollWheelEvent(NULL, kCGScrollEventUnitPixel, 2, y, x);
 	CGEventPost(kCGHIDEventTap, event);
 
-  CFRelease(event);
+	CFRelease(event);
 
 #elif defined(USE_X11)
 
@@ -267,8 +267,8 @@ void scrollMouse(int x, int y)
 		xdir = 7;
 	}
 
-  int xi;
-  int yi;
+	int xi;
+	int yi;
 	for (xi = 0; xi < abs(x); xi++) {
 		XTestFakeButtonEvent(display, xdir, 1, CurrentTime);
 		XTestFakeButtonEvent(display, xdir, 0, CurrentTime);
