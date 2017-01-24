@@ -335,6 +335,8 @@ static KeyNames key_names[] =
 	{ "command",        K_META },
 	{ "alt",            K_ALT },
 	{ "control",        K_CONTROL },
+	{ "left_control",   K_LEFT_CONTROL },
+	{ "right_control",  K_RIGHT_CONTROL },
 	{ "shift",          K_SHIFT },
 	{ "right_shift",    K_RIGHTSHIFT },
 	{ "space",          K_SPACE },
