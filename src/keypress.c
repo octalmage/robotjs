@@ -227,7 +227,11 @@ static void tapUniKey(char c)
 
 void typeString(const char *str)
 {
-	uint c, c1, c2, c3, n;
+	unsigned long c;
+	unsigned long c1;
+	unsigned long c2;
+	unsigned long c3;
+	unsigned long n;
 
 	while (*str != '\0') {
 		c = *str++;
@@ -254,8 +258,14 @@ void typeString(const char *str)
 			n = ((c & 0x07) << 18) | (c1 << 12) | (c2 << 6) | c3;
 		}
 
+		#if defined(IS_MACOSX)
 		toggleUnicodeKey(n, true);
 		toggleUnicodeKey(n, false);
+		#else
+		toggleUniKey(n, true);
+		toggleUniKey(n, false);
+		#endif
+
 	}
 }
 
