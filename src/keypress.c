@@ -191,7 +191,7 @@ void tapKey(char c, MMKeyFlags flags)
 }
 
 #if defined(IS_MACOSX)
-void toggleUnicodeKey(UniChar ch, const bool down)
+void toggleUnicodeKey(unsigned long ch, const bool down)
 {
 	/* This function relies on the convenient
 	 * CGEventKeyboardSetUnicodeString(), which allows us to not have to
@@ -204,7 +204,17 @@ void toggleUnicodeKey(UniChar ch, const bool down)
 		return;
 	}
 
-	CGEventKeyboardSetUnicodeString(keyEvent, 1, &ch);
+	if (ch > 0xFFFF) {
+		// encode to utf-16 if necessary
+		unsigned short surrogates[] = {
+			0xD800 + ((ch - 0x10000) >> 10),
+			0xDC00 + (ch & 0x3FF)
+		};
+
+		CGEventKeyboardSetUnicodeString(keyEvent, 2, &surrogates);
+	} else {
+		CGEventKeyboardSetUnicodeString(keyEvent, 1, &ch);
+	}
 
 	CGEventPost(kCGSessionEventTap, keyEvent);
 	CFRelease(keyEvent);
@@ -212,8 +222,7 @@ void toggleUnicodeKey(UniChar ch, const bool down)
 
 void toggleUniKey(char c, const bool down)
 {
-	UniChar ch = (UniChar)c; /* Convert to unsigned char */
-	toggleUnicodeKey(ch, down);
+	toggleUnicodeKey(c, down);
 }
 #else
 	#define toggleUniKey(c, down) toggleKey(c, down, MOD_NONE)
@@ -227,10 +236,10 @@ static void tapUniKey(char c)
 
 void typeString(const char *str)
 {
-	unsigned long c;
-	unsigned long c1;
-	unsigned long c2;
-	unsigned long c3;
+	unsigned short c;
+	unsigned short c1;
+	unsigned short c2;
+	unsigned short c3;
 	unsigned long n;
 
 	while (*str != '\0') {
