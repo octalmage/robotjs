@@ -16,7 +16,7 @@ This is a work in progress so the exported functions could change at any time be
 
 - [Installation](#installation)
 - [Examples](#examples)
-- [API](https://github.com/octalmage/robotjs/wiki/Syntax)
+- [API](https://http://robotjs.io/docs/syntax)
 - [Building](#building)
 - [Plans](#plans)
 - [Progress](#progress)
@@ -89,9 +89,9 @@ console.log("#" + hex + " at x:" + mouse.x + " y:" + mouse.y);
 ```
 Read the [Wiki](https://github.com/octalmage/robotjs/wiki) for more information!
 
-## [API](https://github.com/octalmage/robotjs/wiki/Syntax)
+## [API](http://robotjs.io/docs/syntax)
 
-The [RobotJS API](https://github.com/octalmage/robotjs/wiki/Syntax) is contained in the [Wiki](https://github.com/octalmage/robotjs/wiki).
+The RobotJS API is hosted at <https://robotjs.io/docs/syntax>.
 
 ## Building
 
