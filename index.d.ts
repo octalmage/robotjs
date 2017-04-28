@@ -23,7 +23,7 @@ export function moveMouseSmooth(x: number, y: number) : void
 export function mouseClick(button?: string, double?: boolean) : void
 export function mouseToggle(down?: string, button?: string) : void
 export function dragMouse(x: number, y: number) : void
-export function scrollMouse(magnitude: number, direction: string) : void
+export function scrollMouse(x: number, y: number) : void
 export function getMousePos(): { x: number, y: number }
 export function getPixelColor(x: number, y: number): string
 export function getScreenSize(): { width: number, height: number }
