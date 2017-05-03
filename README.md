@@ -16,7 +16,7 @@ This is a work in progress so the exported functions could change at any time be
 
 - [Installation](#installation)
 - [Examples](#examples)
-- [API](https://http://robotjs.io/docs/syntax)
+- [API](https://robotjs.io/docs/syntax)
 - [Building](#building)
 - [Plans](#plans)
 - [Progress](#progress)
