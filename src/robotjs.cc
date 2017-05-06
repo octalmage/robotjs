@@ -99,6 +99,13 @@ NAN_METHOD(moveMouse)
 
 	MMPoint point;
 	point = MMPointMake(x, y);
+
+	//Throw error if point is off-screen.
+	if (!pointVisibleOnMainDisplay(point))
+	{
+		return NanThrowError("Mouse coordinates are out of bounds."); 
+	}
+
 	moveMouse(point);
 	microsleep(mouseDelay);
 
@@ -116,6 +123,13 @@ NAN_METHOD(moveMouseSmooth)
 
 	MMPoint point;
 	point = MMPointMake(x, y);
+
+	//Throw error if point is off-screen.
+	if (!pointVisibleOnMainDisplay(point))
+	{
+		return NanThrowError("Mouse coordinates are out of bounds."); 
+	}
+
 	smoothlyMoveMouse(point);
 	microsleep(mouseDelay);
 
