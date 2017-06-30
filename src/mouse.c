@@ -274,8 +274,8 @@ void scrollMouse(int x, int y)
 		XTestFakeButtonEvent(display, xdir, 0, CurrentTime);
 	}
 	for (yi = 0; yi < abs(y); yi++) {
-		YTestFakeButtonEvent(display, ydir, 1, CurrentTime);
-		YTestFakeButtonEvent(display, ydir, 0, CurrentTime);
+		XTestFakeButtonEvent(display, ydir, 1, CurrentTime);
+		XTestFakeButtonEvent(display, ydir, 0, CurrentTime);
 	}
 
 	XFlush(display);
