@@ -419,11 +419,11 @@ int CheckKeyFlags(char* f, MMKeyFlags* flags)
 	{
 		*flags = MOD_META;
 	}
-	else if(strcmp(f, "control") == 0)
+	else if(strcmp(f, "control") == 0 || strcmp(f, "right_control") == 0 || strcmp(f, "left_control") == 0)
 	{
 		*flags = MOD_CONTROL;
 	}
-	else if(strcmp(f, "shift") == 0)
+	else if(strcmp(f, "shift") == 0 || strcmp(f, "right_shift") == 0)
 	{
 		*flags = MOD_SHIFT;
 	}
