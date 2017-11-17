@@ -191,25 +191,38 @@ void tapKey(char c, MMKeyFlags flags)
 }
 
 #if defined(IS_MACOSX)
-void toggleUniKey(char c, const bool down)
+void toggleUnicodeKey(unsigned long ch, const bool down)
 {
 	/* This function relies on the convenient
 	 * CGEventKeyboardSetUnicodeString(), which allows us to not have to
 	 * convert characters to a keycode, but does not support adding modifier
 	 * flags. It is therefore only used in typeString() and typeStringDelayed()
 	 * -- if you need modifier keys, use the above functions instead. */
-	UniChar ch = (UniChar)c; /* Convert to unsigned char */
-
 	CGEventRef keyEvent = CGEventCreateKeyboardEvent(NULL, 0, down);
 	if (keyEvent == NULL) {
 		fputs("Could not create keyboard event.\n", stderr);
 		return;
 	}
 
-	CGEventKeyboardSetUnicodeString(keyEvent, 1, &ch);
+	if (ch > 0xFFFF) {
+		// encode to utf-16 if necessary
+		unsigned short surrogates[] = {
+			0xD800 + ((ch - 0x10000) >> 10),
+			0xDC00 + (ch & 0x3FF)
+		};
+
+		CGEventKeyboardSetUnicodeString(keyEvent, 2, &surrogates);
+	} else {
+		CGEventKeyboardSetUnicodeString(keyEvent, 1, &ch);
+	}
 
 	CGEventPost(kCGSessionEventTap, keyEvent);
 	CFRelease(keyEvent);
+}
+
+void toggleUniKey(char c, const bool down)
+{
+	toggleUnicodeKey(c, down);
 }
 #else
 	#define toggleUniKey(c, down) toggleKey(c, down, MOD_NONE)
@@ -223,8 +236,45 @@ static void tapUniKey(char c)
 
 void typeString(const char *str)
 {
+	unsigned short c;
+	unsigned short c1;
+	unsigned short c2;
+	unsigned short c3;
+	unsigned long n;
+
 	while (*str != '\0') {
-		tapUniKey(*str++);
+		c = *str++;
+
+		// warning, the following utf8 decoder
+		// doesn't perform validation
+		if (c <= 0x7F) {
+			// 0xxxxxxx one byte
+			n = c;
+		} else if ((c & 0xE0) == 0xC0)  {
+			// 110xxxxx two bytes
+			c1 = (*str++) & 0x3F;
+			n = ((c & 0x1F) << 6) | c1;
+		} else if ((c & 0xF0) == 0xE0) {
+			// 1110xxxx three bytes
+			c1 = (*str++) & 0x3F;
+			c2 = (*str++) & 0x3F;
+			n = ((c & 0x0F) << 12) | (c1 << 6) | c2;
+		} else if ((c & 0xF8) == 0xF0) {
+			// 11110xxx four bytes
+			c1 = (*str++) & 0x3F;
+			c2 = (*str++) & 0x3F;
+			c3 = (*str++) & 0x3F;
+			n = ((c & 0x07) << 18) | (c1 << 12) | (c2 << 6) | c3;
+		}
+
+		#if defined(IS_MACOSX)
+		toggleUnicodeKey(n, true);
+		toggleUnicodeKey(n, false);
+		#else
+		toggleUniKey(n, true);
+		toggleUniKey(n, false);
+		#endif
+
 	}
 }
 
