@@ -234,13 +234,13 @@ static void tapUniKey(char c)
 	toggleUniKey(c, false);
 }
 
-void typeString(const char *str)
+static void typeStringWithDelay(const char *str, const double mspcDelay)
 {
+	unsigned long n;
 	unsigned short c;
 	unsigned short c1;
 	unsigned short c2;
 	unsigned short c3;
-	unsigned long n;
 
 	while (*str != '\0') {
 		c = *str++;
@@ -271,11 +271,18 @@ void typeString(const char *str)
 		toggleUnicodeKey(n, true);
 		toggleUnicodeKey(n, false);
 		#else
-		toggleUniKey(n, true);
-		toggleUniKey(n, false);
+		tapUniKey(n);
 		#endif
 
+		if (mspcDelay > 0) {
+			microsleep(mspcDelay + (DEADBEEF_UNIFORM(0.0, 62.5)));
+		}
 	}
+}
+
+void typeString(const char *str)
+{
+	typeStringWithDelay(str, 0);
 }
 
 void typeStringDelayed(const char *str, const unsigned cpm)
@@ -286,8 +293,5 @@ void typeStringDelayed(const char *str, const unsigned cpm)
 	/* Average milli-seconds per character */
 	const double mspc = (cps == 0.0) ? 0.0 : 1000.0 / cps;
 
-	while (*str != '\0') {
-		tapUniKey(*str++);
-		microsleep(mspc + (DEADBEEF_UNIFORM(0.0, 62.5)));
-	}
+	typeStringWithDelay(str, mspc);
 }
