@@ -225,7 +225,6 @@ void unicodeTap(const unsigned value)
 		ip.type = INPUT_KEYBOARD;
 		ip.ki.wVk = 0; // Virtual-key code
 		ip.ki.wScan = value; // Hardware scan code for key
-		// ip.ki.wScan = 0x03B1;
 		ip.ki.time = 0; // System will provide its own time stamp.
 		ip.ki.dwExtraInfo = 0; // No extra info. Use the GetMessageExtraInfo function to obtain this information if needed.
 		ip.ki.dwFlags = KEYEVENTF_UNICODE; // KEYEVENTF_KEYUP for key release.
