@@ -66,6 +66,9 @@ void tapKeyCode(MMKeyCode code, MMKeyFlags flags);
 void toggleKey(char c, const bool down, MMKeyFlags flags);
 void tapKey(char c, MMKeyFlags flags);
 
+/* Sends a UTF-32 character without modifiers. */
+void tapUtf32(const unsigned utf32dec);
+
 /* Sends a UTF-8 string without modifiers. */
 void typeString(const char *str);
 
