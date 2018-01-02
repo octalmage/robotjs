@@ -211,10 +211,10 @@ void toggleUnicode(UniChar ch, const bool down)
 }
 #endif
 
-void tapUtf32(const unsigned utf32dec)
+void unicodeTap(const unsigned value)
 {
 	#if defined(IS_MACOSX)
-		UniChar ch = (UniChar)utf32dec; // Convert to unsigned char
+		UniChar ch = (UniChar)value; // Convert to unsigned char
 
 		toggleUnicode(ch, true);
 		toggleUnicode(ch, false);
@@ -224,7 +224,7 @@ void tapUtf32(const unsigned utf32dec)
 		// Set up a generic keyboard event.
 		ip.type = INPUT_KEYBOARD;
 		ip.ki.wVk = 0; // Virtual-key code
-		ip.ki.wScan = utf32dec; // Hardware scan code for key
+		ip.ki.wScan = value; // Hardware scan code for key
 		// ip.ki.wScan = 0x03B1;
 		ip.ki.time = 0; // System will provide its own time stamp.
 		ip.ki.dwExtraInfo = 0; // No extra info. Use the GetMessageExtraInfo function to obtain this information if needed.
@@ -273,7 +273,7 @@ void typeStringDelayed(const char *str, const unsigned cpm)
 			n = ((c & 0x07) << 18) | (c1 << 12) | (c2 << 6) | c3;
 		}
 
-		tapUtf32(n);
+		unicodeTap(n);
 
 		if (mspc > 0) {
 			microsleep(mspc + (DEADBEEF_UNIFORM(0.0, 62.5)));

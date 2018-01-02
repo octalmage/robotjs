@@ -567,12 +567,12 @@ NAN_METHOD(keyToggle)
 	info.GetReturnValue().Set(Nan::New(1));
 }
 
-NAN_METHOD(utf32Tap)
+NAN_METHOD(unicodeTap)
 {
-	size_t utf32dec = info[0]->Int32Value();
+	size_t value = info[0]->Int32Value();
 
-	if (utf32dec != 0) {
-		tapUtf32(utf32dec);
+	if (value != 0) {
+		unicodeTap(value);
 
 		info.GetReturnValue().Set(Nan::New(1));
 	} else {
@@ -865,8 +865,8 @@ NAN_MODULE_INIT(InitAll)
 	Nan::Set(target, Nan::New("keyToggle").ToLocalChecked(),
 		Nan::GetFunction(Nan::New<FunctionTemplate>(keyToggle)).ToLocalChecked());
 
-	Nan::Set(target, Nan::New("utf32Tap").ToLocalChecked(),
-		Nan::GetFunction(Nan::New<FunctionTemplate>(utf32Tap)).ToLocalChecked());
+	Nan::Set(target, Nan::New("unicodeTap").ToLocalChecked(),
+		Nan::GetFunction(Nan::New<FunctionTemplate>(unicodeTap)).ToLocalChecked());
 
 	Nan::Set(target, Nan::New("typeString").ToLocalChecked(),
 		Nan::GetFunction(Nan::New<FunctionTemplate>(typeString)).ToLocalChecked());

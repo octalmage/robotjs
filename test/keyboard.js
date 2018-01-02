@@ -59,19 +59,19 @@ test('Tap all numpad keys.', function(t)
 	t.end();
 });
 
-test('Tap a UTF32 character.', function(t)
+test('Tap a Unicode character.', function(t)
 {
 	t.plan(7);
-	t.ok(robot.utf32Tap("r".charCodeAt(0)) === 1, 'successfully tapped "r".');
-	t.ok(robot.utf32Tap("ά".charCodeAt(0)) === 1, 'successfully tapped "ά".');
-	t.ok(robot.utf32Tap("ö".charCodeAt(0)) === 1, 'successfully tapped "ö".');
-	t.ok(robot.utf32Tap("ち".charCodeAt(0)) === 1, 'successfully tapped "ち".');
-	t.ok(robot.utf32Tap("嗨".charCodeAt(0)) === 1, 'successfully tapped "嗨".');
-	t.ok(robot.utf32Tap("ఝ".charCodeAt(0)) === 1, 'successfully tapped "ఝ".');
+	t.ok(robot.unicodeTap("r".charCodeAt(0)) === 1, 'successfully tapped "r".');
+	t.ok(robot.unicodeTap("ά".charCodeAt(0)) === 1, 'successfully tapped "ά".');
+	t.ok(robot.unicodeTap("ö".charCodeAt(0)) === 1, 'successfully tapped "ö".');
+	t.ok(robot.unicodeTap("ち".charCodeAt(0)) === 1, 'successfully tapped "ち".');
+	t.ok(robot.unicodeTap("嗨".charCodeAt(0)) === 1, 'successfully tapped "嗨".');
+	t.ok(robot.unicodeTap("ఝ".charCodeAt(0)) === 1, 'successfully tapped "ఝ".');
 
 	t.throws(function()
 	{
-		robot.utf32Tap();
+		robot.unicodeTap();
 	}, /Invalid character typed./, 'tap nothing.');
 });
 
