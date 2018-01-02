@@ -582,28 +582,36 @@ NAN_METHOD(utf32Tap)
 
 NAN_METHOD(typeString)
 {
-	char *str;
-	Nan::Utf8String string(info[0]);
+	if (info.Length() > 0) {
+		char *str;
+		Nan::Utf8String string(info[0]);
 
-	str = *string;
+		str = *string;
 
-	typeString(str);
+		typeStringDelayed(str, 0);
 
-	info.GetReturnValue().Set(Nan::New(1));
+		info.GetReturnValue().Set(Nan::New(1));
+	} else {
+		return Nan::ThrowError("Invalid number of arguments.");
+	}
 }
 
 NAN_METHOD(typeStringDelayed)
 {
-	char *str;
-	Nan::Utf8String string(info[0]);
+	if (info.Length() > 0) {
+		char *str;
+		Nan::Utf8String string(info[0]);
 
-	str = *string;
+		str = *string;
 
-	size_t cpm = info[1]->Int32Value();
+		size_t cpm = info[1]->Int32Value();
 
-	typeStringDelayed(str, cpm);
+		typeStringDelayed(str, cpm);
 
-	info.GetReturnValue().Set(Nan::New(1));
+		info.GetReturnValue().Set(Nan::New(1));
+	} else {
+		return Nan::ThrowError("Invalid number of arguments.");
+	}
 }
 
 NAN_METHOD(setKeyboardDelay)

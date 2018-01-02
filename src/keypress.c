@@ -191,40 +191,12 @@ void tapKey(char c, MMKeyFlags flags)
 }
 
 #if defined(IS_MACOSX)
-void toggleUnicodeKey(unsigned long ch, const bool down)
+void toggleUnicode(UniChar ch, const bool down)
 {
 	/* This function relies on the convenient
 	 * CGEventKeyboardSetUnicodeString(), which allows us to not have to
 	 * convert characters to a keycode, but does not support adding modifier
-	 * flags. It is therefore only used in typeString() and typeStringDelayed()
-	 * -- if you need modifier keys, use the above functions instead. */
-	CGEventRef keyEvent = CGEventCreateKeyboardEvent(NULL, 0, down);
-	if (keyEvent == NULL) {
-		fputs("Could not create keyboard event.\n", stderr);
-		return;
-	}
-
-	if (ch > 0xFFFF) {
-		// encode to utf-16 if necessary
-		unsigned short surrogates[] = {
-			0xD800 + ((ch - 0x10000) >> 10),
-			0xDC00 + (ch & 0x3FF)
-		};
-
-		CGEventKeyboardSetUnicodeString(keyEvent, 2, &surrogates);
-	} else {
-		CGEventKeyboardSetUnicodeString(keyEvent, 1, &ch);
-	}
-
-	CGEventPost(kCGSessionEventTap, keyEvent);
-	CFRelease(keyEvent);
-}
-void toggleUniChar(UniChar ch, const bool down)
-{
-	/* This function relies on the convenient
-	 * CGEventKeyboardSetUnicodeString(), which allows us to not have to
-	 * convert characters to a keycode, but does not support adding modifier
-	 * flags. It is therefore only used in typeString() and typeStringDelayed()
+	 * flags. It is therefore only used in typeStringDelayed()
 	 * -- if you need modifier keys, use the above functions instead. */
 	CGEventRef keyEvent = CGEventCreateKeyboardEvent(NULL, 0, down);
 	if (keyEvent == NULL) {
@@ -237,14 +209,6 @@ void toggleUniChar(UniChar ch, const bool down)
 	CGEventPost(kCGSessionEventTap, keyEvent);
 	CFRelease(keyEvent);
 }
-void toggleUniKey(char c, const bool down)
-{
-	UniChar ch = (UniChar)c; // Convert to unsigned char
-
-	toggleUniChar(ch, down);
-}
-#else
-	#define toggleUniKey(c, down) toggleKey(c, down, MOD_NONE)
 #endif
 
 void tapUtf32(const unsigned utf32dec)
@@ -252,8 +216,8 @@ void tapUtf32(const unsigned utf32dec)
 	#if defined(IS_MACOSX)
 		UniChar ch = (UniChar)utf32dec; // Convert to unsigned char
 
-		toggleUniChar(ch, true);
-		toggleUniChar(ch, false);
+		toggleUnicode(ch, true);
+		toggleUnicode(ch, false);
 	#elif defined(IS_WINDOWS)
 		INPUT ip;
 
@@ -270,19 +234,19 @@ void tapUtf32(const unsigned utf32dec)
 	#endif
 }
 
-static void tapUniKey(char c)
+void typeStringDelayed(const char *str, const unsigned cpm)
 {
-	toggleUniKey(c, true);
-	toggleUniKey(c, false);
-}
-
-void typeString(const char *str)
-{
+	unsigned long n;
 	unsigned short c;
 	unsigned short c1;
 	unsigned short c2;
 	unsigned short c3;
-	unsigned long n;
+
+	/* Characters per second */
+	const double cps = (double)cpm / 60.0;
+
+	/* Average milli-seconds per character */
+	const double mspc = (cps == 0.0) ? 0.0 : 1000.0 / cps;
 
 	while (*str != '\0') {
 		c = *str++;
@@ -309,27 +273,10 @@ void typeString(const char *str)
 			n = ((c & 0x07) << 18) | (c1 << 12) | (c2 << 6) | c3;
 		}
 
-		#if defined(IS_MACOSX)
-		toggleUnicodeKey(n, true);
-		toggleUnicodeKey(n, false);
-		#else
-		toggleUniKey(n, true);
-		toggleUniKey(n, false);
-		#endif
+		tapUtf32(n);
 
-	}
-}
-
-void typeStringDelayed(const char *str, const unsigned cpm)
-{
-	/* Characters per second */
-	const double cps = (double)cpm / 60.0;
-
-	/* Average milli-seconds per character */
-	const double mspc = (cps == 0.0) ? 0.0 : 1000.0 / cps;
-
-	while (*str != '\0') {
-		tapUniKey(*str++);
-		microsleep(mspc + (DEADBEEF_UNIFORM(0.0, 62.5)));
+		if (mspc > 0) {
+			microsleep(mspc + (DEADBEEF_UNIFORM(0.0, 62.5)));
+		}
 	}
 }
