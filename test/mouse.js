@@ -61,7 +61,7 @@ test('Move the mouse smoothly.', function(t)
 
 test('Click the mouse.', function(t) 
 {
-	t.plan(8);
+	t.plan(11);
 	t.ok(robot.mouseClick(), 'click the mouse (no button specified).');
 	t.ok(robot.mouseClick("left") === 1, 'click the left mouse button.');
 	t.ok(robot.mouseClick("middle") === 1, 'click the middle mouse button.');
@@ -78,10 +78,21 @@ test('Click the mouse.', function(t)
 	{
 		robot.mouseClick("0");
 	}, /Invalid mouse/, 'click an incorrect mouse button (0).');
-	
+
+	var modifiers = []
+	modifiers.push('shift')
+	modifiers.push('control')
+	t.ok(robot.mouseClick("left", 0, modifiers), 'Successfully clicked the left mouse button while Ctrl+Shift were pressed down.');
+	t.ok(robot.mouseClick("left", 0, modifiers), 'Successfully clicked the left mouse button while Ctrl+Shift were pressed down.');
+
 	t.throws(function()
 	{
 		robot.mouseClick("left", 0, "test");
+	}, /Invalid key flag specified./, 'click the mouse with wrong modifier argument.');
+
+	t.throws(function()
+	{
+		robot.mouseClick("left", 0, modifiers, "test");
 	}, /Invalid number/, 'click the mouse with an extra argument.');
 	
 });
@@ -106,7 +117,7 @@ test('Drag the mouse.', function(t)
 	{
 		robot.dragMouse(2, 2, "party");
 	}, /Invalid mouse/, 'drag an incorrect mouse button (party).');
-	
+
 });
 
 //TODO: Need tests for mouseToggle, and scrollMouse. 
