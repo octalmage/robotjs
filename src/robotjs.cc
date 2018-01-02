@@ -550,7 +550,7 @@ NAN_METHOD(keyToggle)
 		}
 	}
 
-	//Get the acutal key.
+	//Get the actual key.
 	switch(CheckKeyCodes(k, &key))
 	{
 		case -1:
@@ -561,10 +561,23 @@ NAN_METHOD(keyToggle)
 			break;
 		default:
 			toggleKeyCode(key, down, flags);
-			  microsleep(keyboardDelay);
+			microsleep(keyboardDelay);
 	}
 
 	info.GetReturnValue().Set(Nan::New(1));
+}
+
+NAN_METHOD(utf32Tap)
+{
+	size_t utf32dec = info[0]->Int32Value();
+
+	if (utf32dec != 0) {
+		tapUtf32(utf32dec);
+
+		info.GetReturnValue().Set(Nan::New(1));
+	} else {
+		return Nan::ThrowError("Invalid character typed.");
+	}
 }
 
 NAN_METHOD(typeString)
@@ -843,6 +856,9 @@ NAN_MODULE_INIT(InitAll)
 
 	Nan::Set(target, Nan::New("keyToggle").ToLocalChecked(),
 		Nan::GetFunction(Nan::New<FunctionTemplate>(keyToggle)).ToLocalChecked());
+
+	Nan::Set(target, Nan::New("utf32Tap").ToLocalChecked(),
+		Nan::GetFunction(Nan::New<FunctionTemplate>(utf32Tap)).ToLocalChecked());
 
 	Nan::Set(target, Nan::New("typeString").ToLocalChecked(),
 		Nan::GetFunction(Nan::New<FunctionTemplate>(typeString)).ToLocalChecked());

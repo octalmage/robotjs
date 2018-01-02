@@ -6,7 +6,9 @@
   "typings": "index.d.ts",
   "scripts": {
     "test": "node test/all.js",
-    "install": "prebuild-install || node-gyp rebuild"
+    "test-keyboard": "node test/keyboard.js",
+    "install": "prebuild-install || node-gyp rebuild",
+    "install-debug": "prebuild-install || node-gyp rebuild --debug"
   },
   "repository": {
     "type": "git",
@@ -37,11 +39,11 @@
   },
   "homepage": "https://github.com/octalmage/robotjs",
   "dependencies": {
-    "nan": "^2.2.1",
-    "prebuild-install": "^2.1.1"
+    "nan": "^2.8.0",
+    "prebuild-install": "^2.4.1"
   },
   "devDependencies": {
-    "tape": "^3.5.0",
-    "prebuild": "v6.1.0"
+    "tape": "^4.8.0",
+    "prebuild": "v7.0.0"
   }
 }

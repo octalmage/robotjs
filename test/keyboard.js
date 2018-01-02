@@ -6,8 +6,9 @@ var os = require('os');
 
 test('Tap a key.', function(t)
 {
-	t.plan(4);
+	t.plan(5);
 	t.ok(robot.keyTap("a") === 1, 'successfully tapped "a".');
+	t.ok(robot.keyTap("control") === 1, 'successfully tapped "ctrl".');
 	t.ok(robot.keyTap("a", "control") === 1, 'successfully tapped "ctrl+a".');
 
 	t.throws(function()
@@ -56,4 +57,19 @@ test('Tap all numpad keys.', function(t)
 	}
 
 	t.end();
+});
+
+test('Tap a UTF32 character.', function(t)
+{
+	t.plan(6);
+	t.ok(robot.utf32Tap("r".charCodeAt(0)) === 1, 'successfully tapped "r".');
+	t.ok(robot.utf32Tap("ά".charCodeAt(0)) === 1, 'successfully tapped "ά".');
+	t.ok(robot.utf32Tap("ö".charCodeAt(0)) === 1, 'successfully tapped "ö".');
+	t.ok(robot.utf32Tap("ち".charCodeAt(0)) === 1, 'successfully tapped "ち".');
+	t.ok(robot.utf32Tap("嗨".charCodeAt(0)) === 1, 'successfully tapped "嗨".');
+
+	t.throws(function()
+	{
+		robot.utf32Tap();
+	}, /Invalid character typed./, 'tap nothing.');
 });

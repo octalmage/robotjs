@@ -219,14 +219,56 @@ void toggleUnicodeKey(unsigned long ch, const bool down)
 	CGEventPost(kCGSessionEventTap, keyEvent);
 	CFRelease(keyEvent);
 }
+void toggleUniChar(UniChar ch, const bool down)
+{
+	/* This function relies on the convenient
+	 * CGEventKeyboardSetUnicodeString(), which allows us to not have to
+	 * convert characters to a keycode, but does not support adding modifier
+	 * flags. It is therefore only used in typeString() and typeStringDelayed()
+	 * -- if you need modifier keys, use the above functions instead. */
+	CGEventRef keyEvent = CGEventCreateKeyboardEvent(NULL, 0, down);
+	if (keyEvent == NULL) {
+		fputs("Could not create keyboard event.\n", stderr);
+		return;
+	}
 
+	CGEventKeyboardSetUnicodeString(keyEvent, 1, &ch);
+
+	CGEventPost(kCGSessionEventTap, keyEvent);
+	CFRelease(keyEvent);
+}
 void toggleUniKey(char c, const bool down)
 {
-	toggleUnicodeKey(c, down);
+	UniChar ch = (UniChar)c; // Convert to unsigned char
+
+	toggleUniChar(ch, down);
 }
 #else
 	#define toggleUniKey(c, down) toggleKey(c, down, MOD_NONE)
 #endif
+
+void tapUtf32(const unsigned utf32dec)
+{
+	#if defined(IS_MACOSX)
+		UniChar ch = (UniChar)utf32dec; // Convert to unsigned char
+
+		toggleUniChar(ch, true);
+		toggleUniChar(ch, false);
+	#elif defined(IS_WINDOWS)
+		INPUT ip;
+
+		// Set up a generic keyboard event.
+		ip.type = INPUT_KEYBOARD;
+		ip.ki.wVk = 0; // Virtual-key code
+		ip.ki.wScan = utf32dec; // Hardware scan code for key
+		// ip.ki.wScan = 0x03B1;
+		ip.ki.time = 0; // System will provide its own time stamp.
+		ip.ki.dwExtraInfo = 0; // No extra info. Use the GetMessageExtraInfo function to obtain this information if needed.
+		ip.ki.dwFlags = KEYEVENTF_UNICODE; // KEYEVENTF_KEYUP for key release.
+
+		SendInput(1, &ip, sizeof(INPUT));
+	#endif
+}
 
 static void tapUniKey(char c)
 {
