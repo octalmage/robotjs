@@ -6,7 +6,7 @@ var elements;
 
 robot.setMouseDelay(100);
 
-test('Test clicking.', { timeout: 2000 }, function(t)
+test('Test clicking.', { timeout: 10000 }, function(t)
 {
 	t.plan(2);
 
@@ -38,7 +38,7 @@ test('Test clicking.', { timeout: 2000 }, function(t)
 	});
 });
 
-test('Test typing.', { timeout: 5000 }, function(t)
+test('Test typing.', { timeout: 10000 }, function(t)
 {
 	t.plan(2);
 
@@ -66,7 +66,7 @@ test('Test typing.', { timeout: 5000 }, function(t)
 	});
 });
 
-test('Test scrolling.', { timeout: 5000 }, function(t)
+test('Test scrolling.', { timeout: 10000 }, function(t)
 {
 	t.plan(2);
 
