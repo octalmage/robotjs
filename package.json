@@ -5,7 +5,9 @@
   "main": "index.js",
   "typings": "index.d.ts",
   "scripts": {
-    "test": "node test/all.js",
+    "test": "npm run test:unit && npm run test:integration",
+    "test:unit": "node test/all.js",
+    "test:integration": "node test/integration/mouse.js",
     "install": "prebuild-install || node-gyp rebuild"
   },
   "repository": {
@@ -41,7 +43,8 @@
     "prebuild-install": "^2.1.1"
   },
   "devDependencies": {
+    "prebuild": "v6.1.0",
     "tape": "^3.5.0",
-    "prebuild": "v6.1.0"
+    "targetpractice": "0.0.4"
   }
 }
