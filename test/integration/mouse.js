@@ -84,6 +84,7 @@ test('Test scrolling.', { timeout: 10000 }, function(t)
 	target.on('scroll', function(element)
 	{
 		// On Linux the textarea scrolls more aggressively.
+		// TODO: I couldn't find a way to make scrolling more accurate on Linux.
 		const expectedScroll = os.platform() === 'linux' ? 180 : 10;
 		t.equal(element.id, 'textarea_1', 'Confirm textarea_1 was used.');
 		t.equal(element.scroll_y, expectedScroll, 'Confirm scroll to 10.');
