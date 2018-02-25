@@ -37,7 +37,7 @@ describe('Integration/Mouse', () => {
 		robot.mouseClick();
 	});
 
-	it('scrolls', done => {
+	it('scrolls vertically', done => {
 		target.once('scroll', element => {
 			/**
 			 *  TODO: This is gross! The scroll distance is different for each OS. I want
@@ -63,5 +63,33 @@ describe('Integration/Mouse', () => {
 		robot.moveMouse(textarea_1.x, textarea_1.y);
 		robot.mouseClick();
 		robot.scrollMouse(0, -10);
+	});
+
+	it('scrolls horizontally', done => {
+		target.once('scroll', element => {
+			/**
+			 *  TODO: This is gross! The scroll distance is different for each OS. I want
+			 *  to look into this further, but at least these numbers are consistent.
+			 */
+			var expectedScroll;
+			switch(os.platform()) {
+				case 'linux':
+					expectedScroll = 530;
+					break;
+				case 'win32':
+					expectedScroll = 8;
+					break;
+				default:
+					expectedScroll = 10;
+			}
+			expect(element.id).toEqual('textarea_1');
+			expect(element.scroll_x).toEqual(expectedScroll);
+			done();
+		});
+
+		var textarea_1 = elements.textarea_1;
+		robot.moveMouse(textarea_1.x, textarea_1.y);
+		robot.mouseClick();
+		robot.scrollMouse(-10, 0);
 	});
 });
