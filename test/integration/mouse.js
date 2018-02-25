@@ -15,7 +15,7 @@ test('Test clicking.', { timeout: 10000 }, function(t)
 	var target = targetpractice.start();
 
 	// Wait for the list of elements.
-	target.on('elements', function(elements)
+	target.once('elements', function(elements)
 	{
 		// For this test we want a button.
 		var button_1 = elements.button_1;
@@ -26,14 +26,14 @@ test('Test clicking.', { timeout: 10000 }, function(t)
 	});
 
 	// Alright we got a click event, did we click the button we wanted?
-	target.on('click', function(e)
+	target.once('click', function(e)
 	{
 		t.equal(e.id, "button_1", 'Confirm button_1 was clicked.');
 		t.equal(e.type, "click", 'Confirm event was a click.');
 	});
 
 	// Close the UI.
-	t.on("end", function()
+	t.once('end', function()
 	{
 		targetpractice.stop();
 	});
@@ -55,13 +55,13 @@ test('Test typing.', { timeout: 10000 }, function(t)
 	});
 
 	// Currently Target Practice waits for the "user" to finish typing before sending the event.
-	target.on('type', function(element)
+	target.once('type', function(element)
 	{
 		t.equal(element.id, "input_1", 'Confirm input_1 was used.');
 		t.equal(element.text, stringToType, `Confirm that ${stringToType} was typed.`);
 	});
 
-	t.on("end", function()
+	t.once('end', function()
 	{
 		targetpractice.stop();
 	});
@@ -73,7 +73,7 @@ test('Test scrolling.', { timeout: 10000 }, function(t)
 
 	var target = targetpractice.start();
 
-	target.on('elements', function(elements)
+	target.once('elements', function(elements)
 	{
 		var textarea_1 = elements.textarea_1;
 		robot.moveMouse(textarea_1.x, textarea_1.y);
@@ -81,16 +81,28 @@ test('Test scrolling.', { timeout: 10000 }, function(t)
 		robot.scrollMouse(0, -10);
 	});
 
-	target.on('scroll', function(element)
+	target.once('scroll', function(element)
 	{
-		// On Linux the textarea scrolls more aggressively.
-		// TODO: I couldn't find a way to make scrolling more accurate on Linux.
-		const expectedScroll = os.platform() === 'linux' ? 180 : 10;
+		/**
+		 *  TODO: This is gross! The scroll distance is different for each OS. I want
+		 *  to look into this further, but at least these numbers are consistent.
+		 */
+		let expectedScroll;
+		switch(os.platform()) {
+			case 'linux':
+				expectedScroll = 180;
+				break;
+			case 'win32':
+				expectedScroll = 8;
+				break;
+			default:
+				expectedScroll = 10;
+		}
 		t.equal(element.id, 'textarea_1', 'Confirm textarea_1 was used.');
 		t.equal(element.scroll_y, expectedScroll, 'Confirm scroll to 10.');
 	});
 
-	t.on('end', function()
+	t.once('end', function()
 	{
 		targetpractice.stop();
 	});
