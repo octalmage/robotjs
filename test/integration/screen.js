@@ -1,5 +1,4 @@
 /* jshint esversion: 6 */
-var test = require('tape');
 var robot = require('../..');
 var targetpractice = require('targetpractice/index.js');
 let elements, target;
