@@ -109,5 +109,23 @@ test('Drag the mouse.', function(t)
 	
 });
 
-//TODO: Need tests for mouseToggle, and scrollMouse. 
+test('Mouse scroll.', function(t)
+{
+	t.plan(9);
+	t.ok(lastKnownPos = robot.getMousePos(), 'successfully retrieved mouse position.');
+	t.ok(robot.mouseClick() === 1, 'click the mouse (no button specified).');
+	t.ok(robot.scrollMouse(0, 1 * 120) === 1, '1 scroll up.');
+	t.ok(robot.scrollMouse(0, 20 * 120) === 1, '20 scrolls up.');
+	t.ok(robot.scrollMouse(0, -5 * 120) === 1, '5 scrolls down.');
+	t.ok(robot.scrollMouse(1 * 120, 0) === 1, '1 scroll right.');
+	t.ok(robot.scrollMouse(20 * 120, 0) === 1, '20 scrolls right.');
+	t.ok(robot.scrollMouse(-5 * 120, 0) === 1, '5 scrolls left.');
+	t.ok(robot.scrollMouse(-5 * 120, -5 * 120) === 1, '5 scrolls left.');
+});
 
+test('Mouse Toggle', function(t)
+{
+	t.plan(2);
+	t.ok(lastKnownPos = robot.getMousePos(), 'successfully retrieved mouse position.');
+	t.ok(robot.mouseToggle('up', 'right') === 1, 'right click was pressed.');
+});
