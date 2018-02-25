@@ -37,21 +37,6 @@ describe('Integration/Mouse', () => {
 		robot.mouseClick();
 	});
 
-	it('types', done => {
-		const stringToType = 'hello world';
-		// Currently Target Practice waits for the "user" to finish typing before sending the event.
-		target.once('type', element => {
-			expect(element.id).toEqual('input_1');
-			expect(element.text).toEqual(stringToType);
-			done();
-		});
-
-		const input_1 = elements.input_1;
-		robot.moveMouse(input_1.x, input_1.y);
-		robot.mouseClick();
-		robot.typeString(stringToType);
-	});
-
 	it('scrolls', done => {
 		target.once('scroll', element => {
 			/**
