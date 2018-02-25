@@ -6,7 +6,7 @@ var elements;
 
 robot.setMouseDelay(100);
 
-test('Test clicking.', { timeout: 10000 }, function(t)
+test('Test Screen.', { timeout: 10000 }, function(t)
 {
 	t.plan(1);
 
