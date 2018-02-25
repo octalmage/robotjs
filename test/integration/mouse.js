@@ -2,6 +2,7 @@
 var test = require('tape');
 var robot = require('../..');
 var targetpractice = require('targetpractice/index.js');
+var os = require('os');
 var elements;
 
 robot.setMouseDelay(100);
@@ -82,8 +83,10 @@ test('Test scrolling.', { timeout: 10000 }, function(t)
 
 	target.on('scroll', function(element)
 	{
+		// On Linux the textarea scrolls more aggressively.
+		const expectedScroll = os.platform() === 'linux' ? 180 : 10;
 		t.equal(element.id, 'textarea_1', 'Confirm textarea_1 was used.');
-		t.equal(element.scroll_y, 10, 'Confirm scroll to 10.');
+		t.equal(element.scroll_y, expectedScroll, 'Confirm scroll to 10.');
 	});
 
 	t.on('end', function()
