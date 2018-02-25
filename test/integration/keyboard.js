@@ -5,7 +5,7 @@ var os = require('os');
 
 robot.setMouseDelay(100);
 
-let target, elements;
+var target, elements;
 
 describe('Integration/Keyboard', () => {
 	beforeEach(done => {

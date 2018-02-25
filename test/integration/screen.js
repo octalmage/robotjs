@@ -1,7 +1,7 @@
 /* jshint esversion: 6 */
 var robot = require('../..');
 var targetpractice = require('targetpractice/index.js');
-let elements, target;
+var elements, target;
 
 describe('Integration/Screen', () => {
 	beforeEach(done => {

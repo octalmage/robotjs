@@ -5,7 +5,7 @@ var os = require('os');
 
 robot.setMouseDelay(100);
 
-let target, elements;
+var target, elements;
 
 describe('Integration/Mouse', () => {
 	beforeEach(done => {
@@ -43,7 +43,7 @@ describe('Integration/Mouse', () => {
 			 *  TODO: This is gross! The scroll distance is different for each OS. I want
 			 *  to look into this further, but at least these numbers are consistent.
 			 */
-			let expectedScroll;
+			var expectedScroll;
 			switch(os.platform()) {
 				case 'linux':
 					expectedScroll = 180;
