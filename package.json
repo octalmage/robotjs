@@ -45,6 +45,6 @@
   "devDependencies": {
     "prebuild": "v6.1.0",
     "tape": "^3.5.0",
-    "targetpractice": "0.0.6"
+    "targetpractice": "0.0.7"
   }
 }
