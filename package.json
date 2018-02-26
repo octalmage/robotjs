@@ -5,7 +5,9 @@
   "main": "index.js",
   "typings": "index.d.ts",
   "scripts": {
-    "test": "node test/all.js",
+    "test": "run-script-os",
+    "test:darwin:linux": "jasmine 'test/**/*.js'",
+    "test:win32": "jasmine test/**/*.js",
     "install": "prebuild-install || node-gyp rebuild"
   },
   "repository": {
@@ -41,7 +43,9 @@
     "prebuild-install": "^2.1.1"
   },
   "devDependencies": {
-    "tape": "^3.5.0",
-    "prebuild": "v6.1.0"
+    "jasmine": "^2.99.0",
+    "prebuild": "v6.1.0",
+    "run-script-os": "^1.0.3",
+    "targetpractice": "0.0.7"
   }
 }

@@ -247,7 +247,7 @@ NAN_METHOD(scrollMouse)
 	{
     	return Nan::ThrowError("Invalid number of arguments.");
 	}
-	
+
 	int x = info[0]->Int32Value();
 	int y = info[1]->Int32Value();
 
