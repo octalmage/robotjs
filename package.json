@@ -1,6 +1,6 @@
 {
   "name": "robotjs",
-  "version": "0.4.7",
+  "version": "0.4.8",
   "description": "Node.js Desktop Automation.",
   "main": "index.js",
   "typings": "index.d.ts",
@@ -8,7 +8,8 @@
     "test": "run-script-os",
     "test:darwin:linux": "jasmine 'test/**/*.js'",
     "test:win32": "jasmine test/**/*.js",
-    "install": "prebuild-install || node-gyp rebuild"
+    "install": "prebuild-install || node-gyp rebuild",
+    "deploy": "prebuild --all -u"
   },
   "repository": {
     "type": "git",
@@ -44,7 +45,7 @@
   },
   "devDependencies": {
     "jasmine": "^2.99.0",
-    "prebuild": "v6.1.0",
+    "prebuild": "^7.4.0",
     "run-script-os": "^1.0.3",
     "targetpractice": "0.0.7"
   }
