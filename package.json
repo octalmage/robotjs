@@ -9,7 +9,7 @@
     "test:darwin:linux": "jasmine 'test/**/*.js'",
     "test:win32": "jasmine test/**/*.js",
     "install": "prebuild-install || node-gyp rebuild",
-    "deploy": "prebuild --all -u"
+    "prebuild": "prebuild --all"
   },
   "repository": {
     "type": "git",

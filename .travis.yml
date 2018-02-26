@@ -51,8 +51,7 @@ script:
 
 after_success:
   - if [ $TRAVIS_BRANCH == "master" ]; then echo upload=$GITHUB_TOKEN > ~/.prebuildrc; fi
-  - if [ $TRAVIS_BRANCH == "master" ]; then cat ~/.prebuildrc; fi
-  - if [ $TRAVIS_BRANCH == "master" ]; then npm run deploy; fi
+  - if [ $TRAVIS_BRANCH == "master" ]; then npm run prebuild; fi
 
 notifications:
   webhooks:
