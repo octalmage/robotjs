@@ -1,7 +1,7 @@
 var robot = require('..');
 var os = require('os');
 
-//TODO: Need its for keyToggle, typeString, typeStringDelayed, and setKeyboardDelay.
+// TODO: Need tests for keyToggle, typeString, typeStringDelayed, and setKeyboardDelay.
 
 describe('Keyboard', () => {
   it('Tap a key.', function() {
