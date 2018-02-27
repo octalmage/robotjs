@@ -27,6 +27,7 @@ test_script:
   # run tests
   - npm test
 
-build: off
+build:
+  - npm run prebuild -- -u %GITHUB_TOKEN%
 
 version: "{build}"
