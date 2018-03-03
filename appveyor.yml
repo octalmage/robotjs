@@ -32,7 +32,7 @@ test_script:
   - npm test
 
 on_success:
-  - IF defined "%APPVEYOR_REPO_TAG%" npm run prebuild -- -u %GITHUB_TOKEN%
+  - IF defined APPVEYOR_REPO_TAG npm run prebuild -- -u %GITHUB_TOKEN%
 
 build: off
 version: "{build}"
