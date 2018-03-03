@@ -22,7 +22,7 @@
 		(XTestFakeKeyEvent(display, \
 		                   XKeysymToKeycode(display, key), \
 		                   is_press, CurrentTime), \
-		 XFlush(display))
+		 XSync(display, false))
 	#define X_KEY_EVENT_WAIT(display, key, is_press) \
 		(X_KEY_EVENT(display, key, is_press), \
 		 microsleep(DEADBEEF_UNIFORM(0.0, 62.5)))
@@ -162,25 +162,25 @@ void tapKeyCode(MMKeyCode code, MMKeyFlags flags)
 }
 
 void toggleKey(char c, const bool down, MMKeyFlags flags)
-{	
+{
 	MMKeyCode keyCode = keyCodeForChar(c);
-	
+
 	//Prevent unused variable warning for Mac and Linux.
 #if defined(IS_WINDOWS)
 	int modifiers;
-#endif	
-	
+#endif
+
 	if (isupper(c) && !(flags & MOD_SHIFT)) {
 		flags |= MOD_SHIFT; /* Not sure if this is safe for all layouts. */
 	}
-	
+
 #if defined(IS_WINDOWS)
 	modifiers = keyCode >> 8; // Pull out modifers.
 	if ((modifiers & 1) != 0) flags |= MOD_SHIFT; // Uptdate flags from keycode modifiers.
     if ((modifiers & 2) != 0) flags |= MOD_CONTROL;
     if ((modifiers & 4) != 0) flags |= MOD_ALT;
     keyCode = keyCode & 0xff; // Mask out modifiers.
-#endif	
+#endif
 	toggleKeyCode(keyCode, down, flags);
 }
 
