@@ -32,7 +32,7 @@ test_script:
   - npm test
 
 on_success:
-  - IF "%APPVEYOR_PULL_REQUEST_NUMBER%" EQU "" npm run prebuild -- -u %GITHUB_TOKEN%
+  - IF "%APPVEYOR_REPO_TAG%" NEQ "" npm run prebuild -- -u %GITHUB_TOKEN%
 
 build: off
 version: "{build}"
