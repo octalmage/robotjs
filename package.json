@@ -1,6 +1,6 @@
 {
   "name": "robotjs",
-  "version": "0.4.8",
+  "version": "0.5.0",
   "description": "Node.js Desktop Automation.",
   "main": "index.js",
   "typings": "index.d.ts",
