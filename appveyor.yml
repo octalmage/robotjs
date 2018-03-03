@@ -4,12 +4,14 @@
 environment:
   matrix:
   # node.js
-    - nodejs_version: "0.10"
-    - nodejs_version: "0.12"
     - nodejs_version: "4"
     - nodejs_version: "5"
     - nodejs_version: "6"
     - nodejs_version: "Stable"
+
+platform:
+  - x86
+  - x64
 
 # Install scripts. (runs after repo cloning)
 install:
@@ -29,6 +31,8 @@ test_script:
   # run tests
   - npm test
 
-build: off
+on_success:
+  - IF "%APPVEYOR_PULL_REQUEST_NUMBER%" EQU "" npm run prebuild -- -u %GITHUB_TOKEN%
 
+build: off
 version: "{build}"
