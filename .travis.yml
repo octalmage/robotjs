@@ -50,7 +50,7 @@ script:
   - npm test
 
 after_success:
-  - if [ $TRAVIS_TAG != "" ]; then npm run prebuild -- -u $GITHUB_TOKEN; fi
+  - if [[ $TRAVIS_TAG != "" ]]; then npm run prebuild -- -u $GITHUB_TOKEN; fi
 
 notifications:
   webhooks:
