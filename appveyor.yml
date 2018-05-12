@@ -19,10 +19,10 @@ install:
   - ps: Install-Product node $env:nodejs_version
   - IF %nodejs_version% EQU 0.8 npm -g install npm@2
   - IF %nodejs_version% EQU 0.8 set PATH=%APPDATA%\npm;%PATH%
-  - npm -g install npm
+  - npm -g install npm@latest
   - IF %nodejs_version% NEQ 0.8 set PATH=%APPDATA%\npm;%PATH%
   # Typical npm stuff.
-  - npm install
+  - npm ci
 
 test_script:
   # Output useful info for debugging.
