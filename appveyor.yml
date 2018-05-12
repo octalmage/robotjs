@@ -9,6 +9,9 @@ environment:
     - nodejs_version: "6"
     - nodejs_version: "Stable"
 
+cache:
+  - node_modules
+
 platform:
   - x86
   - x64

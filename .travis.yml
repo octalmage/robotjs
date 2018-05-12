@@ -5,6 +5,10 @@ os:
   - linux
   - osx
 
+cache:
+  directories:
+    - node_modules
+
 env:
   matrix:
   - TRAVIS_NODE_VERSION="4"
