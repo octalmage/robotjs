@@ -5,6 +5,9 @@ os:
   - linux
   - osx
 
+git:
+  depth: 5
+
 env:
   matrix:
   - TRAVIS_NODE_VERSION="4"

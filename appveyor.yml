@@ -9,6 +9,8 @@ environment:
     - nodejs_version: "6"
     - nodejs_version: "Stable"
 
+clone_depth: 5
+
 platform:
   - x86
   - x64
