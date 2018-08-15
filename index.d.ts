@@ -18,6 +18,7 @@ export function keyToggle(key: string, down: string, modifier?: string | string[
 export function typeString(string: string) : void
 export function typeStringDelayed(string: string, cpm: number) : void
 export function setMouseDelay(delay: number) : void
+export function updateScreenMetrics() : void
 export function moveMouse(x: number, y: number) : void
 export function moveMouseSmooth(x: number, y: number) : void
 export function mouseClick(button?: string, double?: boolean) : void

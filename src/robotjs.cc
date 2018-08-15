@@ -88,6 +88,13 @@ NAN_METHOD(dragMouse)
 	info.GetReturnValue().Set(Nan::New(1));
 }
 
+NAN_METHOD(updateScreenMetrics)
+{
+	updateScreenMetrics();
+
+	info.GetReturnValue().Set(Nan::New(1));
+}
+
 NAN_METHOD(moveMouse)
 {
 	if (info.Length() != 2)
@@ -816,6 +823,9 @@ NAN_MODULE_INIT(InitAll)
 {
 	Nan::Set(target, Nan::New("dragMouse").ToLocalChecked(),
 		Nan::GetFunction(Nan::New<FunctionTemplate>(dragMouse)).ToLocalChecked());
+
+	Nan::Set(target, Nan::New("updateScreenMetrics").ToLocalChecked(),
+		Nan::GetFunction(Nan::New<FunctionTemplate>(updateScreenMetrics)).ToLocalChecked());
 
 	Nan::Set(target, Nan::New("moveMouse").ToLocalChecked(),
 		Nan::GetFunction(Nan::New<FunctionTemplate>(moveMouse)).ToLocalChecked());

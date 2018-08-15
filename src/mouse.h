@@ -57,6 +57,12 @@ enum __MMMouseWheelDirection
 };
 typedef int MMMouseWheelDirection;
 
+/* Updates information about current virtual screen size and coordinates
+ * in Windows
+ * It is up to the caller to ensure that this called before mouse moving
+*/
+void updateScreenMetrics();
+
 /* Immediately moves the mouse to the given point on-screen.
  * It is up to the caller to ensure that this point is within the
  * screen boundaries. */
