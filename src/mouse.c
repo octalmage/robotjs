@@ -41,18 +41,11 @@
 
 #elif defined(IS_WINDOWS)
 
-#define MMMouseToMEventF(down, button) \
-	(down ? MMMouseDownToMEventF(button) : MMMouseUpToMEventF(button))
+#define MMMouseDownToSendInputFlag(button) \
+	((button) == (LEFT_BUTTON) ? MOUSEEVENTF_LEFTDOWN : MOUSEEVENTF_RIGHTDOWN)
 
-#define MMMouseUpToMEventF(button) \
-	((button) == LEFT_BUTTON ? MOUSEEVENTF_LEFTUP \
-	                         : ((button) == RIGHT_BUTTON ? MOUSEEVENTF_RIGHTUP \
-	                                                     : MOUSEEVENTF_MIDDLEUP))
-
-#define MMMouseDownToMEventF(button) \
-	((button) == LEFT_BUTTON ? MOUSEEVENTF_LEFTDOWN \
-	                         : ((button) == RIGHT_BUTTON ? MOUSEEVENTF_RIGHTDOWN \
-	                                                     : MOUSEEVENTF_MIDDLEDOWN))
+#define MMMouseUpToSendInputFlag(button) \
+	((button) == (LEFT_BUTTON) ? MOUSEEVENTF_LEFTUP : MOUSEEVENTF_RIGHTUP)
 
 #endif
 
