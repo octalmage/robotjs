@@ -206,14 +206,14 @@ void toggleUnicodeKey(unsigned long ch, const bool down)
 
 	if (ch > 0xFFFF) {
 		// encode to utf-16 if necessary
-		unsigned short surrogates[] = {
+		UniChar surrogates[2] = {
 			0xD800 + ((ch - 0x10000) >> 10),
 			0xDC00 + (ch & 0x3FF)
 		};
 
-		CGEventKeyboardSetUnicodeString(keyEvent, 2, &surrogates);
+		CGEventKeyboardSetUnicodeString(keyEvent, 2, (UniChar*) &surrogates);
 	} else {
-		CGEventKeyboardSetUnicodeString(keyEvent, 1, &ch);
+		CGEventKeyboardSetUnicodeString(keyEvent, 1, (UniChar*) &ch);
 	}
 
 	CGEventPost(kCGSessionEventTap, keyEvent);

@@ -9,11 +9,12 @@ cache:
   directories:
     - node_modules
 
+git:
+  depth: 5
+
 env:
   matrix:
-  - TRAVIS_NODE_VERSION="4"
-  - TRAVIS_NODE_VERSION="5"
-  - TRAVIS_NODE_VERSION="6"
+  - TRAVIS_NODE_VERSION="8"
   - TRAVIS_NODE_VERSION="stable"
 
 addons:
