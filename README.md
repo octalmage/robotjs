@@ -117,6 +117,7 @@ npm install -g node-gyp
 Then build:
 
 ```
+cd ./node_modules/robotjs
 node-gyp rebuild
 ```
 
