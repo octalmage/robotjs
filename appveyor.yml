@@ -4,25 +4,21 @@
 environment:
   matrix:
   # node.js
-    - nodejs_version: "0.8"
-    - nodejs_version: "0.10"
-    - nodejs_version: "0" #Latest 0.x.x build.
-    - nodejs_version: "3" #Latest io.js build.
-    - nodejs_version: "4.2.4" #LTS
+    - nodejs_version: "8"
     - nodejs_version: "Stable"
 
-matrix:
-  allow_failures:
-    - nodejs_version: "0.8" #Allow Node.js 0.8.x to fail.
-    
+clone_depth: 5
+
+platform:
+  - x86
+  - x64
+
 # Install scripts. (runs after repo cloning)
 install:
   # Get the latest stable version of Node 0.STABLE.latest
   - ps: Install-Product node $env:nodejs_version
-  - IF %nodejs_version% EQU 0.8 npm -g install npm@2
-  - IF %nodejs_version% EQU 0.8 set PATH=%APPDATA%\npm;%PATH%
   - npm -g install npm
-  - IF %nodejs_version% NEQ 0.8 set PATH=%APPDATA%\npm;%PATH%
+  - set PATH=%APPDATA%\npm;%PATH%
   # Typical npm stuff.
   - npm install
 
@@ -33,6 +29,8 @@ test_script:
   # run tests
   - npm test
 
-build: off
+on_success:
+  - IF defined APPVEYOR_REPO_TAG_NAME npm run prebuild -- -u %GITHUB_TOKEN%
 
+build: off
 version: "{build}"

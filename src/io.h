@@ -6,6 +6,10 @@
 #include <stddef.h>
 #include <stdint.h>
 
+#ifdef __cplusplus
+extern "C" 
+{
+#endif
 
 enum _MMImageType {
 	kInvalidImageType = 0,
@@ -42,5 +46,10 @@ int saveMMBitmapToFile(MMBitmapRef bitmap, const char *path, MMImageType type);
 /* Returns description of given error code.
  * Returned string is constant and hence should not be freed. */
 const char *MMIOErrorString(MMImageType type, MMIOError error);
+
+#ifdef __cplusplus
+}
+#endif
+
 
 #endif /* IO_H */
