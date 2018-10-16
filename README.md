@@ -98,7 +98,7 @@ The RobotJS API is hosted at <https://robotjs.io/docs/syntax>.
 Please ensure you have the required dependencies before installing:
 
 * Windows
-  * windows-build-tools npm package (`npm install --global --production windows-build-tools`)
+  * windows-build-tools npm package (`npm install --global --production windows-build-tools` from an elevated PowerShell or CMD.exe)
 * Mac
   * Xcode Command Line Tools.
 * Linux
