@@ -98,8 +98,7 @@ The RobotJS API is hosted at <https://robotjs.io/docs/syntax>.
 Please ensure you have the required dependencies before installing:
 
 * Windows
-  * Visual Studio 2013 (Express works fine).
-  * Python (v2.7.3 recommended, v3.x.x is not supported).
+  * windows-build-tools npm package (`npm install --global --production windows-build-tools`)
 * Mac
   * Xcode Command Line Tools.
 * Linux
