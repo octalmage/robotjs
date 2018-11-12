@@ -76,7 +76,7 @@ void typeString(const char *str);
 /* Sends a string with partially random delays between each letter. Note that
  * deadbeef_srand() must be called before this function if you actually want
  * randomness. */
-void typeStringDelayed(const char *str, const unsigned cpm);
+double typeStringDelayed(const char *str, const unsigned cpm);
 
 #ifdef __cplusplus
 }

@@ -116,10 +116,11 @@ NAN_METHOD(moveMouseSmooth)
 
 	MMPoint point;
 	point = MMPointMake(x, y);
-	smoothlyMoveMouse(point);
+	double processTime = smoothlyMoveMouse(point);
 	microsleep(mouseDelay);
+	processTime += mouseDelay;
 
-	info.GetReturnValue().Set(Nan::New(1));
+	info.GetReturnValue().Set(Nan::New(processTime));
 }
 
 NAN_METHOD(getMousePos)
@@ -588,9 +589,9 @@ NAN_METHOD(typeStringDelayed)
 
 	size_t cpm = info[1]->Int32Value();
 
-	typeStringDelayed(str, cpm);
+	double processTime = typeStringDelayed(str, cpm);
 
-	info.GetReturnValue().Set(Nan::New(1));
+	info.GetReturnValue().Set(Nan::New(processTime));
 }
 
 NAN_METHOD(setKeyboardDelay)

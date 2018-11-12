@@ -37,7 +37,7 @@ describe('Mouse', () => {
   it('Move the mouse smoothly.', function()
   {
     lastKnownPos = robot.moveMouseSmooth(0, 0);
-    expect(robot.moveMouseSmooth(100, 100) === 1).toBeTruthy();
+    expect(robot.moveMouseSmooth(100, 100) >= 1).toBeTruthy();
     currentPos = robot.getMousePos();
     expect(currentPos.x).toEqual(100);
     expect(currentPos.y).toEqual(100);
@@ -52,7 +52,7 @@ describe('Mouse', () => {
       robot.moveMouseSmooth(0);
     }).toThrowError(/Invalid number/);
 
-    expect(robot.moveMouseSmooth("0", "0") === 1).toBeTruthy();
+    expect(robot.moveMouseSmooth("0", "0") >= 1).toBeTruthy();
 
   });
 

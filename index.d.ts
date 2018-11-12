@@ -16,10 +16,10 @@ export function setKeyboardDelay(ms: number) : void
 export function keyTap(key: string, modifier?: string | string[]) : void
 export function keyToggle(key: string, down: string, modifier?: string | string[]) : void
 export function typeString(string: string) : void
-export function typeStringDelayed(string: string, cpm: number) : void
+export function typeStringDelayed(string: string, cpm: number) : number
 export function setMouseDelay(delay: number) : void
 export function moveMouse(x: number, y: number) : void
-export function moveMouseSmooth(x: number, y: number) : void
+export function moveMouseSmooth(x: number, y: number) : number
 export function mouseClick(button?: string, double?: boolean) : void
 export function mouseToggle(down?: string, button?: string) : void
 export function dragMouse(x: number, y: number) : void

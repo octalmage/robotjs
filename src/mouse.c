@@ -340,12 +340,13 @@ static double crude_hypot(double x, double y)
 	return ((M_SQRT2 - 1.0) * small) + big;
 }
 
-bool smoothlyMoveMouse(MMPoint endPoint)
+double smoothlyMoveMouse(MMPoint endPoint) // URIEL
 {
 	MMPoint pos = getMousePos();
 	MMSize screenSize = getMainDisplaySize();
 	double velo_x = 0.0, velo_y = 0.0;
 	double distance;
+	double processTime = 0; // URIEL
 
 	while ((distance = crude_hypot((double)pos.x - endPoint.x,
 	                               (double)pos.y - endPoint.y)) > 1.0) {
@@ -359,8 +360,8 @@ bool smoothlyMoveMouse(MMPoint endPoint)
 		velo_x /= veloDistance;
 		velo_y /= veloDistance;
 
-		pos.x += floor(velo_x + 0.5);
-		pos.y += floor(velo_y + 0.5);
+		pos.x += (size_t)floor(velo_x + 0.5);
+		pos.y += (size_t)floor(velo_y + 0.5);
 
 		/* Make sure we are in the screen boundaries!
 		 * (Strange things will happen if we are not.) */
@@ -371,8 +372,9 @@ bool smoothlyMoveMouse(MMPoint endPoint)
 		moveMouse(pos);
 
 		/* Wait 1 - 3 milliseconds. */
-		microsleep(DEADBEEF_UNIFORM(1.0, 3.0));
+		double sleep = DEADBEEF_UNIFORM(1.0, 3.0); // URIEL
+		microsleep(sleep); // URIEL
+		processTime += sleep; // URIEL
 	}
-
-	return true;
+	return processTime;
 }

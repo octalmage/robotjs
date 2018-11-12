@@ -278,16 +278,19 @@ void typeString(const char *str)
 	}
 }
 
-void typeStringDelayed(const char *str, const unsigned cpm)
+double typeStringDelayed(const char *str, const unsigned cpm)
 {
 	/* Characters per second */
 	const double cps = (double)cpm / 60.0;
 
 	/* Average milli-seconds per character */
 	const double mspc = (cps == 0.0) ? 0.0 : 1000.0 / cps;
-
+	double processTime = 0;
 	while (*str != '\0') {
 		tapUniKey(*str++);
-		microsleep(mspc + (DEADBEEF_UNIFORM(0.0, 62.5)));
+		double sleep = mspc + (DEADBEEF_UNIFORM(0.0, 62.5));
+		microsleep(sleep);
+		processTime += sleep;
 	}
+	return processTime;
 }
