@@ -124,11 +124,11 @@ See the [node-gyp readme](https://github.com/nodejs/node-gyp#installation) for m
 
 ## Plans
 
-* √ Control the mouse by changing the mouse position, left/right clicking, and dragging.
-* √ Control the keyboard by pressing keys, holding keys down, and typing words.
-* √ Read pixel color from the screen and capture the screen.
-* Find an image on screen, read pixels from an image.
-* Possibly include window management?
+- [x] Control the mouse by changing the mouse position, left/right clicking, and dragging.
+- [x] Control the keyboard by pressing keys, holding keys down, and typing words.
+- [x] Read pixel color from the screen and capture the screen.
+- [ ] Find an image on screen, read pixels from an image.
+- [ ] Possibly include window management?
 
 ## Progress
 
