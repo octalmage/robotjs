@@ -118,7 +118,6 @@ void moveMouse(MMPoint point)
 	mouseInput.mi.dwExtraInfo = 0;
 	mouseInput.mi.mouseData = 0;
 	SendInput(1, &mouseInput, sizeof(mouseInput));
-
 #endif
 }
 
