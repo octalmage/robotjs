@@ -345,7 +345,7 @@ static double crude_hypot(double x, double y)
 	return ((M_SQRT2 - 1.0) * small) + big;
 }
 
-bool smoothlyMoveMouse(MMPoint endPoint)
+bool smoothlyMoveMouse(MMPoint endPoint,double speed)
 {
 	MMPoint pos = getMousePos();
 	MMSize screenSize = getMainDisplaySize();
@@ -375,8 +375,8 @@ bool smoothlyMoveMouse(MMPoint endPoint)
 
 		moveMouse(pos);
 
-		/* Wait 1 - 3 milliseconds. */
-		microsleep(DEADBEEF_UNIFORM(1.0, 3.0));
+		/* Wait 1 - (speed) milliseconds. */
+		microsleep(DEADBEEF_UNIFORM(0.7, speed));
 	}
 
 	return true;

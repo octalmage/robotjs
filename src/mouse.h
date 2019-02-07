@@ -11,7 +11,7 @@
 	#include <stdbool.h>
 #endif
 #ifdef __cplusplus
-extern "C" 
+extern "C"
 {
 #endif
 #if defined(IS_MACOSX)
@@ -49,7 +49,7 @@ extern "C"
 #define MMMouseButtonIsValid(button) \
 	(button == LEFT_BUTTON || button == RIGHT_BUTTON || \
 	 button == CENTER_BUTTON)
-	 
+
 enum __MMMouseWheelDirection
 {
 	DIRECTION_DOWN 	= -1,
@@ -73,7 +73,7 @@ void dragMouse(MMPoint point, const MMMouseButton button);
  *
  * Returns false if unsuccessful (i.e. a point was hit that is outside of the
  * screen boundaries), or true if successful. */
-bool smoothlyMoveMouse(MMPoint point);
+bool smoothlyMoveMouse(MMPoint point,double speed);
 
 /* Returns the coordinates of the mouse on the current screen. */
 MMPoint getMousePos(void);
@@ -88,7 +88,7 @@ void clickMouse(MMMouseButton button);
 /* Double clicks the mouse with the given button. */
 void doubleClick(MMMouseButton button);
 
-/* Scrolls the mouse in the stated direction. 
+/* Scrolls the mouse in the stated direction.
  * TODO: Add a smoothly scroll mouse next. */
 void scrollMouse(int x, int y);
 

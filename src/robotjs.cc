@@ -107,16 +107,23 @@ NAN_METHOD(moveMouse)
 
 NAN_METHOD(moveMouseSmooth)
 {
-	if (info.Length() != 2)
+	if (info.Length() > 3 || info.Length() < 2 )
 	{
 		return Nan::ThrowError("Invalid number of arguments.");
 	}
 	size_t x = info[0]->Int32Value();
 	size_t y = info[1]->Int32Value();
-
 	MMPoint point;
 	point = MMPointMake(x, y);
-	smoothlyMoveMouse(point);
+	if (info.Length() == 3)
+	{
+		size_t speed = info[2]->Int32Value();
+		smoothlyMoveMouse(point, speed);
+	}
+	else
+	{
+		smoothlyMoveMouse(point, 3.0);
+	}
 	microsleep(mouseDelay);
 
 	info.GetReturnValue().Set(Nan::New(1));
