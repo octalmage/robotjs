@@ -392,9 +392,9 @@ bool smoothlyMoveMouseLinear(MMPoint endPoint, double steps, double delay)
 	//divide by number of steps
 	slope.x = slope.x / steps;
     slope.y = slope.y / steps;	
-
+    int i=0;
     // Move the mouse to each iterative point.
-    for (int i = 0; i < steps; i++)
+    for (i = 0; i < steps; i++)
     {
     	iter.x=iter.x+slope.x;
     	iter.y=iter.y+slope.y;
