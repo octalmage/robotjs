@@ -118,6 +118,7 @@ void moveMouse(MMPoint point)
 	mouseInput.mi.dwExtraInfo = 0;
 	mouseInput.mi.mouseData = 0;
 	SendInput(1, &mouseInput, sizeof(mouseInput));
+
 #endif
 }
 
@@ -185,15 +186,7 @@ void toggleMouse(bool down, MMMouseButton button)
 	XTestFakeButtonEvent(display, button, down ? True : False, CurrentTime);
 	XSync(display, false);
 #elif defined(IS_WINDOWS)
-	INPUT mouseInput;
-	mouseInput.type = INPUT_MOUSE;
-	mouseInput.mi.dx = 0;
-	mouseInput.mi.dy = 0;
-	mouseInput.mi.dwFlags = MMMouseToMEventF(down, button);
-	mouseInput.mi.time = 0; //System will provide the timestamp
-	mouseInput.mi.dwExtraInfo = 0;
-	mouseInput.mi.mouseData = 0;
-	SendInput(1, &mouseInput, sizeof(mouseInput));
+	mouse_event(MMMouseToMEventF(down, button), 0, 0, 0, 0);
 #endif
 }
 
@@ -244,7 +237,8 @@ void scrollMouse(int x, int y)
 #if defined(IS_WINDOWS)
 	// Fix for #97 https://github.com/octalmage/robotjs/issues/97,
 	// C89 needs variables declared on top of functions (mouseScrollInput)
-	INPUT mouseScrollInputs[2];
+	INPUT mouseScrollInputH;
+	INPUT mouseScrollInputV;
 #endif
 
   /* Direction should only be considered based on the scrollDirection. This
@@ -300,24 +294,25 @@ void scrollMouse(int x, int y)
 
 #elif defined(IS_WINDOWS)
 
-	mouseScrollInputs[0].type = INPUT_MOUSE;
-	mouseScrollInputs[0].mi.dx = 0;
-	mouseScrollInputs[0].mi.dy = 0;
-	mouseScrollInputs[0].mi.dwFlags = MOUSEEVENTF_HWHEEL;
-	mouseScrollInputs[0].mi.time = 0;
-	mouseScrollInputs[0].mi.dwExtraInfo = 0;
+	mouseScrollInputH.type = INPUT_MOUSE;
+	mouseScrollInputH.mi.dx = 0;
+	mouseScrollInputH.mi.dy = 0;
+	mouseScrollInputH.mi.dwFlags = MOUSEEVENTF_HWHEEL;
+	mouseScrollInputH.mi.time = 0;
+	mouseScrollInputH.mi.dwExtraInfo = 0;
 	// Flip x to match other platforms.
-	mouseScrollInputs[0].mi.mouseData = -x;
+	mouseScrollInputH.mi.mouseData = -x;
 
-	mouseScrollInputs[1].type = INPUT_MOUSE;
-	mouseScrollInputs[1].mi.dx = 0;
-	mouseScrollInputs[1].mi.dy = 0;
-	mouseScrollInputs[1].mi.dwFlags = MOUSEEVENTF_WHEEL;
-	mouseScrollInputs[1].mi.time = 0;
-	mouseScrollInputs[1].mi.dwExtraInfo = 0;
-	mouseScrollInputs[1].mi.mouseData = y;
+	mouseScrollInputV.type = INPUT_MOUSE;
+	mouseScrollInputV.mi.dx = 0;
+	mouseScrollInputV.mi.dy = 0;
+	mouseScrollInputV.mi.dwFlags = MOUSEEVENTF_WHEEL;
+	mouseScrollInputV.mi.time = 0;
+	mouseScrollInputV.mi.dwExtraInfo = 0;
+	mouseScrollInputV.mi.mouseData = y;
 
-	SendInput(2, mouseScrollInputs, sizeof(mouseScrollInputs));
+	SendInput(1, &mouseScrollInputH, sizeof(mouseScrollInputH));
+	SendInput(1, &mouseScrollInputV, sizeof(mouseScrollInputV));
 #endif
 }
 
@@ -379,5 +374,34 @@ bool smoothlyMoveMouse(MMPoint endPoint)
 		microsleep(DEADBEEF_UNIFORM(1.0, 3.0));
 	}
 
+	return true;
+}
+
+bool smoothlyMoveMouseLinear(MMPoint endPoint, double steps, double delay)
+{
+
+	MMPoint pos = getMousePos();
+	MMPoint iter = pos;
+	MMSize screenSize = getMainDisplaySize();
+	double velo_x = 0.0, velo_y = 0.0;
+	double distance;
+	MMPoint slope;
+	//get slope of straight line between two points
+	slope.x=endPoint.x-pos.x; 
+	slope.y=endPoint.y-pos.y;
+	//divide by number of steps
+	slope.x = slope.x / steps;
+    slope.y = slope.y / steps;	
+
+    // Move the mouse to each iterative point.
+    for (int i = 0; i < steps; i++)
+    {
+    	iter.x=iter.x+slope.x;
+    	iter.y=iter.y+slope.y;
+        moveMouse(iter);
+        microsleep(delay);        
+    }
+
+    moveMouse(endPoint);
 	return true;
 }

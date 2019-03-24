@@ -122,6 +122,25 @@ NAN_METHOD(moveMouseSmooth)
 	info.GetReturnValue().Set(Nan::New(1));
 }
 
+NAN_METHOD(moveMouseSmoothLinear)
+{
+	if (info.Length() != 4)
+	{
+		return Nan::ThrowError("Invalid number of arguments.");
+	}
+	size_t x = info[0]->Int32Value();
+	size_t y = info[1]->Int32Value();
+	size_t steps = info[2]->Int32Value();
+	size_t delay = info[3]->Int32Value();
+
+	MMPoint point;
+	point = MMPointMake(x, y);
+	smoothlyMoveMouseLinear(point, steps, delay);	
+
+	info.GetReturnValue().Set(Nan::New(1));
+}
+
+
 NAN_METHOD(getMousePos)
 {
 	MMPoint pos = getMousePos();
@@ -415,23 +434,23 @@ int CheckKeyFlags(char* f, MMKeyFlags* flags)
 	return 0;
 }
 
-int GetFlagsFromString(v8::Local<v8::Value> value, MMKeyFlags* flags)
+int GetFlagsFromString(v8::Handle<v8::Value> value, MMKeyFlags* flags)
 {
 	v8::String::Utf8Value fstr(value->ToString());
 	return CheckKeyFlags(*fstr, flags);
 }
 
-int GetFlagsFromValue(v8::Local<v8::Value> value, MMKeyFlags* flags)
+int GetFlagsFromValue(v8::Handle<v8::Value> value, MMKeyFlags* flags)
 {
 	if (!flags) return -1;
 
 	//Optionally allow an array of flag strings to be passed.
 	if (value->IsArray())
 	{
-		v8::Local<v8::Array> a = v8::Local<v8::Array>::Cast(value);
+		v8::Handle<v8::Array> a = v8::Handle<v8::Array>::Cast(value);
 		for (uint32_t i = 0; i < a->Length(); i++)
 		{
-			v8::Local<v8::Value> v(a->Get(i));
+			v8::Handle<v8::Value> v(a->Get(i));
 			if (!v->IsString()) return -2;
 
 			MMKeyFlags f = MOD_NONE;
@@ -822,6 +841,8 @@ NAN_MODULE_INIT(InitAll)
 
 	Nan::Set(target, Nan::New("moveMouseSmooth").ToLocalChecked(),
 		Nan::GetFunction(Nan::New<FunctionTemplate>(moveMouseSmooth)).ToLocalChecked());
+	Nan::Set(target, Nan::New("moveMouseSmoothLinear").ToLocalChecked(),
+		Nan::GetFunction(Nan::New<FunctionTemplate>(moveMouseSmoothLinear)).ToLocalChecked());
 
 	Nan::Set(target, Nan::New("getMousePos").ToLocalChecked(),
 		Nan::GetFunction(Nan::New<FunctionTemplate>(getMousePos)).ToLocalChecked());

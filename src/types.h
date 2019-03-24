@@ -9,8 +9,8 @@
 /* Some generic, cross-platform types. */
 
 struct _MMPoint {
-	size_t x;
-	size_t y;
+	int x;
+	int y;
 };
 
 typedef struct _MMPoint MMPoint;
