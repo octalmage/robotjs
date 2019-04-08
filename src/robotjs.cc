@@ -28,7 +28,9 @@ int keyboardDelay = 10;
 |_|  |_|\___/ \__,_|___/\___|
 
 */
-
+/**
+ * parse mousebutton "left" | "right" | "middle"
+ */
 int CheckMouseButton(const char * const b, MMMouseButton * const button)
 {
 	if (!button) return -1;
@@ -52,7 +54,9 @@ int CheckMouseButton(const char * const b, MMMouseButton * const button)
 
 	return 0;
 }
-
+/**
+ * Node function dragMouse(x: number, y: number) : void
+ */
 NAN_METHOD(dragMouse)
 {
 	if (info.Length() < 2 || info.Length() > 3)
@@ -87,7 +91,9 @@ NAN_METHOD(dragMouse)
 
 	info.GetReturnValue().Set(Nan::New(1));
 }
-
+/**
+ * Node function moveMouse(x: number, y: number) : void
+ */
 NAN_METHOD(moveMouse)
 {
 	if (info.Length() != 2)
@@ -102,9 +108,11 @@ NAN_METHOD(moveMouse)
 	moveMouse(point);
 	microsleep(mouseDelay);
 
-	info.GetReturnValue().Set(Nan::New(1));
+	info.GetReturnValue().Set(Nan::New(mouseDelay));
 }
-
+/**
+ * Node function moveMouseSmooth(x: number, y: number) : number
+ */
 NAN_METHOD(moveMouseSmooth)
 {
 	if (info.Length() != 2)
@@ -123,6 +131,9 @@ NAN_METHOD(moveMouseSmooth)
 	info.GetReturnValue().Set(Nan::New(processTime));
 }
 
+/**
+ * Node function getMousePos(): { x: number, y: number }
+ */
 NAN_METHOD(getMousePos)
 {
 	MMPoint pos = getMousePos();
@@ -133,7 +144,9 @@ NAN_METHOD(getMousePos)
 	Nan::Set(obj, Nan::New("y").ToLocalChecked(), Nan::New((int)pos.y));
 	info.GetReturnValue().Set(obj);
 }
-
+/**
+ * Node function mouseClick(button?: "left" | "right" | "middle", double?: boolean) : void
+ */
 NAN_METHOD(mouseClick)
 {
 	MMMouseButton button = LEFT_BUTTON;
@@ -177,12 +190,14 @@ NAN_METHOD(mouseClick)
 
 	info.GetReturnValue().Set(Nan::New(1));
 }
-
+/**
+ * Node function mouseToggle(down?: string, button?: string) : void
+ */
 NAN_METHOD(mouseToggle)
 {
 	MMMouseButton button = LEFT_BUTTON;
 	bool down = false;
-
+	// 1st param down
 	if (info.Length() > 0)
 	{
 		char *d;
@@ -203,7 +218,7 @@ NAN_METHOD(mouseToggle)
 			return Nan::ThrowError("Invalid mouse button state specified.");
 		}
 	}
-
+	// 2nd param button
 	if (info.Length() == 2)
 	{
 		Nan::Utf8String bstr(info[1]);
@@ -230,6 +245,9 @@ NAN_METHOD(mouseToggle)
 	info.GetReturnValue().Set(Nan::New(1));
 }
 
+/**
+ * Node function setMouseDelay(delay: number) : void
+ */
 NAN_METHOD(setMouseDelay)
 {
 	if (info.Length() != 1)
@@ -242,6 +260,9 @@ NAN_METHOD(setMouseDelay)
 	info.GetReturnValue().Set(Nan::New(1));
 }
 
+/**
+ * Node function scrollMouse(x: number, y: number) : void
+ */
 NAN_METHOD(scrollMouse)
 {
 	if (info.Length() != 2)
@@ -383,7 +404,12 @@ int CheckKeyCodes(char* k, MMKeyCode *key)
 
 	return 0;
 }
-
+/**
+ * Parse a string as a flag 
+ * valid flad: alt | command | control | shift | none
+ * 
+ * @return 0 if valid
+ */
 int CheckKeyFlags(char* f, MMKeyFlags* flags)
 {
 	if (!flags) return -1;
@@ -416,12 +442,25 @@ int CheckKeyFlags(char* f, MMKeyFlags* flags)
 	return 0;
 }
 
+/**
+ * Parse a node string as a flag 
+ * valid flad: alt | command | control | shift | none
+ * 
+ * @return 0 if valid
+ */
 int GetFlagsFromString(v8::Local<v8::Value> value, MMKeyFlags* flags)
 {
 	v8::String::Utf8Value fstr(value->ToString());
 	return CheckKeyFlags(*fstr, flags);
 }
 
+/**
+ * Parse a node<String> or A node<String[]> as a flag or a flag set
+ * 
+ * valid flad: alt | command | control | shift | none
+ * 
+ * @return 0 if valid
+ */
 int GetFlagsFromValue(v8::Local<v8::Value> value, MMKeyFlags* flags)
 {
 	if (!flags) return -1;
@@ -447,19 +486,23 @@ int GetFlagsFromValue(v8::Local<v8::Value> value, MMKeyFlags* flags)
 	//If it's not an array, it should be a single string value.
 	return GetFlagsFromString(value, flags);
 }
-
+/**
+ * node function keyTap(key: string, modifier?: string | string[]) : void
+ */
 NAN_METHOD(keyTap)
 {
 	MMKeyFlags flags = MOD_NONE;
 	MMKeyCode key;
 
 	char *k;
-
+	//read key first parameter
 	v8::String::Utf8Value kstr(info[0]->ToString());
 	k = *kstr;
 
+	//the function can have one or two parameters
 	switch (info.Length())
 	{
+		//parse the flags second if 2 parameter are given
 		case 2:
 			switch (GetFlagsFromValue(info[1], &flags))
 			{
@@ -490,10 +533,12 @@ NAN_METHOD(keyTap)
 			microsleep(keyboardDelay);
 	}
 
-	info.GetReturnValue().Set(Nan::New(1));
+	info.GetReturnValue().Set(Nan::New(keyboardDelay));
 }
 
-
+/**
+ * Node function keyToggle(key: string, down: string, modifier?: string | string[]) : void
+ */
 NAN_METHOD(keyToggle)
 {
 	MMKeyFlags flags = MOD_NONE;
@@ -562,12 +607,14 @@ NAN_METHOD(keyToggle)
 			break;
 		default:
 			toggleKeyCode(key, down, flags);
-			  microsleep(keyboardDelay);
+			microsleep(keyboardDelay);
 	}
 
-	info.GetReturnValue().Set(Nan::New(1));
+	info.GetReturnValue().Set(Nan::New(keyboardDelay));
 }
-
+/**
+ * Node function typeString(string: string) : void
+ */
 NAN_METHOD(typeString)
 {
 	char *str;
@@ -579,7 +626,9 @@ NAN_METHOD(typeString)
 
 	info.GetReturnValue().Set(Nan::New(1));
 }
-
+/**
+ * Node function typeStringDelayed(string: string, cpm: number) : number
+ */
 NAN_METHOD(typeStringDelayed)
 {
 	char *str;
@@ -593,7 +642,9 @@ NAN_METHOD(typeStringDelayed)
 
 	info.GetReturnValue().Set(Nan::New(processTime));
 }
-
+/**
+ * Node function setKeyboardDelay(ms: number) : void
+ */
 NAN_METHOD(setKeyboardDelay)
 {
 	if (info.Length() != 1)
@@ -626,7 +677,9 @@ void padHex(MMRGBHex color, char* hex)
 	//Use %06x to pad hex value with leading 0s.
 	snprintf(hex, 7, "%06x", color);
 }
-
+/**
+ * Node function getPixelColor(x: number, y: number): string
+ */
 NAN_METHOD(getPixelColor)
 {
 	if (info.Length() != 2)
@@ -658,6 +711,9 @@ NAN_METHOD(getPixelColor)
 	info.GetReturnValue().Set(Nan::New(hex).ToLocalChecked());
 }
 
+/**
+ * Node function getScreenSize(): { width: number, height: number }
+ */
 NAN_METHOD(getScreenSize)
 {
 	//Get display size.
@@ -672,6 +728,9 @@ NAN_METHOD(getScreenSize)
 	info.GetReturnValue().Set(obj);
 }
 
+/**
+ * Node function getXDisplayName(): String
+ */
 NAN_METHOD(getXDisplayName)
 {
 	#if defined(USE_X11)
@@ -681,7 +740,9 @@ NAN_METHOD(getXDisplayName)
 	Nan::ThrowError("getXDisplayName is only supported on Linux");
 	#endif
 }
-
+/**
+ * Node function setXDisplayName(String: name): number
+ */
 NAN_METHOD(setXDisplayName)
 {
 	#if defined(USE_X11)
@@ -692,7 +753,9 @@ NAN_METHOD(setXDisplayName)
 	Nan::ThrowError("setXDisplayName is only supported on Linux");
 	#endif
 }
-
+/**
+ * Node function capture(x?: number, y?: number, width?: number, height?: number): Bitmap
+ */
 NAN_METHOD(captureScreen)
 {
 	size_t x;

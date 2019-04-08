@@ -161,6 +161,20 @@ void tapKeyCode(MMKeyCode code, MMKeyFlags flags)
 	toggleKeyCode(code, false, flags);
 }
 
+#if defined(USE_X11)
+bool toUpper(char c) {
+	if (isupper(c))
+		return true;
+	char *special = "!@#$%^&*()_+";
+	while (*special) {
+		if (*special == c)
+			return true;
+		special++;
+	}
+	return false;
+}
+#endif
+
 void toggleKey(char c, const bool down, MMKeyFlags flags)
 {
 	MMKeyCode keyCode = keyCodeForChar(c);
@@ -170,9 +184,15 @@ void toggleKey(char c, const bool down, MMKeyFlags flags)
 	int modifiers;
 #endif
 
+#if defined(USE_X11)
+	if (toUpper(c) && !(flags & MOD_SHIFT)) {
+		flags |= MOD_SHIFT; /* Not sure if this is safe for all layouts. */
+	}
+#else
 	if (isupper(c) && !(flags & MOD_SHIFT)) {
 		flags |= MOD_SHIFT; /* Not sure if this is safe for all layouts. */
 	}
+#endif
 
 #if defined(IS_WINDOWS)
 	modifiers = keyCode >> 8; // Pull out modifers.
@@ -270,6 +290,9 @@ void typeString(const char *str)
 		#if defined(IS_MACOSX)
 		toggleUnicodeKey(n, true);
 		toggleUnicodeKey(n, false);
+		#elif defined(USE_X11)
+		toggleUniKey(n, true);
+		toggleUniKey(n, false);
 		#else
 		toggleUniKey(n, true);
 		toggleUniKey(n, false);
