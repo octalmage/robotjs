@@ -5,6 +5,10 @@ os:
   - linux
   - osx
 
+cache:
+  directories:
+    - node_modules
+
 git:
   depth: 5
 
