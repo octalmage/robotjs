@@ -364,9 +364,10 @@ double smoothlyMoveMouse(MMPoint endPoint) // URIEL
 		veloDistance = crude_hypot(velo_x, velo_y);
 		velo_x /= veloDistance;
 		velo_y /= veloDistance;
-
-		pos.x += (size_t)floor(velo_x + 0.5);
-		pos.y += (size_t)floor(velo_y + 0.5);
+		double x = floor(velo_x + 0.5);
+		double y = floor(velo_y + 0.5);
+		pos.x += (size_t)x;
+		pos.y += (size_t)y;
 
 		/* Make sure we are in the screen boundaries!
 		 * (Strange things will happen if we are not.) */

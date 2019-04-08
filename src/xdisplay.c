@@ -1,6 +1,7 @@
 #include "xdisplay.h"
 #include <stdio.h> /* For fputs() */
 #include <stdlib.h> /* For atexit() */
+#include <string.h>
 
 static Display *mainDisplay = NULL;
 static int registered = 0;

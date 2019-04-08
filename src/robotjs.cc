@@ -544,7 +544,7 @@ NAN_METHOD(keyToggle)
 	MMKeyFlags flags = MOD_NONE;
 	MMKeyCode key;
 
-	bool down;
+	bool down = false;
 	char *k;
 
 	//Get arguments from JavaScript.
