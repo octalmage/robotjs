@@ -60,8 +60,8 @@ NAN_METHOD(dragMouse)
 		return Nan::ThrowError("Invalid number of arguments.");
 	}
 
-	const size_t x = info[0]->Int32Value();
-	const size_t y = info[1]->Int32Value();
+	const size_t x = info[0]->Int32Value(Nan::GetCurrentContext()).FromJust();
+	const size_t y = info[1]->Int32Value(Nan::GetCurrentContext()).FromJust();
 	MMMouseButton button = LEFT_BUTTON;
 
 	if (info.Length() == 3)
