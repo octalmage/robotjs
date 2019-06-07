@@ -60,8 +60,8 @@ NAN_METHOD(dragMouse)
 		return Nan::ThrowError("Invalid number of arguments.");
 	}
 
-	const size_t x = info[0]->Int32Value(Nan::GetCurrentContext()).FromJust();
-	const size_t y = info[1]->Int32Value(Nan::GetCurrentContext()).FromJust();
+	const size_t x = Nan::To<int32_t>(info[0]).FromJust();
+	const size_t y = Nan::To<int32_t>(info[1]).FromJust();
 	MMMouseButton button = LEFT_BUTTON;
 
 	if (info.Length() == 3)
@@ -94,8 +94,8 @@ NAN_METHOD(moveMouse)
 	{
 		return Nan::ThrowError("Invalid number of arguments.");
 	}
-	size_t x = info[0]->Int32Value();
-	size_t y = info[1]->Int32Value();
+	size_t x = Nan::To<int32_t>(info[0]).FromJust();
+	size_t y = Nan::To<int32_t>(info[1]).FromJust();
 
 	MMPoint point;
 	point = MMPointMake(x, y);
@@ -111,8 +111,8 @@ NAN_METHOD(moveMouseSmooth)
 	{
 		return Nan::ThrowError("Invalid number of arguments.");
 	}
-	size_t x = info[0]->Int32Value();
-	size_t y = info[1]->Int32Value();
+	size_t x = Nan::To<int32_t>(info[0]).FromJust();
+	size_t y = Nan::To<int32_t>(info[1]).FromJust();
 
 	MMPoint point;
 	point = MMPointMake(x, y);
@@ -140,7 +140,7 @@ NAN_METHOD(mouseClick)
 
 	if (info.Length() > 0)
 	{
-		v8::String::Utf8Value bstr(info[0]->ToString());
+		v8::String::Utf8Value bstr(info[0]->ToString(Nan::GetCurrentContext()).FromMaybe(v8::Local<v8::String>()));
 		const char * const b = *bstr;
 
 		switch (CheckMouseButton(b, &button))
@@ -156,7 +156,7 @@ NAN_METHOD(mouseClick)
 
 	if (info.Length() == 2)
 	{
-		doubleC = info[1]->BooleanValue();
+		doubleC = info[1]->BooleanValue(Nan::GetCurrentContext()).FromJust();
 	}
 	else if (info.Length() > 2)
 	{
@@ -236,7 +236,7 @@ NAN_METHOD(setMouseDelay)
 		return Nan::ThrowError("Invalid number of arguments.");
 	}
 
-	mouseDelay = info[0]->Int32Value();
+	mouseDelay = Nan::To<int32_t>(info[0]).FromJust();
 
 	info.GetReturnValue().Set(Nan::New(1));
 }
@@ -248,8 +248,8 @@ NAN_METHOD(scrollMouse)
     	return Nan::ThrowError("Invalid number of arguments.");
 	}
 
-	int x = info[0]->Int32Value();
-	int y = info[1]->Int32Value();
+	int x = Nan::To<int32_t>(info[0]).FromJust();
+	int y = Nan::To<int32_t>(info[1]).FromJust();
 
 	scrollMouse(x, y);
 	microsleep(mouseDelay);
@@ -417,7 +417,7 @@ int CheckKeyFlags(char* f, MMKeyFlags* flags)
 
 int GetFlagsFromString(v8::Local<v8::Value> value, MMKeyFlags* flags)
 {
-	v8::String::Utf8Value fstr(value->ToString());
+	v8::String::Utf8Value fstr(value->ToString(Nan::GetCurrentContext()).FromMaybe(v8::Local<v8::String>()));
 	return CheckKeyFlags(*fstr, flags);
 }
 
@@ -454,7 +454,7 @@ NAN_METHOD(keyTap)
 
 	char *k;
 
-	v8::String::Utf8Value kstr(info[0]->ToString());
+	v8::String::Utf8Value kstr(info[0]->ToString(Nan::GetCurrentContext()).FromMaybe(v8::Local<v8::String>()));
 	k = *kstr;
 
 	switch (info.Length())
@@ -586,7 +586,7 @@ NAN_METHOD(typeStringDelayed)
 
 	str = *string;
 
-	size_t cpm = info[1]->Int32Value();
+	size_t cpm = Nan::To<int32_t>(info[1]).FromJust();
 
 	typeStringDelayed(str, cpm);
 
@@ -600,7 +600,7 @@ NAN_METHOD(setKeyboardDelay)
 		return Nan::ThrowError("Invalid number of arguments.");
 	}
 
-	keyboardDelay = info[0]->Int32Value();
+	keyboardDelay = Nan::To<int32_t>(info[0]).FromJust();
 
 	info.GetReturnValue().Set(Nan::New(1));
 }
@@ -636,8 +636,8 @@ NAN_METHOD(getPixelColor)
 	MMBitmapRef bitmap;
 	MMRGBHex color;
 
-	size_t x = info[0]->Int32Value();
-	size_t y = info[1]->Int32Value();
+	size_t x = Nan::To<int32_t>(info[0]).FromJust();
+	size_t y = Nan::To<int32_t>(info[1]).FromJust();
 
 	if (!pointVisibleOnMainDisplay(MMPointMake(x, y)))
 	{
@@ -705,10 +705,10 @@ NAN_METHOD(captureScreen)
 		//TODO: Make sure requested coords are within the screen bounds, or we get a seg fault.
 		// 		An error message is much nicer!
 
-		x = info[0]->Int32Value();
-		y = info[1]->Int32Value();
-		w = info[2]->Int32Value();
-		h = info[3]->Int32Value();
+		x = Nan::To<int32_t>(info[0]).FromJust();
+		y = Nan::To<int32_t>(info[1]).FromJust();
+		w = Nan::To<int32_t>(info[2]).FromJust();
+		h = Nan::To<int32_t>(info[3]).FromJust();
 	}
 	else
 	{
@@ -765,11 +765,11 @@ BMP buildBMP(Local<Object> info)
 
 	BMP img;
 
-	img.width = obj->Get(Nan::New("width").ToLocalChecked())->Uint32Value();
-	img.height = obj->Get(Nan::New("height").ToLocalChecked())->Uint32Value();
-	img.byteWidth = obj->Get(Nan::New("byteWidth").ToLocalChecked())->Uint32Value();
-	img.bitsPerPixel = obj->Get(Nan::New("bitsPerPixel").ToLocalChecked())->Uint32Value();
-	img.bytesPerPixel = obj->Get(Nan::New("bytesPerPixel").ToLocalChecked())->Uint32Value();
+	img.width = obj->Get(Nan::New("width").ToLocalChecked())->Uint32Value(Nan::GetCurrentContext()).FromJust();
+	img.height = obj->Get(Nan::New("height").ToLocalChecked())->Uint32Value(Nan::GetCurrentContext()).FromJust();
+	img.byteWidth = obj->Get(Nan::New("byteWidth").ToLocalChecked())->Uint32Value(Nan::GetCurrentContext()).FromJust();
+	img.bitsPerPixel = obj->Get(Nan::New("bitsPerPixel").ToLocalChecked())->Uint32Value(Nan::GetCurrentContext()).FromJust();
+	img.bytesPerPixel = obj->Get(Nan::New("bytesPerPixel").ToLocalChecked())->Uint32Value(Nan::GetCurrentContext()).FromJust();
 
 	char* buf = node::Buffer::Data(obj->Get(Nan::New("image").ToLocalChecked()));
 
@@ -785,8 +785,8 @@ NAN_METHOD(getColor)
 	MMBitmapRef bitmap;
 	MMRGBHex color;
 
-	size_t x = info[1]->Int32Value();
-	size_t y = info[2]->Int32Value();
+	size_t x = Nan::To<int32_t>(info[1]).FromJust();
+	size_t y = Nan::To<int32_t>(info[2]).FromJust();
 
 	//Get our image object from JavaScript.
 	BMP img = buildBMP(Nan::To<v8::Object>(info[0]).ToLocalChecked());
