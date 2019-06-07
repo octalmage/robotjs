@@ -4,7 +4,7 @@
 environment:
   matrix:
   # node.js
-    - nodejs_version: "8"
+    - nodejs_version: "12"
     - nodejs_version: "Stable"
 
 cache:
