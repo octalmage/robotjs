@@ -14,7 +14,7 @@ git:
 
 env:
   matrix:
-  - TRAVIS_NODE_VERSION="8"
+  - TRAVIS_NODE_VERSION="12"
   - TRAVIS_NODE_VERSION="stable"
 
 addons:
