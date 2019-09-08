@@ -102,7 +102,7 @@ void win32KeyEvent(int key, MMKeyFlags flags)
 		scan |= 0x80;
 	}
 
-	flags |= KEYEVENTF_SCANCODE
+	flags |= KEYEVENTF_SCANCODE;
 
 	INPUT keyboardInput;
 	keyboardInput.type = INPUT_KEYBOARD;
