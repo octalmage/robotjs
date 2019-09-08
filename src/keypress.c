@@ -101,6 +101,9 @@ void win32KeyEvent(int key, MMKeyFlags flags)
 	if ( flags & KEYEVENTF_KEYUP ) {
 		scan |= 0x80;
 	}
+
+	flags |= KEYEVENTF_SCANCODE
+
 	INPUT keyboardInput;
 	keyboardInput.type = INPUT_KEYBOARD;
 	keyboardInput.ki.wVk = key;
