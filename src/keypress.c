@@ -16,7 +16,7 @@
 /* Convenience wrappers around ugly APIs. */
 #if defined(IS_WINDOWS)
 	#define WIN32_KEY_EVENT_WAIT(key, flags) \
-		(win32KeyEvent(key, flags), Sleep(DEADBEEF_RANDRANGE(0, 63)))
+		(win32KeyEvent(key, flags), Sleep(DEADBEEF_RANDRANGE(63, 125)))
 #elif defined(USE_X11)
 	#define X_KEY_EVENT(display, key, is_press) \
 		(XTestFakeKeyEvent(display, \
@@ -25,7 +25,7 @@
 		 XSync(display, false))
 	#define X_KEY_EVENT_WAIT(display, key, is_press) \
 		(X_KEY_EVENT(display, key, is_press), \
-		 microsleep(DEADBEEF_UNIFORM(0.0, 62.5)))
+		 microsleep(DEADBEEF_UNIFORM(62.5, 125.0)))
 #endif
 
 #if defined(IS_MACOSX)
@@ -149,7 +149,7 @@ void toggleKeyCode(MMKeyCode code, const bool down, MMKeyFlags flags)
 	if (flags & MOD_CONTROL) WIN32_KEY_EVENT_WAIT(K_CONTROL, dwFlags);
 	if (flags & MOD_SHIFT) WIN32_KEY_EVENT_WAIT(K_SHIFT, dwFlags);
 
-	win32KeyEvent(code, dwFlags);
+	WIN32_KEY_EVENT_WAIT(code, dwFlags);
 #elif defined(USE_X11)
 	Display *display = XGetMainDisplay();
 	const Bool is_press = down ? True : False; /* Just to be safe. */
@@ -160,7 +160,7 @@ void toggleKeyCode(MMKeyCode code, const bool down, MMKeyFlags flags)
 	if (flags & MOD_CONTROL) X_KEY_EVENT_WAIT(display, K_CONTROL, is_press);
 	if (flags & MOD_SHIFT) X_KEY_EVENT_WAIT(display, K_SHIFT, is_press);
 
-	X_KEY_EVENT(display, code, is_press);
+	X_KEY_EVENT_WAIT(display, code, is_press);
 #endif
 }
 
