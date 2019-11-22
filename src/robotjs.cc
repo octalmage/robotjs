@@ -156,7 +156,7 @@ NAN_METHOD(mouseClick)
 
 	if (info.Length() == 2)
 	{
-		doubleC = info[1]->BooleanValue(Nan::GetCurrentContext()).FromJust();
+		doubleC = Nan::To<bool>(info[1]).FromJust();
 	}
 	else if (info.Length() > 2)
 	{
