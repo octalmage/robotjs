@@ -41,11 +41,11 @@
   "homepage": "https://github.com/octalmage/robotjs",
   "dependencies": {
     "nan": "^2.14.0",
-    "prebuild-install": "^2.1.1"
+    "prebuild-install": "^5.3.3"
   },
   "devDependencies": {
     "jasmine": "^2.99.0",
-    "prebuild": "^7.4.0",
+    "prebuild": "^9.1.1",
     "run-script-os": "^1.0.3",
     "targetpractice": "0.0.7"
   }
