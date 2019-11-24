@@ -22,7 +22,7 @@
 		(XTestFakeKeyEvent(display, \
 		                   XKeysymToKeycode(display, key), \
 		                   is_press, CurrentTime), \
-		 XFlush(display))
+		 XSync(display, false))
 	#define X_KEY_EVENT_WAIT(display, key, is_press) \
 		(X_KEY_EVENT(display, key, is_press), \
 		 microsleep(DEADBEEF_UNIFORM(0.0, 62.5)))
@@ -101,8 +101,14 @@ void win32KeyEvent(int key, MMKeyFlags flags)
 	if ( flags & KEYEVENTF_KEYUP ) {
 		scan |= 0x80;
 	}
-
-	keybd_event(key, scan, flags, 0);
+	INPUT keyboardInput;
+	keyboardInput.type = INPUT_KEYBOARD;
+	keyboardInput.ki.wVk = key;
+	keyboardInput.ki.wScan = scan;
+	keyboardInput.ki.dwFlags = flags;
+	keyboardInput.ki.time = 0;
+	keyboardInput.ki.dwExtraInfo = 0;
+	SendInput(1, &keyboardInput, sizeof(keyboardInput));
 }
 #endif
 
@@ -162,25 +168,25 @@ void tapKeyCode(MMKeyCode code, MMKeyFlags flags)
 }
 
 void toggleKey(char c, const bool down, MMKeyFlags flags)
-{	
+{
 	MMKeyCode keyCode = keyCodeForChar(c);
-	
+
 	//Prevent unused variable warning for Mac and Linux.
 #if defined(IS_WINDOWS)
 	int modifiers;
-#endif	
-	
+#endif
+
 	if (isupper(c) && !(flags & MOD_SHIFT)) {
 		flags |= MOD_SHIFT; /* Not sure if this is safe for all layouts. */
 	}
-	
+
 #if defined(IS_WINDOWS)
 	modifiers = keyCode >> 8; // Pull out modifers.
 	if ((modifiers & 1) != 0) flags |= MOD_SHIFT; // Uptdate flags from keycode modifiers.
     if ((modifiers & 2) != 0) flags |= MOD_CONTROL;
     if ((modifiers & 4) != 0) flags |= MOD_ALT;
     keyCode = keyCode & 0xff; // Mask out modifiers.
-#endif	
+#endif
 	toggleKeyCode(keyCode, down, flags);
 }
 
@@ -206,14 +212,14 @@ void toggleUnicodeKey(unsigned long ch, const bool down)
 
 	if (ch > 0xFFFF) {
 		// encode to utf-16 if necessary
-		unsigned short surrogates[] = {
+		UniChar surrogates[2] = {
 			0xD800 + ((ch - 0x10000) >> 10),
 			0xDC00 + (ch & 0x3FF)
 		};
 
-		CGEventKeyboardSetUnicodeString(keyEvent, 2, &surrogates);
+		CGEventKeyboardSetUnicodeString(keyEvent, 2, (UniChar*) &surrogates);
 	} else {
-		CGEventKeyboardSetUnicodeString(keyEvent, 1, &ch);
+		CGEventKeyboardSetUnicodeString(keyEvent, 1, (UniChar*) &ch);
 	}
 
 	CGEventPost(kCGSessionEventTap, keyEvent);
