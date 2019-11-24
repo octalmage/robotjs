@@ -41,6 +41,18 @@
 
 #elif defined(IS_WINDOWS)
 
+// The width of the virtual screen, in pixels.
+static int vscreenWidth = -1; // not initialized
+
+// The height of the virtual screen, in pixels.
+static int vscreenHeight = -1; // not initialized
+
+// The coordinates for the left side of the virtual screen.
+static int vscreenMinX = 0;
+
+// The coordinates for the top of the virtual screen.
+static int vscreenMinY = 0;
+
 #define MMMouseToMEventF(down, button) \
 	(down ? MMMouseDownToMEventF(button) : MMMouseUpToMEventF(button))
 
@@ -83,7 +95,15 @@ void calculateDeltas(CGEventRef *event, MMPoint point)
 }
 #endif
 
-
+void updateScreenMetrics()
+{
+	#if defined(IS_WINDOWS)
+		vscreenWidth = GetSystemMetrics(SM_CXVIRTUALSCREEN);
+		vscreenHeight = GetSystemMetrics(SM_CYVIRTUALSCREEN);
+		vscreenMinX = GetSystemMetrics(SM_XVIRTUALSCREEN);
+		vscreenMinY = GetSystemMetrics(SM_YVIRTUALSCREEN);
+	#endif
+}
 /**
  * Move the mouse to a specific point.
  * @param point The coordinates to move the mouse to (x, y).
@@ -105,18 +125,23 @@ void moveMouse(MMPoint point)
 	             0, 0, 0, 0, point.x, point.y);
 	XSync(display, false);
 #elif defined(IS_WINDOWS)
+
+	if(vscreenWidth<0 || vscreenHeight<0)
+		updateScreenMetrics();
+
 	//Mouse motion is now done using SendInput with MOUSEINPUT. We use Absolute mouse positioning
-	#define MOUSE_COORD_TO_ABS(coord, width_or_height) (((65536 * coord) / width_or_height) + (coord < 0 ? -1 : 1))
-	point.x = MOUSE_COORD_TO_ABS(point.x, GetSystemMetrics(SM_CXSCREEN));
-	point.y = MOUSE_COORD_TO_ABS(point.y, GetSystemMetrics(SM_CYSCREEN));
-	INPUT mouseInput;
+	#define MOUSE_COORD_TO_ABS(coord, width_or_height) ((65536 * (coord) / width_or_height) + ((coord) < 0 ? -1 : 1))
+
+	size_t x = MOUSE_COORD_TO_ABS(point.x-vscreenMinX, vscreenWidth);
+	size_t y = MOUSE_COORD_TO_ABS(point.y-vscreenMinY, vscreenHeight);
+
+	INPUT mouseInput = {0};
 	mouseInput.type = INPUT_MOUSE;
-	mouseInput.mi.dx = point.x;
-	mouseInput.mi.dy = point.y;
-	mouseInput.mi.dwFlags = MOUSEEVENTF_ABSOLUTE | MOUSEEVENTF_MOVE;
+	mouseInput.mi.dx = x;
+	mouseInput.mi.dy = y;
+	mouseInput.mi.dwFlags = MOUSEEVENTF_ABSOLUTE | MOUSEEVENTF_MOVE | MOUSEEVENTF_VIRTUALDESK;
 	mouseInput.mi.time = 0; //System will provide the timestamp
-	mouseInput.mi.dwExtraInfo = 0;
-	mouseInput.mi.mouseData = 0;
+
 	SendInput(1, &mouseInput, sizeof(mouseInput));
 #endif
 }
