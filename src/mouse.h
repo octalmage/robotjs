@@ -57,16 +57,22 @@ enum __MMMouseWheelDirection
 };
 typedef int MMMouseWheelDirection;
 
+/* Updates information about current virtual screen size and coordinates
+ * in Windows
+ * It is up to the caller to ensure that this called before mouse moving
+*/
+void updateScreenMetrics();
+
 /* Immediately moves the mouse to the given point on-screen.
  * It is up to the caller to ensure that this point is within the
  * screen boundaries. */
-void moveMouse(MMPoint point);
+void moveMouse(MMSignedPoint point);
 
 /* Like moveMouse, moves the mouse to the given point on-screen, but marks
  * the event as the mouse being dragged on platforms where it is supported.
  * It is up to the caller to ensure that this point is within the screen
  * boundaries. */
-void dragMouse(MMPoint point, const MMMouseButton button);
+void dragMouse(MMSignedPoint point, const MMMouseButton button);
 
 /* Smoothly moves the mouse from the current position to the given point.
  * deadbeef_srand() should be called before using this function.
