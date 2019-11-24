@@ -1,6 +1,13 @@
 sudo: false
 language: cpp
 
+env:
+  matrix:
+    - TRAVIS_NODE_VERSION="8"
+    - TRAVIS_NODE_VERSION="10"
+    - TRAVIS_NODE_VERSION="12"
+    - TRAVIS_NODE_VERSION="stable"
+
 os:
   - linux
   - osx
@@ -11,11 +18,6 @@ cache:
 
 git:
   depth: 5
-
-env:
-  matrix:
-  - TRAVIS_NODE_VERSION="8"
-  - TRAVIS_NODE_VERSION="stable"
 
 addons:
   apt:
@@ -30,11 +32,9 @@ addons:
       - gcc-4.8
 
 before_install:
-  # reinstall latest nvm
   - rm -rf ~/.nvm && git clone https://github.com/creationix/nvm.git ~/.nvm && (cd ~/.nvm && git checkout `git describe --abbrev=0 --tags`) && source ~/.nvm/nvm.sh
   - nvm install $TRAVIS_NODE_VERSION
   - PATH=$PATH:`pwd`/node_modules/.bin
-
   # print versions
   - node --version
   - npm --version
@@ -43,16 +43,12 @@ before_install:
   - if [[ $TRAVIS_OS_NAME == "linux" ]]; then export CXX=g++-4.8; fi
   - $CXX --version
 
-before_script:
-  # Start xvfb
-  - if [[ $TRAVIS_OS_NAME == "linux" ]]; then export DISPLAY=:99.0; fi
-  - if [[ $TRAVIS_OS_NAME == "linux" ]]; then sh -e /etc/init.d/xvfb start; fi
-
 install:
   - npm install
 
 script:
-  - npm test
+  - if [ "$TRAVIS_OS_NAME" = "osx" ]; then npm test; fi
+  - if [ "$TRAVIS_OS_NAME" = "linux" ]; then xvfb-run npm test; fi
 
 after_success:
   - if [[ $TRAVIS_TAG != "" ]]; then npm run prebuild -- -u $GITHUB_TOKEN; fi
