@@ -312,6 +312,8 @@ static KeyNames key_names[] =
 	{ "command",        K_META },
 	{ "alt",            K_ALT },
 	{ "control",        K_CONTROL },
+	{ "left_control",   K_LEFT_CONTROL },
+	{ "right_control",  K_RIGHT_CONTROL },
 	{ "shift",          K_SHIFT },
 	{ "right_shift",    K_RIGHTSHIFT },
 	{ "space",          K_SPACE },
@@ -395,11 +397,11 @@ int CheckKeyFlags(char* f, MMKeyFlags* flags)
 	{
 		*flags = MOD_META;
 	}
-	else if(strcmp(f, "control") == 0)
+	else if(strcmp(f, "control") == 0 || strcmp(f, "right_control") == 0 || strcmp(f, "left_control") == 0)
 	{
 		*flags = MOD_CONTROL;
 	}
-	else if(strcmp(f, "shift") == 0)
+	else if(strcmp(f, "shift") == 0 || strcmp(f, "right_shift") == 0)
 	{
 		*flags = MOD_SHIFT;
 	}
