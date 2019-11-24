@@ -103,7 +103,7 @@ void moveMouse(MMSignedPoint point)
 	Display *display = XGetMainDisplay();
 	XWarpPointer(display, None, DefaultRootWindow(display),
 	             0, 0, 0, 0, point.x, point.y);
-	XFlush(display);
+	XSync(display, false);
 #elif defined(IS_WINDOWS)
 	//Mouse motion is now done using SendInput with MOUSEINPUT. We use Absolute mouse positioning
 	#define MOUSE_COORD_TO_ABS(coord, width_or_height) (((65536 * coord) / width_or_height) + (coord < 0 ? -1 : 1))
@@ -118,7 +118,6 @@ void moveMouse(MMSignedPoint point)
 	mouseInput.mi.dwExtraInfo = 0;
 	mouseInput.mi.mouseData = 0;
 	SendInput(1, &mouseInput, sizeof(mouseInput));
-
 #endif
 }
 
@@ -184,9 +183,17 @@ void toggleMouse(bool down, MMMouseButton button)
 #elif defined(USE_X11)
 	Display *display = XGetMainDisplay();
 	XTestFakeButtonEvent(display, button, down ? True : False, CurrentTime);
-	XFlush(display);
+	XSync(display, false);
 #elif defined(IS_WINDOWS)
-	mouse_event(MMMouseToMEventF(down, button), 0, 0, 0, 0);
+	INPUT mouseInput;
+	mouseInput.type = INPUT_MOUSE;
+	mouseInput.mi.dx = 0;
+	mouseInput.mi.dy = 0;
+	mouseInput.mi.dwFlags = MMMouseToMEventF(down, button);
+	mouseInput.mi.time = 0; //System will provide the timestamp
+	mouseInput.mi.dwExtraInfo = 0;
+	mouseInput.mi.mouseData = 0;
+	SendInput(1, &mouseInput, sizeof(mouseInput));
 #endif
 }
 
@@ -237,8 +244,7 @@ void scrollMouse(int x, int y)
 #if defined(IS_WINDOWS)
 	// Fix for #97 https://github.com/octalmage/robotjs/issues/97,
 	// C89 needs variables declared on top of functions (mouseScrollInput)
-	INPUT mouseScrollInputH;
-	INPUT mouseScrollInputV;
+	INPUT mouseScrollInputs[2];
 #endif
 
   /* Direction should only be considered based on the scrollDirection. This
@@ -256,8 +262,20 @@ void scrollMouse(int x, int y)
 
 #elif defined(USE_X11)
 
-	int ydir = 4; /* Button 4 is up, 5 is down. */
-	int xdir = 6;
+	/*
+	X11 Mouse Button Numbering
+	1 = left button
+	2 = middle button (pressing the scroll wheel)
+	3 = right button
+	4 = turn scroll wheel up
+	5 = turn scroll wheel down
+	6 = push scroll wheel left
+	7 = push scroll wheel right
+	8 = 4th button (aka browser backward button)
+	9 = 5th button (aka browser forward button)
+	*/
+	int ydir = 4; // Button 4 is up, 5 is down.
+	int xdir = 6; // Button 6 is left, 7 is right.
 	Display *display = XGetMainDisplay();
 
 	if (y < 0){
@@ -274,32 +292,32 @@ void scrollMouse(int x, int y)
 		XTestFakeButtonEvent(display, xdir, 0, CurrentTime);
 	}
 	for (yi = 0; yi < abs(y); yi++) {
-		YTestFakeButtonEvent(display, ydir, 1, CurrentTime);
-		YTestFakeButtonEvent(display, ydir, 0, CurrentTime);
+		XTestFakeButtonEvent(display, ydir, 1, CurrentTime);
+		XTestFakeButtonEvent(display, ydir, 0, CurrentTime);
 	}
 
-	XFlush(display);
+	XSync(display, false);
 
 #elif defined(IS_WINDOWS)
 
-	mouseScrollInputH.type = INPUT_MOUSE;
-	mouseScrollInputH.mi.dx = 0;
-	mouseScrollInputH.mi.dy = 0;
-	mouseScrollInputH.mi.dwFlags = MOUSEEVENTF_WHEEL;
-	mouseScrollInputH.mi.time = 0;
-	mouseScrollInputH.mi.dwExtraInfo = 0;
-	mouseScrollInputH.mi.mouseData = WHEEL_DELTA * x;
+	mouseScrollInputs[0].type = INPUT_MOUSE;
+	mouseScrollInputs[0].mi.dx = 0;
+	mouseScrollInputs[0].mi.dy = 0;
+	mouseScrollInputs[0].mi.dwFlags = MOUSEEVENTF_HWHEEL;
+	mouseScrollInputs[0].mi.time = 0;
+	mouseScrollInputs[0].mi.dwExtraInfo = 0;
+	// Flip x to match other platforms.
+	mouseScrollInputs[0].mi.mouseData = -x;
 
-	mouseScrollInputV.type = INPUT_MOUSE;
-	mouseScrollInputV.mi.dx = 0;
-	mouseScrollInputV.mi.dy = 0;
-	mouseScrollInputV.mi.dwFlags = MOUSEEVENTF_HWHEEL;
-	mouseScrollInputV.mi.time = 0;
-	mouseScrollInputV.mi.dwExtraInfo = 0;
-	mouseScrollInputV.mi.mouseData = WHEEL_DELTA * y;
+	mouseScrollInputs[1].type = INPUT_MOUSE;
+	mouseScrollInputs[1].mi.dx = 0;
+	mouseScrollInputs[1].mi.dy = 0;
+	mouseScrollInputs[1].mi.dwFlags = MOUSEEVENTF_WHEEL;
+	mouseScrollInputs[1].mi.time = 0;
+	mouseScrollInputs[1].mi.dwExtraInfo = 0;
+	mouseScrollInputs[1].mi.mouseData = y;
 
-	SendInput(1, &mouseScrollInputH, sizeof(mouseScrollInputH));
-	SendInput(1, &mouseScrollInputV, sizeof(mouseScrollInputV));
+	SendInput(2, mouseScrollInputs, sizeof(mouseScrollInputs));
 #endif
 }
 
