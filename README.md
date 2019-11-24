@@ -1,5 +1,4 @@
 <p align="center"><img src="https://cldup.com/1ATDf2JMtv.png"></p>
-========
 
 <p align="center"><a href="https://travis-ci.org/octalmage/robotjs"><img src="https://api.travis-ci.org/octalmage/robotjs.svg?branch=master"></a> <a href="https://ci.appveyor.com/project/octalmage/robotjs"><img src="https://ci.appveyor.com/api/projects/status/qh2eqb37j7ap6x36?svg=true"></a> <a href="https://www.npmjs.com/package/robotjs"><img src="https://img.shields.io/npm/v/robotjs.svg"></a> <a href="https://gitter.im/octalmage/robotjs?utm_source=badge&utm_medium=badge&utm_campaign=pr-badge&utm_content=badge"><img src="https://img.shields.io/badge/gitter-join%20chat-blue.svg"></a> <a href="http://waffle.io/octalmage/robotjs"><img src="https://img.shields.io/waffle/label/octalmage/robotjs/ready.svg?maxAge=3600"></a></p>
 
@@ -17,7 +16,7 @@ This is a work in progress so the exported functions could change at any time be
 
 - [Installation](#installation)
 - [Examples](#examples)
-- [API](https://github.com/octalmage/robotjs/wiki/Syntax)
+- [API](https://robotjs.io/docs/syntax)
 - [Building](#building)
 - [Plans](#plans)
 - [Progress](#progress)
@@ -90,17 +89,16 @@ console.log("#" + hex + " at x:" + mouse.x + " y:" + mouse.y);
 ```
 Read the [Wiki](https://github.com/octalmage/robotjs/wiki) for more information!
 
-## [API](https://github.com/octalmage/robotjs/wiki/Syntax)
+## [API](http://robotjs.io/docs/syntax)
 
-The [RobotJS API](https://github.com/octalmage/robotjs/wiki/Syntax) is contained in the [Wiki](https://github.com/octalmage/robotjs/wiki).
+The RobotJS API is hosted at <https://robotjs.io/docs/syntax>.
 
 ## Building
 
 Please ensure you have the required dependencies before installing:
 
 * Windows
-  * Visual Studio 2013 (Express works fine).
-  * Python (v2.7.3 recommended, v3.x.x is not supported).
+  * windows-build-tools npm package (`npm install --global --production windows-build-tools` from an elevated PowerShell or CMD.exe)
 * Mac
   * Xcode Command Line Tools.
 * Linux

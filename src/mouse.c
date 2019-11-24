@@ -103,7 +103,7 @@ void moveMouse(MMPoint point)
 	Display *display = XGetMainDisplay();
 	XWarpPointer(display, None, DefaultRootWindow(display),
 	             0, 0, 0, 0, point.x, point.y);
-	XFlush(display);
+	XSync(display, false);
 #elif defined(IS_WINDOWS)
 	//Mouse motion is now done using SendInput with MOUSEINPUT. We use Absolute mouse positioning
 	#define MOUSE_COORD_TO_ABS(coord, width_or_height) (((65536 * coord) / width_or_height) + (coord < 0 ? -1 : 1))
@@ -118,7 +118,6 @@ void moveMouse(MMPoint point)
 	mouseInput.mi.dwExtraInfo = 0;
 	mouseInput.mi.mouseData = 0;
 	SendInput(1, &mouseInput, sizeof(mouseInput));
-	
 #endif
 }
 
@@ -184,9 +183,17 @@ void toggleMouse(bool down, MMMouseButton button)
 #elif defined(USE_X11)
 	Display *display = XGetMainDisplay();
 	XTestFakeButtonEvent(display, button, down ? True : False, CurrentTime);
-	XFlush(display);
+	XSync(display, false);
 #elif defined(IS_WINDOWS)
-	mouse_event(MMMouseToMEventF(down, button), 0, 0, 0, 0);
+	INPUT mouseInput;
+	mouseInput.type = INPUT_MOUSE;
+	mouseInput.mi.dx = 0;
+	mouseInput.mi.dy = 0;
+	mouseInput.mi.dwFlags = MMMouseToMEventF(down, button);
+	mouseInput.mi.time = 0; //System will provide the timestamp
+	mouseInput.mi.dwExtraInfo = 0;
+	mouseInput.mi.mouseData = 0;
+	SendInput(1, &mouseInput, sizeof(mouseInput));
 #endif
 }
 
@@ -202,7 +209,7 @@ void clickMouse(MMMouseButton button)
  */
 void doubleClick(MMMouseButton button)
 {
-	
+
 #if defined(IS_MACOSX)
 
 	/* Double click for Mac. */
@@ -210,17 +217,17 @@ void doubleClick(MMMouseButton button)
 	const CGEventType mouseTypeDown = MMMouseToCGEventType(true, button);
 	const CGEventType mouseTypeUP = MMMouseToCGEventType(false, button);
 
-	CGEventRef event = CGEventCreateMouseEvent(NULL, mouseTypeDown, currentPos, kCGMouseButtonLeft);  
-	
-	/* Set event to double click. */						
-	CGEventSetIntegerValueField(event, kCGMouseEventClickState, 2);
-											
-	CGEventPost(kCGHIDEventTap, event);  
-																
-	CGEventSetType(event, mouseTypeUP);  
-	CGEventPost(kCGHIDEventTap, event);  
+	CGEventRef event = CGEventCreateMouseEvent(NULL, mouseTypeDown, currentPos, kCGMouseButtonLeft);
 
-	CFRelease(event); 
+	/* Set event to double click. */
+	CGEventSetIntegerValueField(event, kCGMouseEventClickState, 2);
+
+	CGEventPost(kCGHIDEventTap, event);
+
+	CGEventSetType(event, mouseTypeUP);
+	CGEventPost(kCGHIDEventTap, event);
+
+	CFRelease(event);
 
 #else
 
@@ -228,75 +235,90 @@ void doubleClick(MMMouseButton button)
 	clickMouse(button);
 	microsleep(200);
 	clickMouse(button);
-	
+
 #endif
 }
 
-/**
- * Function used to scroll the screen in the required direction.
- * This uses the magnitude to scroll the required amount in the direction. 
- * TODO Requires further fine tuning based on the requirements.
- */
-void scrollMouse(int scrollMagnitude, MMMouseWheelDirection scrollDirection)
+void scrollMouse(int x, int y)
 {
-	#if defined(IS_WINDOWS)
-		// Fix for #97 https://github.com/octalmage/robotjs/issues/97,
-		// C89 needs variables declared on top of functions (mouseScrollInput)
-		INPUT mouseScrollInput;
-	#endif
+#if defined(IS_WINDOWS)
+	// Fix for #97 https://github.com/octalmage/robotjs/issues/97,
+	// C89 needs variables declared on top of functions (mouseScrollInput)
+	INPUT mouseScrollInputs[2];
+#endif
 
-	/* Direction should only be considered based on the scrollDirection. This
-	 * Should not interfere. */
-	int cleanScrollMagnitude = abs(scrollMagnitude);
-	if (!(scrollDirection == DIRECTION_UP || scrollDirection == DIRECTION_DOWN))
-	{
-		return;
+  /* Direction should only be considered based on the scrollDirection. This
+   * Should not interfere. */
+
+  /* Set up the OS specific solution */
+#if defined(__APPLE__)
+
+	CGEventRef event;
+
+	event = CGEventCreateScrollWheelEvent(NULL, kCGScrollEventUnitPixel, 2, y, x);
+	CGEventPost(kCGHIDEventTap, event);
+
+	CFRelease(event);
+
+#elif defined(USE_X11)
+
+	/*
+	X11 Mouse Button Numbering
+	1 = left button
+	2 = middle button (pressing the scroll wheel)
+	3 = right button
+	4 = turn scroll wheel up
+	5 = turn scroll wheel down
+	6 = push scroll wheel left
+	7 = push scroll wheel right
+	8 = 4th button (aka browser backward button)
+	9 = 5th button (aka browser forward button)
+	*/
+	int ydir = 4; // Button 4 is up, 5 is down.
+	int xdir = 6; // Button 6 is left, 7 is right.
+	Display *display = XGetMainDisplay();
+
+	if (y < 0){
+		ydir = 5;
+	}
+	if (x < 0){
+		xdir = 7;
 	}
 
-	/* Set up the OS specific solution */
-	#if defined(__APPLE__)
+	int xi;
+	int yi;
+	for (xi = 0; xi < abs(x); xi++) {
+		XTestFakeButtonEvent(display, xdir, 1, CurrentTime);
+		XTestFakeButtonEvent(display, xdir, 0, CurrentTime);
+	}
+	for (yi = 0; yi < abs(y); yi++) {
+		XTestFakeButtonEvent(display, ydir, 1, CurrentTime);
+		XTestFakeButtonEvent(display, ydir, 0, CurrentTime);
+	}
 
-		CGWheelCount wheel = 1;
-		CGEventRef event;
+	XSync(display, false);
 
-		/* Make scroll magnitude negative if we're scrolling down. */
-		cleanScrollMagnitude = cleanScrollMagnitude * scrollDirection;
+#elif defined(IS_WINDOWS)
 
-		event = CGEventCreateScrollWheelEvent(NULL, kCGScrollEventUnitLine, wheel, cleanScrollMagnitude, 0);
-		CGEventPost(kCGHIDEventTap, event);
+	mouseScrollInputs[0].type = INPUT_MOUSE;
+	mouseScrollInputs[0].mi.dx = 0;
+	mouseScrollInputs[0].mi.dy = 0;
+	mouseScrollInputs[0].mi.dwFlags = MOUSEEVENTF_HWHEEL;
+	mouseScrollInputs[0].mi.time = 0;
+	mouseScrollInputs[0].mi.dwExtraInfo = 0;
+	// Flip x to match other platforms.
+	mouseScrollInputs[0].mi.mouseData = -x;
 
-	#elif defined(USE_X11)
+	mouseScrollInputs[1].type = INPUT_MOUSE;
+	mouseScrollInputs[1].mi.dx = 0;
+	mouseScrollInputs[1].mi.dy = 0;
+	mouseScrollInputs[1].mi.dwFlags = MOUSEEVENTF_WHEEL;
+	mouseScrollInputs[1].mi.time = 0;
+	mouseScrollInputs[1].mi.dwExtraInfo = 0;
+	mouseScrollInputs[1].mi.mouseData = y;
 
-		int x;
-		int dir = 4; /* Button 4 is up, 5 is down. */
-		Display *display = XGetMainDisplay();
-
-		if (scrollDirection == DIRECTION_DOWN)
-		{
-			dir = 5;
-		}
-
-		for (x = 0; x < cleanScrollMagnitude; x++)
-		{
-			XTestFakeButtonEvent(display, dir, 1, CurrentTime);
-			XTestFakeButtonEvent(display, dir, 0, CurrentTime);
-		}
-
-		XFlush(display);
-
-	#elif defined(IS_WINDOWS)
-
-		mouseScrollInput.type = INPUT_MOUSE;
-		mouseScrollInput.mi.dx = 0;
-		mouseScrollInput.mi.dy = 0;
-		mouseScrollInput.mi.dwFlags = MOUSEEVENTF_WHEEL;
-		mouseScrollInput.mi.time = 0;
-		mouseScrollInput.mi.dwExtraInfo = 0;
-		mouseScrollInput.mi.mouseData = WHEEL_DELTA * scrollDirection * cleanScrollMagnitude;
-
-		SendInput(1, &mouseScrollInput, sizeof(mouseScrollInput));
-
-	#endif
+	SendInput(2, mouseScrollInputs, sizeof(mouseScrollInputs));
+#endif
 }
 
 /*
