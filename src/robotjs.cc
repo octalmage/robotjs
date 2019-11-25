@@ -60,8 +60,8 @@ NAN_METHOD(dragMouse)
 		return Nan::ThrowError("Invalid number of arguments.");
 	}
 
-	const size_t x = Nan::To<int32_t>(info[0]).FromJust();
-	const size_t y = Nan::To<int32_t>(info[1]).FromJust();
+	const int32_t x = Nan::To<int32_t>(info[0]).FromJust();
+	const int32_t y = Nan::To<int32_t>(info[1]).FromJust();
 	MMMouseButton button = LEFT_BUTTON;
 
 	if (info.Length() == 3)
@@ -80,10 +80,17 @@ NAN_METHOD(dragMouse)
 		}
 	}
 
-	MMPoint point;
-	point = MMPointMake(x, y);
+	MMSignedPoint point;
+	point = MMSignedPointMake(x, y);
 	dragMouse(point, button);
 	microsleep(mouseDelay);
+
+	info.GetReturnValue().Set(Nan::New(1));
+}
+
+NAN_METHOD(updateScreenMetrics)
+{
+	updateScreenMetrics();
 
 	info.GetReturnValue().Set(Nan::New(1));
 }
@@ -94,11 +101,12 @@ NAN_METHOD(moveMouse)
 	{
 		return Nan::ThrowError("Invalid number of arguments.");
 	}
-	size_t x = Nan::To<int32_t>(info[0]).FromJust();
-	size_t y = Nan::To<int32_t>(info[1]).FromJust();
 
-	MMPoint point;
-	point = MMPointMake(x, y);
+	int32_t x = Nan::To<int32_t>(info[0]).FromJust();
+	int32_t y = Nan::To<int32_t>(info[1]).FromJust();
+
+	MMSignedPoint point;
+	point = MMSignedPointMake(x, y);
 	moveMouse(point);
 	microsleep(mouseDelay);
 
@@ -314,6 +322,7 @@ static KeyNames key_names[] =
 	{ "alt",            K_ALT },
 	{ "right_alt",      K_RIGHT_ALT },
 	{ "control",        K_CONTROL },
+	{ "left_control",   K_LEFT_CONTROL },
 	{ "right_control",  K_RIGHT_CONTROL },
 	{ "shift",          K_SHIFT },
 	{ "right_shift",    K_RIGHTSHIFT },
@@ -405,7 +414,7 @@ int CheckKeyFlags(char* f, MMKeyFlags* flags)
 	{
 		*flags = MOD_META;
 	}
-	else if(strcmp(f, "control") == 0 || strcmp(f, "right_control") == 0)
+	else if(strcmp(f, "control") == 0 || strcmp(f, "right_control") == 0 || strcmp(f, "left_control") == 0)
 	{
 		*flags = MOD_CONTROL;
 	}
@@ -828,6 +837,9 @@ NAN_MODULE_INIT(InitAll)
 {
 	Nan::Set(target, Nan::New("dragMouse").ToLocalChecked(),
 		Nan::GetFunction(Nan::New<FunctionTemplate>(dragMouse)).ToLocalChecked());
+
+	Nan::Set(target, Nan::New("updateScreenMetrics").ToLocalChecked(),
+		Nan::GetFunction(Nan::New<FunctionTemplate>(updateScreenMetrics)).ToLocalChecked());
 
 	Nan::Set(target, Nan::New("moveMouse").ToLocalChecked(),
 		Nan::GetFunction(Nan::New<FunctionTemplate>(moveMouse)).ToLocalChecked());
