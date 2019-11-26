@@ -126,7 +126,7 @@ NAN_METHOD(moveMouseSmooth)
 	point = MMPointMake(x, y);
 	if (info.Length() == 3)
 	{
-	        size_t speed = Nan::To<int32_t>(info[2]).FromJust();
+		size_t speed = Nan::To<int32_t>(info[2]).FromJust();
 		smoothlyMoveMouse(point, speed);
 	}
 	else
