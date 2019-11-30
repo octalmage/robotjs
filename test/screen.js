@@ -32,6 +32,8 @@ describe('Screen', () => {
 
   it('Get screen size.', function()
   {
+    console.log(robot.getScreenSize());
+
     expect(screenSize = robot.getScreenSize()).toBeTruthy();
     expect(screenSize.width !== undefined).toBeTruthy();
     expect(screenSize.height !== undefined).toBeTruthy();

@@ -9,7 +9,8 @@
     "test:darwin:linux": "jasmine 'test/**/*.js'",
     "test:win32": "jasmine test/**/*.js",
     "install": "prebuild-install || node-gyp rebuild",
-    "prebuild": "prebuild --all"
+    "build": "node-gyp --debug configure rebuild",
+    "build:release": "node-gyp build"
   },
   "repository": {
     "type": "git",
@@ -40,13 +41,22 @@
   },
   "homepage": "https://github.com/octalmage/robotjs",
   "dependencies": {
-    "nan": "^2.14.0",
+    "conventional-changelog": "^3.1.15",
+    "node-addon-api": "*",
     "prebuild-install": "^5.3.3"
   },
   "devDependencies": {
-    "jasmine": "^2.99.0",
+    "jasmine": "^3.5.0",
+    "jest": "^24.9.0",
+    "nan": "^2.14.0",
+    "node-gyp": "^6.0.1",
     "prebuild": "^9.1.1",
-    "run-script-os": "^1.0.3",
+    "run-script-os": "^1.0.7",
     "targetpractice": "0.0.7"
+  },
+  "jest": {
+    "testMatch": [
+      "**/test/**/*.[jt]s?(x)"
+    ]
   }
 }
