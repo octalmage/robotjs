@@ -11,7 +11,7 @@
 	#include <stdbool.h>
 #endif
 #ifdef __cplusplus
-extern "C" 
+extern "C"
 {
 #endif
 #if defined(IS_MACOSX)
@@ -49,7 +49,7 @@ extern "C"
 #define MMMouseButtonIsValid(button) \
 	(button == LEFT_BUTTON || button == RIGHT_BUTTON || \
 	 button == CENTER_BUTTON)
-	 
+
 enum __MMMouseWheelDirection
 {
 	DIRECTION_DOWN 	= -1,
@@ -57,23 +57,29 @@ enum __MMMouseWheelDirection
 };
 typedef int MMMouseWheelDirection;
 
+/* Updates information about current virtual screen size and coordinates
+ * in Windows
+ * It is up to the caller to ensure that this called before mouse moving
+*/
+void updateScreenMetrics();
+
 /* Immediately moves the mouse to the given point on-screen.
  * It is up to the caller to ensure that this point is within the
  * screen boundaries. */
-void moveMouse(MMPoint point);
+void moveMouse(MMSignedPoint point);
 
 /* Like moveMouse, moves the mouse to the given point on-screen, but marks
  * the event as the mouse being dragged on platforms where it is supported.
  * It is up to the caller to ensure that this point is within the screen
  * boundaries. */
-void dragMouse(MMPoint point, const MMMouseButton button);
+void dragMouse(MMSignedPoint point, const MMMouseButton button);
 
 /* Smoothly moves the mouse from the current position to the given point.
  * deadbeef_srand() should be called before using this function.
  *
  * Returns false if unsuccessful (i.e. a point was hit that is outside of the
  * screen boundaries), or true if successful. */
-bool smoothlyMoveMouse(MMPoint point);
+bool smoothlyMoveMouse(MMPoint point,double speed);
 
 /* Returns the coordinates of the mouse on the current screen. */
 MMPoint getMousePos(void);
@@ -88,7 +94,7 @@ void clickMouse(MMMouseButton button);
 /* Double clicks the mouse with the given button. */
 void doubleClick(MMMouseButton button);
 
-/* Scrolls the mouse in the stated direction. 
+/* Scrolls the mouse in the stated direction.
  * TODO: Add a smoothly scroll mouse next. */
 void scrollMouse(int x, int y);
 

@@ -1,14 +1,17 @@
 {
   "name": "robotjs",
-  "version": "0.4.7",
+  "version": "0.5.1",
   "description": "Node.js Desktop Automation.",
   "main": "index.js",
   "typings": "index.d.ts",
   "scripts": {
-    "test": "node test/all.js",
+    "test": "run-script-os",
+    "test:darwin:linux": "jasmine 'test/**/*.js'",
     "test-keyboard": "node test/keyboard.js",
+    "test:win32": "jasmine test/**/*.js",
     "install": "prebuild-install || node-gyp rebuild",
-    "install-debug": "prebuild-install || node-gyp rebuild --debug"
+    "install-debug": "prebuild-install || node-gyp rebuild --debug",
+    "prebuild": "prebuild --all"
   },
   "repository": {
     "type": "git",
@@ -39,11 +42,14 @@
   },
   "homepage": "https://github.com/octalmage/robotjs",
   "dependencies": {
-    "nan": "^2.8.0",
-    "prebuild-install": "^2.4.1"
+    "nan": "^2.14.0",
+    "prebuild-install": "^5.3.3"
   },
   "devDependencies": {
     "tape": "^4.8.0",
-    "prebuild": "v7.0.0"
+    "jasmine": "^2.99.0",
+    "prebuild": "^9.1.1",
+    "run-script-os": "^1.0.3",
+    "targetpractice": "0.0.7"
   }
 }

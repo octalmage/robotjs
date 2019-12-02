@@ -41,6 +41,18 @@
 
 #elif defined(IS_WINDOWS)
 
+// The width of the virtual screen, in pixels.
+static int vscreenWidth = -1; // not initialized
+
+// The height of the virtual screen, in pixels.
+static int vscreenHeight = -1; // not initialized
+
+// The coordinates for the left side of the virtual screen.
+static int vscreenMinX = 0;
+
+// The coordinates for the top of the virtual screen.
+static int vscreenMinY = 0;
+
 #define MMMouseToMEventF(down, button) \
 	(down ? MMMouseDownToMEventF(button) : MMMouseUpToMEventF(button))
 
@@ -62,7 +74,7 @@
  * @param event The mouse move event (by ref).
  * @param point The new mouse x and y.
  */
-void calculateDeltas(CGEventRef *event, MMPoint point)
+void calculateDeltas(CGEventRef *event, MMSignedPoint point)
 {
 	/**
 	 * The next few lines are a workaround for games not detecting mouse moves.
@@ -83,16 +95,24 @@ void calculateDeltas(CGEventRef *event, MMPoint point)
 }
 #endif
 
-
+void updateScreenMetrics()
+{
+	#if defined(IS_WINDOWS)
+		vscreenWidth = GetSystemMetrics(SM_CXVIRTUALSCREEN);
+		vscreenHeight = GetSystemMetrics(SM_CYVIRTUALSCREEN);
+		vscreenMinX = GetSystemMetrics(SM_XVIRTUALSCREEN);
+		vscreenMinY = GetSystemMetrics(SM_YVIRTUALSCREEN);
+	#endif
+}
 /**
  * Move the mouse to a specific point.
  * @param point The coordinates to move the mouse to (x, y).
  */
-void moveMouse(MMPoint point)
+void moveMouse(MMSignedPoint point)
 {
 #if defined(IS_MACOSX)
 	CGEventRef move = CGEventCreateMouseEvent(NULL, kCGEventMouseMoved,
-	                                          CGPointFromMMPoint(point),
+	                                          CGPointFromMMSignedPoint(point),
 	                                          kCGMouseButtonLeft);
 
 	calculateDeltas(&move, point);
@@ -103,31 +123,35 @@ void moveMouse(MMPoint point)
 	Display *display = XGetMainDisplay();
 	XWarpPointer(display, None, DefaultRootWindow(display),
 	             0, 0, 0, 0, point.x, point.y);
-	XFlush(display);
+	XSync(display, false);
 #elif defined(IS_WINDOWS)
-	//Mouse motion is now done using SendInput with MOUSEINPUT. We use Absolute mouse positioning
-	#define MOUSE_COORD_TO_ABS(coord, width_or_height) (((65536 * coord) / width_or_height) + (coord < 0 ? -1 : 1))
-	point.x = MOUSE_COORD_TO_ABS(point.x, GetSystemMetrics(SM_CXSCREEN));
-	point.y = MOUSE_COORD_TO_ABS(point.y, GetSystemMetrics(SM_CYSCREEN));
-	INPUT mouseInput;
-	mouseInput.type = INPUT_MOUSE;
-	mouseInput.mi.dx = point.x;
-	mouseInput.mi.dy = point.y;
-	mouseInput.mi.dwFlags = MOUSEEVENTF_ABSOLUTE | MOUSEEVENTF_MOVE;
-	mouseInput.mi.time = 0; //System will provide the timestamp
-	mouseInput.mi.dwExtraInfo = 0;
-	mouseInput.mi.mouseData = 0;
-	SendInput(1, &mouseInput, sizeof(mouseInput));
 
+	if(vscreenWidth<0 || vscreenHeight<0)
+		updateScreenMetrics();
+
+	//Mouse motion is now done using SendInput with MOUSEINPUT. We use Absolute mouse positioning
+	#define MOUSE_COORD_TO_ABS(coord, width_or_height) ((65536 * (coord) / width_or_height) + ((coord) < 0 ? -1 : 1))
+
+	size_t x = MOUSE_COORD_TO_ABS(point.x-vscreenMinX, vscreenWidth);
+	size_t y = MOUSE_COORD_TO_ABS(point.y-vscreenMinY, vscreenHeight);
+
+	INPUT mouseInput = {0};
+	mouseInput.type = INPUT_MOUSE;
+	mouseInput.mi.dx = x;
+	mouseInput.mi.dy = y;
+	mouseInput.mi.dwFlags = MOUSEEVENTF_ABSOLUTE | MOUSEEVENTF_MOVE | MOUSEEVENTF_VIRTUALDESK;
+	mouseInput.mi.time = 0; //System will provide the timestamp
+
+	SendInput(1, &mouseInput, sizeof(mouseInput));
 #endif
 }
 
-void dragMouse(MMPoint point, const MMMouseButton button)
+void dragMouse(MMSignedPoint point, const MMMouseButton button)
 {
 #if defined(IS_MACOSX)
 	const CGEventType dragType = MMMouseDragToCGEventType(button);
 	CGEventRef drag = CGEventCreateMouseEvent(NULL, dragType,
-	                                                CGPointFromMMPoint(point),
+	                                                CGPointFromMMSignedPoint(point),
 	                                                (CGMouseButton)button);
 	calculateDeltas(&drag, point);
 
@@ -184,9 +208,17 @@ void toggleMouse(bool down, MMMouseButton button)
 #elif defined(USE_X11)
 	Display *display = XGetMainDisplay();
 	XTestFakeButtonEvent(display, button, down ? True : False, CurrentTime);
-	XFlush(display);
+	XSync(display, false);
 #elif defined(IS_WINDOWS)
-	mouse_event(MMMouseToMEventF(down, button), 0, 0, 0, 0);
+	INPUT mouseInput;
+	mouseInput.type = INPUT_MOUSE;
+	mouseInput.mi.dx = 0;
+	mouseInput.mi.dy = 0;
+	mouseInput.mi.dwFlags = MMMouseToMEventF(down, button);
+	mouseInput.mi.time = 0; //System will provide the timestamp
+	mouseInput.mi.dwExtraInfo = 0;
+	mouseInput.mi.mouseData = 0;
+	SendInput(1, &mouseInput, sizeof(mouseInput));
 #endif
 }
 
@@ -237,8 +269,7 @@ void scrollMouse(int x, int y)
 #if defined(IS_WINDOWS)
 	// Fix for #97 https://github.com/octalmage/robotjs/issues/97,
 	// C89 needs variables declared on top of functions (mouseScrollInput)
-	INPUT mouseScrollInputH;
-	INPUT mouseScrollInputV;
+	INPUT mouseScrollInputs[2];
 #endif
 
   /* Direction should only be considered based on the scrollDirection. This
@@ -256,8 +287,20 @@ void scrollMouse(int x, int y)
 
 #elif defined(USE_X11)
 
-	int ydir = 4; /* Button 4 is up, 5 is down. */
-	int xdir = 6;
+	/*
+	X11 Mouse Button Numbering
+	1 = left button
+	2 = middle button (pressing the scroll wheel)
+	3 = right button
+	4 = turn scroll wheel up
+	5 = turn scroll wheel down
+	6 = push scroll wheel left
+	7 = push scroll wheel right
+	8 = 4th button (aka browser backward button)
+	9 = 5th button (aka browser forward button)
+	*/
+	int ydir = 4; // Button 4 is up, 5 is down.
+	int xdir = 6; // Button 6 is left, 7 is right.
 	Display *display = XGetMainDisplay();
 
 	if (y < 0){
@@ -274,32 +317,32 @@ void scrollMouse(int x, int y)
 		XTestFakeButtonEvent(display, xdir, 0, CurrentTime);
 	}
 	for (yi = 0; yi < abs(y); yi++) {
-		YTestFakeButtonEvent(display, ydir, 1, CurrentTime);
-		YTestFakeButtonEvent(display, ydir, 0, CurrentTime);
+		XTestFakeButtonEvent(display, ydir, 1, CurrentTime);
+		XTestFakeButtonEvent(display, ydir, 0, CurrentTime);
 	}
 
-	XFlush(display);
+	XSync(display, false);
 
 #elif defined(IS_WINDOWS)
 
-	mouseScrollInputH.type = INPUT_MOUSE;
-	mouseScrollInputH.mi.dx = 0;
-	mouseScrollInputH.mi.dy = 0;
-	mouseScrollInputH.mi.dwFlags = MOUSEEVENTF_WHEEL;
-	mouseScrollInputH.mi.time = 0;
-	mouseScrollInputH.mi.dwExtraInfo = 0;
-	mouseScrollInputH.mi.mouseData = WHEEL_DELTA * x;
+	mouseScrollInputs[0].type = INPUT_MOUSE;
+	mouseScrollInputs[0].mi.dx = 0;
+	mouseScrollInputs[0].mi.dy = 0;
+	mouseScrollInputs[0].mi.dwFlags = MOUSEEVENTF_HWHEEL;
+	mouseScrollInputs[0].mi.time = 0;
+	mouseScrollInputs[0].mi.dwExtraInfo = 0;
+	// Flip x to match other platforms.
+	mouseScrollInputs[0].mi.mouseData = -x;
 
-	mouseScrollInputV.type = INPUT_MOUSE;
-	mouseScrollInputV.mi.dx = 0;
-	mouseScrollInputV.mi.dy = 0;
-	mouseScrollInputV.mi.dwFlags = MOUSEEVENTF_HWHEEL;
-	mouseScrollInputV.mi.time = 0;
-	mouseScrollInputV.mi.dwExtraInfo = 0;
-	mouseScrollInputV.mi.mouseData = WHEEL_DELTA * y;
+	mouseScrollInputs[1].type = INPUT_MOUSE;
+	mouseScrollInputs[1].mi.dx = 0;
+	mouseScrollInputs[1].mi.dy = 0;
+	mouseScrollInputs[1].mi.dwFlags = MOUSEEVENTF_WHEEL;
+	mouseScrollInputs[1].mi.time = 0;
+	mouseScrollInputs[1].mi.dwExtraInfo = 0;
+	mouseScrollInputs[1].mi.mouseData = y;
 
-	SendInput(1, &mouseScrollInputH, sizeof(mouseScrollInputH));
-	SendInput(1, &mouseScrollInputV, sizeof(mouseScrollInputV));
+	SendInput(2, mouseScrollInputs, sizeof(mouseScrollInputs));
 #endif
 }
 
@@ -327,7 +370,7 @@ static double crude_hypot(double x, double y)
 	return ((M_SQRT2 - 1.0) * small) + big;
 }
 
-bool smoothlyMoveMouse(MMPoint endPoint)
+bool smoothlyMoveMouse(MMPoint endPoint,double speed)
 {
 	MMPoint pos = getMousePos();
 	MMSize screenSize = getMainDisplaySize();
@@ -355,10 +398,10 @@ bool smoothlyMoveMouse(MMPoint endPoint)
 			return false;
 		}
 
-		moveMouse(pos);
+		moveMouse(MMSignedPointMake((int32_t)pos.x, (int32_t)pos.y));
 
-		/* Wait 1 - 3 milliseconds. */
-		microsleep(DEADBEEF_UNIFORM(1.0, 3.0));
+		/* Wait 1 - (speed) milliseconds. */
+		microsleep(DEADBEEF_UNIFORM(0.7, speed));
 	}
 
 	return true;
