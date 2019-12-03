@@ -598,7 +598,7 @@ NAN_METHOD(keyToggle)
 
 NAN_METHOD(unicodeTap)
 {
-	size_t value = info[0]->Int32Value();
+	size_t value = info[0]->Int32Value(Nan::GetCurrentContext());
 
 	if (value != 0) {
 		unicodeTap(value);
