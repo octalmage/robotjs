@@ -41,20 +41,13 @@ export function typeStringDelayed(string: string, cpm: number) : number
  * @param delay mouse delay in ms
  */
 export function setMouseDelay(delay: number) : void
-/**
- * @param x 
- * @param y 
- * @param delay mouse delay in ms
- */
+export function updateScreenMetrics() : void
+
 export function moveMouse(x: number, y: number) : number
-/**
- * @param x 
- * @param y 
- * @param delay mouse delay in ms
- */
-export function moveMouseSmooth(x: number, y: number) : number
+export function moveMouseSmooth(x: number, y: number, speed?:number) : number
 export function mouseClick(button?: "left" | "right" | "middle", double?: boolean) : void
 export function mouseToggle(down?: "down" | "up", button?: "left" | "right" | "middle") : void
+
 export function dragMouse(x: number, y: number) : void
 export function scrollMouse(x: number, y: number) : void
 export function getMousePos(): { x: number, y: number }
@@ -67,6 +60,6 @@ export function getXDisplayName(): String
 /**
  * X11 only change display name
  */
-export function setXDisplayName(String: name): number
+export function setXDisplayName(name: string): number
 
 export var screen: Screen

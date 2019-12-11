@@ -16,7 +16,7 @@
 /* Convenience wrappers around ugly APIs. */
 #if defined(IS_WINDOWS)
 	#define WIN32_KEY_EVENT_WAIT(key, flags) \
-		(win32KeyEvent(key, flags), Sleep(DEADBEEF_RANDRANGE(0, 63)))
+		(win32KeyEvent(key, flags), Sleep(DEADBEEF_RANDRANGE(63, 125)))
 #elif defined(USE_X11)
 	#define X_KEY_EVENT(display, key, is_press) \
 		(XTestFakeKeyEvent(display, \
@@ -25,7 +25,7 @@
 		 XSync(display, false))
 	#define X_KEY_EVENT_WAIT(display, key, is_press) \
 		(X_KEY_EVENT(display, key, is_press), \
-		 microsleep(DEADBEEF_UNIFORM(0.0, 62.5)))
+		 microsleep(DEADBEEF_UNIFORM(62.5, 125.0)))
 #endif
 
 #if defined(IS_MACOSX)
@@ -101,9 +101,12 @@ void win32KeyEvent(int key, MMKeyFlags flags)
 	if ( flags & KEYEVENTF_KEYUP ) {
 		scan |= 0x80;
 	}
+
+	flags |= KEYEVENTF_SCANCODE;
+
 	INPUT keyboardInput;
 	keyboardInput.type = INPUT_KEYBOARD;
-	keyboardInput.ki.wVk = key;
+	keyboardInput.ki.wVk = 0;
 	keyboardInput.ki.wScan = scan;
 	keyboardInput.ki.dwFlags = flags;
 	keyboardInput.ki.time = 0;
@@ -140,24 +143,46 @@ void toggleKeyCode(MMKeyCode code, const bool down, MMKeyFlags flags)
 #elif defined(IS_WINDOWS)
 	const DWORD dwFlags = down ? 0 : KEYEVENTF_KEYUP;
 
-	/* Parse modifier keys. */
-	if (flags & MOD_META) WIN32_KEY_EVENT_WAIT(K_META, dwFlags);
-	if (flags & MOD_ALT) WIN32_KEY_EVENT_WAIT(K_ALT, dwFlags);
-	if (flags & MOD_CONTROL) WIN32_KEY_EVENT_WAIT(K_CONTROL, dwFlags);
-	if (flags & MOD_SHIFT) WIN32_KEY_EVENT_WAIT(K_SHIFT, dwFlags);
+	if (down) {
+		/* Parse modifier keys. */
+		if (flags & MOD_META) WIN32_KEY_EVENT_WAIT(K_META, dwFlags);
+		if (flags & MOD_ALT) WIN32_KEY_EVENT_WAIT(K_ALT, dwFlags);
+		if (flags & MOD_CONTROL) WIN32_KEY_EVENT_WAIT(K_CONTROL, dwFlags);
+		if (flags & MOD_SHIFT) WIN32_KEY_EVENT_WAIT(K_SHIFT, dwFlags);
 
-	win32KeyEvent(code, dwFlags);
+		WIN32_KEY_EVENT_WAIT(code, dwFlags);
+	} else {
+		/* Reverse order for key up */
+		WIN32_KEY_EVENT_WAIT(code, dwFlags);
+
+		/* Parse modifier keys. */
+		if (flags & MOD_META) win32KeyEvent(K_META, dwFlags);
+		if (flags & MOD_ALT) win32KeyEvent(K_ALT, dwFlags);
+		if (flags & MOD_CONTROL) win32KeyEvent(K_CONTROL, dwFlags);
+		if (flags & MOD_SHIFT) win32KeyEvent(K_SHIFT, dwFlags);
+	}
 #elif defined(USE_X11)
 	Display *display = XGetMainDisplay();
 	const Bool is_press = down ? True : False; /* Just to be safe. */
 
-	/* Parse modifier keys. */
-	if (flags & MOD_META) X_KEY_EVENT_WAIT(display, K_META, is_press);
-	if (flags & MOD_ALT) X_KEY_EVENT_WAIT(display, K_ALT, is_press);
-	if (flags & MOD_CONTROL) X_KEY_EVENT_WAIT(display, K_CONTROL, is_press);
-	if (flags & MOD_SHIFT) X_KEY_EVENT_WAIT(display, K_SHIFT, is_press);
+	if (down) {
+		/* Parse modifier keys. */
+		if (flags & MOD_META) X_KEY_EVENT_WAIT(display, K_META, is_press);
+		if (flags & MOD_ALT) X_KEY_EVENT_WAIT(display, K_ALT, is_press);
+		if (flags & MOD_CONTROL) X_KEY_EVENT_WAIT(display, K_CONTROL, is_press);
+		if (flags & MOD_SHIFT) X_KEY_EVENT_WAIT(display, K_SHIFT, is_press);
 
-	X_KEY_EVENT(display, code, is_press);
+		X_KEY_EVENT_WAIT(display, code, is_press);
+	} else {
+		/* Reverse order for key up */
+		X_KEY_EVENT_WAIT(display, code, is_press);
+
+		/* Parse modifier keys. */
+		if (flags & MOD_META) X_KEY_EVENT(display, K_META, is_press);
+		if (flags & MOD_ALT) X_KEY_EVENT(display, K_ALT, is_press);
+		if (flags & MOD_CONTROL) X_KEY_EVENT(display, K_CONTROL, is_press);
+		if (flags & MOD_SHIFT) X_KEY_EVENT(display, K_SHIFT, is_press);
+	}
 #endif
 }
 
