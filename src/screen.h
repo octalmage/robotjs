@@ -16,7 +16,7 @@ extern "C"
 #endif
 
 /* Returns the size of the main display. */
-MMSignedSize getMainDisplaySize(void);
+MMSize getMainDisplaySize(void);
 
 /* Convenience function that returns whether the given point is in the bounds
  * of the main screen. */

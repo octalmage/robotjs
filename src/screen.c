@@ -8,7 +8,7 @@
 	#include "xdisplay.h"
 #endif
 
-MMSignedSize getMainDisplaySize(void)
+MMSize getMainDisplaySize(void)
 {
 #if defined(IS_MACOSX)
 	CGDirectDisplayID displayID = CGMainDisplayID();
@@ -21,13 +21,13 @@ MMSignedSize getMainDisplaySize(void)
 	return MMSizeMake((size_t)DisplayWidth(display, screen),
 	                  (size_t)DisplayHeight(display, screen));
 #elif defined(IS_WINDOWS)
-	return MMSignedSizeMake((size_t)GetSystemMetrics(SM_CXVIRTUALSCREEN),
-	                  (size_t)GetSystemMetrics(SM_CYVIRTUALSCREEN));
+	return MMSizeMake((size_t)GetSystemMetrics(SM_CXSCREEN),
+	                  (size_t)GetSystemMetrics(SM_CYSCREEN));
 #endif
 }
 
 bool pointVisibleOnMainDisplay(MMPoint point)
 {
-	MMSignedSize displaySize = getMainDisplaySize();
+	MMSize displaySize = getMainDisplaySize();
 	return point.x < displaySize.width && point.y < displaySize.height;
 }

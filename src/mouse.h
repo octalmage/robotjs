@@ -66,7 +66,7 @@ void updateScreenMetrics();
 /* Immediately moves the mouse to the given point on-screen.
  * It is up to the caller to ensure that this point is within the
  * screen boundaries. */
-void moveMouse(MMSignedPoint point, bool sm);
+void moveMouse(MMSignedPoint point);
 
 /* Like moveMouse, moves the mouse to the given point on-screen, but marks
  * the event as the mouse being dragged on platforms where it is supported.
@@ -82,7 +82,7 @@ void dragMouse(MMSignedPoint point, const MMMouseButton button);
 bool smoothlyMoveMouse(MMPoint point,double speed);
 
 /* Returns the coordinates of the mouse on the current screen. */
-MMSignedPoint getMousePos(void);
+MMPoint getMousePos(void);
 
 /* Holds down or releases the mouse with the given button in the current
  * position. */
