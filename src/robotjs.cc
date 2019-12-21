@@ -107,7 +107,7 @@ NAN_METHOD(moveMouse)
 
 	MMSignedPoint point;
 	point = MMSignedPointMake(x, y);
-	moveMouse(point);
+	moveMouse(point,false);
 	microsleep(mouseDelay);
 
 	info.GetReturnValue().Set(Nan::New(1));
@@ -140,7 +140,7 @@ NAN_METHOD(moveMouseSmooth)
 
 NAN_METHOD(getMousePos)
 {
-	MMPoint pos = getMousePos();
+	MMSignedPoint pos = getMousePos();
 
 	//Return object with .x and .y.
 	Local<Object> obj = Nan::New<Object>();
@@ -689,7 +689,7 @@ NAN_METHOD(getPixelColor)
 NAN_METHOD(getScreenSize)
 {
 	//Get display size.
-	MMSize displaySize = getMainDisplaySize();
+	MMSignedSize displaySize = getMainDisplaySize();
 
 	//Create our return object.
 	Local<Object> obj = Nan::New<Object>();
@@ -746,7 +746,7 @@ NAN_METHOD(captureScreen)
 		y = 0;
 
 		//Get screen size.
-		MMSize displaySize = getMainDisplaySize();
+		MMSignedSize displaySize = getMainDisplaySize();
 		w = displaySize.width;
 		h = displaySize.height;
 	}

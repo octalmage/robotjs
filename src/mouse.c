@@ -108,7 +108,7 @@ void updateScreenMetrics()
  * Move the mouse to a specific point.
  * @param point The coordinates to move the mouse to (x, y).
  */
-void moveMouse(MMSignedPoint point)
+void moveMouse(MMSignedPoint point, bool sm)
 {
 #if defined(IS_MACOSX)
 	CGEventRef move = CGEventCreateMouseEvent(NULL, kCGEventMouseMoved,
@@ -128,13 +128,20 @@ void moveMouse(MMSignedPoint point)
 
 	if(vscreenWidth<0 || vscreenHeight<0)
 		updateScreenMetrics();
+	int32_t x = 0;
+	int32_t y = 0;
+	if (!sm)
+	{
+		//Mouse motion is now done using SendInput with MOUSEINPUT. We use Absolute mouse positioning
+		#define MOUSE_COORD_TO_ABS(coord, width_or_height) ((65536 * (coord) / width_or_height) + ((coord) < 0 ? -1 : 1))
 
-	//Mouse motion is now done using SendInput with MOUSEINPUT. We use Absolute mouse positioning
-	#define MOUSE_COORD_TO_ABS(coord, width_or_height) ((65536 * (coord) / width_or_height) + ((coord) < 0 ? -1 : 1))
-
-	size_t x = MOUSE_COORD_TO_ABS(point.x-vscreenMinX, vscreenWidth);
-	size_t y = MOUSE_COORD_TO_ABS(point.y-vscreenMinY, vscreenHeight);
-
+		x = MOUSE_COORD_TO_ABS(point.x - vscreenMinX, vscreenWidth);
+		y = MOUSE_COORD_TO_ABS(point.y - vscreenMinY, vscreenHeight);
+	}
+	else {
+		x = point.x;
+		y = point.y;
+	}
 	INPUT mouseInput = {0};
 	mouseInput.type = INPUT_MOUSE;
 	mouseInput.mi.dx = x;
@@ -158,11 +165,11 @@ void dragMouse(MMSignedPoint point, const MMMouseButton button)
 	CGEventPost(kCGSessionEventTap, drag);
 	CFRelease(drag);
 #else
-	moveMouse(point);
+	moveMouse(point,false);
 #endif
 }
 
-MMPoint getMousePos()
+MMSignedPoint getMousePos()
 {
 #if defined(IS_MACOSX)
 	CGEventRef event = CGEventCreate(NULL);
@@ -184,8 +191,13 @@ MMPoint getMousePos()
 #elif defined(IS_WINDOWS)
 	POINT point;
 	GetCursorPos(&point);
+	if (vscreenWidth < 0 || vscreenHeight < 0)
+		updateScreenMetrics();
+	#define MOUSE_COORD_TO_ABS(coord, width_or_height) ((65536 * (coord) / width_or_height) + ((coord) < 0 ? -1 : 1))
 
-	return MMPointFromPOINT(point);
+	int32_t x = MOUSE_COORD_TO_ABS(point.x - vscreenMinX, vscreenWidth);
+	int32_t y = MOUSE_COORD_TO_ABS(point.y - vscreenMinY, vscreenHeight);
+	return MMSignedPointFromPOINT(point);
 #endif
 }
 
@@ -370,15 +382,18 @@ static double crude_hypot(double x, double y)
 	return ((M_SQRT2 - 1.0) * small) + big;
 }
 
-bool smoothlyMoveMouse(MMPoint endPoint,double speed)
+bool smoothlyMoveMouse(MMPoint endPoint, double speed)
 {
-	MMPoint pos = getMousePos();
-	MMSize screenSize = getMainDisplaySize();
+	MMSignedPoint pos = getMousePos();
+	MMSignedSize screenSize = getMainDisplaySize();
 	double velo_x = 0.0, velo_y = 0.0;
 	double distance;
-
+	int32_t x, y = 0;
+	if (vscreenWidth < 0 || vscreenHeight < 0)
+		updateScreenMetrics();
+	double bdist = (distance = crude_hypot((double)pos.x - endPoint.x,(double)pos.y - endPoint.y));
 	while ((distance = crude_hypot((double)pos.x - endPoint.x,
-	                               (double)pos.y - endPoint.y)) > 1.0) {
+		(double)pos.y - endPoint.y)) > 1.0) {
 		double gravity = DEADBEEF_UNIFORM(5.0, 500.0);
 		double veloDistance;
 		velo_x += (gravity * ((double)endPoint.x - pos.x)) / distance;
@@ -397,11 +412,14 @@ bool smoothlyMoveMouse(MMPoint endPoint,double speed)
 		if (pos.x >= screenSize.width || pos.y >= screenSize.height) {
 			return false;
 		}
+		#define MOUSE_COORD_TO_ABS(coord, width_or_height) ((65536 * (coord) / width_or_height) + ((coord) < 0 ? -1 : 1))
 
-		moveMouse(MMSignedPointMake((int32_t)pos.x, (int32_t)pos.y));
+		x = MOUSE_COORD_TO_ABS(pos.x - vscreenMinX, vscreenWidth);
+		y = MOUSE_COORD_TO_ABS(pos.y - vscreenMinY, vscreenHeight);
+		moveMouse(MMSignedPointMake(x,y),true);
 
 		/* Wait 1 - (speed) milliseconds. */
-		microsleep(DEADBEEF_UNIFORM(0.7, speed));
+		microsleep(DEADBEEF_UNIFORM((min(0.7,speed) + (1-(distance / ((bdist + 0.0001) * 2)))), (max(0.7, speed) - (distance / ((bdist + 0.0001) * 1.5)))));
 	}
 
 	return true;
