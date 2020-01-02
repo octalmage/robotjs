@@ -214,10 +214,18 @@ void toggleMouse(bool down, MMMouseButton button)
 	mouseInput.type = INPUT_MOUSE;
 	mouseInput.mi.dx = 0;
 	mouseInput.mi.dy = 0;
-	mouseInput.mi.dwFlags = MMMouseToMEventF(down, button);
+	if (button == X1_BUTTON) {
+		mouseInput.mi.dwFlags = down ? MOUSEEVENTF_XDOWN : MOUSEEVENTF_XUP;
+		mouseInput.mi.mouseData = X1_BUTTON;
+	} else if (button == X2_BUTTON) {
+		mouseInput.mi.dwFlags = down ? MOUSEEVENTF_XDOWN : MOUSEEVENTF_XUP;
+		mouseInput.mi.mouseData = X2_BUTTON;
+	} else {
+		mouseInput.mi.dwFlags = MMMouseToMEventF(down, button);
+		mouseInput.mi.mouseData = 0;
+	}
 	mouseInput.mi.time = 0; //System will provide the timestamp
 	mouseInput.mi.dwExtraInfo = 0;
-	mouseInput.mi.mouseData = 0;
 	SendInput(1, &mouseInput, sizeof(mouseInput));
 #endif
 }

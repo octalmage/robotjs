@@ -38,7 +38,9 @@ extern "C"
 	enum _MMMouseButton {
 		LEFT_BUTTON = 1,
 		CENTER_BUTTON = 2,
-		RIGHT_BUTTON = 3
+		RIGHT_BUTTON = 3,
+		X1_BUTTON = 4,
+		X2_BUTTON = 5
 	};
 	typedef unsigned int MMMouseButton;
 
