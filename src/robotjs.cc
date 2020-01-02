@@ -45,6 +45,14 @@ int CheckMouseButton(const char * const b, MMMouseButton * const button)
 	{
 		*button = CENTER_BUTTON;
 	}
+	else if (strcmp(b, "x1") == 0)
+	{
+		*button = X1_BUTTON;
+	}
+	else if (strcmp(b, "x2") == 0)
+	{
+		*button = X2_BUTTON;
+	}
 	else
 	{
 		return -2;

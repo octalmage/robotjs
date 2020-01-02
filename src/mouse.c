@@ -216,10 +216,10 @@ void toggleMouse(bool down, MMMouseButton button)
 	mouseInput.mi.dy = 0;
 	if (button == X1_BUTTON) {
 		mouseInput.mi.dwFlags = down ? MOUSEEVENTF_XDOWN : MOUSEEVENTF_XUP;
-		mouseInput.mi.mouseData = X1_BUTTON;
+		mouseInput.mi.mouseData = XBUTTON1;
 	} else if (button == X2_BUTTON) {
 		mouseInput.mi.dwFlags = down ? MOUSEEVENTF_XDOWN : MOUSEEVENTF_XUP;
-		mouseInput.mi.mouseData = X2_BUTTON;
+		mouseInput.mi.mouseData = XBUTTON2;
 	} else {
 		mouseInput.mi.dwFlags = MMMouseToMEventF(down, button);
 		mouseInput.mi.mouseData = 0;
