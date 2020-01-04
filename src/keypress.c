@@ -16,7 +16,7 @@
 /* Convenience wrappers around ugly APIs. */
 #if defined(IS_WINDOWS)
 	#define WIN32_KEY_EVENT_WAIT(key, flags) \
-		(win32KeyEvent(key, flags), Sleep(DEADBEEF_RANDRANGE(63, 125)))
+		(win32KeyEvent(key, flags))
 #elif defined(USE_X11)
 	#define X_KEY_EVENT(display, key, is_press) \
 		(XTestFakeKeyEvent(display, \
