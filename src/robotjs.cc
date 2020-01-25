@@ -514,10 +514,11 @@ NAN_METHOD(keyTap)
 			return Nan::ThrowError("Invalid key code specified.");
 			break;
 		default:
-		toggleKeyCode(key, true, flags)
-		microsleep(keyboardDelay);
-		toggleKeyCode(key, false, flags)
-		microsleep(keyboardDelay);
+			toggleKeyCode(key, true, flags);
+			microsleep(keyboardDelay);
+			toggleKeyCode(key, false, flags);
+			microsleep(keyboardDelay);
+			break;
 	}
 
 	info.GetReturnValue().Set(Nan::New(1));
