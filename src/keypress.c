@@ -24,8 +24,7 @@
 		                   is_press, CurrentTime), \
 		 XSync(display, false))
 	#define X_KEY_EVENT_WAIT(display, key, is_press) \
-		(X_KEY_EVENT(display, key, is_press), \
-		 microsleep(DEADBEEF_UNIFORM(62.5, 125.0)))
+		(X_KEY_EVENT(display, key, is_press))
 #endif
 
 #if defined(IS_MACOSX)
