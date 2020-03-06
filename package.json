@@ -7,8 +7,10 @@
   "scripts": {
     "test": "run-script-os",
     "test:darwin:linux": "jasmine 'test/**/*.js'",
+    "test-keyboard": "node test/keyboard.js",
     "test:win32": "jasmine test/**/*.js",
     "install": "prebuild-install || node-gyp rebuild",
+    "install-debug": "prebuild-install || node-gyp rebuild --debug",
     "prebuild": "prebuild --all"
   },
   "repository": {
@@ -44,6 +46,7 @@
     "prebuild-install": "^5.3.3"
   },
   "devDependencies": {
+    "tape": "^4.8.0",
     "jasmine": "^2.99.0",
     "prebuild": "^9.1.1",
     "run-script-os": "^1.0.3",
