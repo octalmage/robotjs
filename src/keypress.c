@@ -318,6 +318,6 @@ void typeStringDelayed(const char *str, const unsigned cpm)
 
 	while (*str != '\0') {
 		tapUniKey(*str++);
-		microsleep(mspc + (DEADBEEF_UNIFORM(0.0, 62.5)));
+		microsleep(mspc);
 	}
 }
