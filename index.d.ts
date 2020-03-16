@@ -34,6 +34,7 @@ export function keyTap(key: string, modifier?: KeyboardModifier | KeyboardModifi
  * @return taping time in ms
  */
 export function keyToggle(key: string, down: string, modifier?: KeyboardModifier | KeyboardModifier[]) : number
+export function unicodeTap(value: number) : void
 export function typeString(string: string) : void
 export function typeStringDelayed(string: string, cpm: number) : number
 /**
