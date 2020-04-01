@@ -313,8 +313,8 @@ void typeStringDelayed(const char *str, const unsigned cpm)
 		}
 
 		unicodeTap(n);
-    
-    if (mspc > 0) {
+
+		if (mspc > 0) {
 			microsleep(mspc);
 		}
 	}
