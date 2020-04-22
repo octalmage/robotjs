@@ -249,11 +249,18 @@ void toggleUnicode(UniChar ch, const bool down)
 	CGEventPost(kCGSessionEventTap, keyEvent);
 	CFRelease(keyEvent);
 }
+#elif defined(USE_X11)
+	#define toggleUniKey(c, down) toggleKey(c, down, MOD_NONE)
 #endif
 
 void unicodeTap(const unsigned value)
 {
-	#if defined(IS_MACOSX)
+	#if defined(USE_X11)
+		char ch = (char)value;
+
+		toggleUniKey(ch, true);
+		toggleUniKey(ch, false);
+	#elif defined(IS_MACOSX)
 		UniChar ch = (UniChar)value; // Convert to unsigned char
 
 		toggleUnicode(ch, true);
