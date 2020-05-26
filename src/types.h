@@ -32,11 +32,19 @@ struct _MMSize {
 typedef struct _MMSize MMSize;
 
 struct _MMRect {
-	MMPoint origin;
+	MMSignedPoint origin;
 	MMSize size;
 };
 
 typedef struct _MMRect MMRect;
+
+struct _MMDisplaySize
+{
+	int32_t displayID;
+	MMSize size;
+};
+
+typedef struct _MMDisplaySize MMDisplaySize;
 
 H_INLINE MMPoint MMPointMake(size_t x, size_t y)
 {
@@ -54,6 +62,15 @@ H_INLINE MMSignedPoint MMSignedPointMake(int32_t x, int32_t y)
 	return point;
 }
 
+H_INLINE MMDisplaySize MMDisplaySizeMake(int32_t displayID, size_t width, size_t height)
+{
+	MMDisplaySize diplaySize;
+	diplaySize.displayID = displayID;
+	diplaySize.size.width = width;
+	diplaySize.size.height = height;
+	return diplaySize;
+}
+
 H_INLINE MMSize MMSizeMake(size_t width, size_t height)
 {
 	MMSize size;
@@ -62,10 +79,10 @@ H_INLINE MMSize MMSizeMake(size_t width, size_t height)
 	return size;
 }
 
-H_INLINE MMRect MMRectMake(size_t x, size_t y, size_t width, size_t height)
+H_INLINE MMRect MMRectMake(int32_t x, int32_t y, size_t width, size_t height)
 {
 	MMRect rect;
-	rect.origin = MMPointMake(x, y);
+	rect.origin = MMSignedPointMake(x, y);
 	rect.size = MMSizeMake(width, height);
 	return rect;
 }

@@ -15,15 +15,13 @@
 	#include <string.h>
 #endif
 
-MMBitmapRef copyMMBitmapFromDisplayInRect(MMRect rect)
+MMBitmapRef copyMMBitmapFromDisplayInRect(int32_t displayID, MMRect rect)
 {
 #if defined(IS_MACOSX)
 
 	MMBitmapRef bitmap = NULL;
 	uint8_t *buffer = NULL;
 	size_t bufferSize = 0;
-
-	CGDirectDisplayID displayID = CGMainDisplayID();
 
 	CGImageRef image = CGDisplayCreateImageForRect(displayID,
 		CGRectMake(rect.origin.x,

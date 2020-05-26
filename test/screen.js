@@ -36,4 +36,10 @@ describe('Screen', () => {
     expect(screenSize.width !== undefined).toBeTruthy();
     expect(screenSize.height !== undefined).toBeTruthy();
   });
+  it("Get all screens size.", function () {
+    expect((screenSize = robot.getAllScreensSize())).toBeTruthy();
+    expect(screenSize.length).toBeGreaterThan(0);
+    expect(screenSize[0].width !== undefined).toBeTruthy();
+    expect(screenSize[0].height !== undefined).toBeTruthy();
+  });
 });

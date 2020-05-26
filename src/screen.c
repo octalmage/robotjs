@@ -8,6 +8,24 @@
 	#include "xdisplay.h"
 #endif
 
+void getAllDisplaySize(uint32_t *_Nullable numDisplays, MMDisplaySize *_Nullable displaySizes)
+{
+#if defined(IS_MACOSX)
+
+	CGDirectDisplayID displays[10];
+
+	CGGetOnlineDisplayList(10, displays, numDisplays);
+	for (uint32_t i = 0; i < *numDisplays; i++)
+	{
+		displaySizes[i] = MMDisplaySizeMake(
+			displays[i],
+			CGDisplayPixelsWide(displays[i]),
+			CGDisplayPixelsHigh(displays[i]));
+	}
+
+#endif
+}
+
 MMSize getMainDisplaySize(void)
 {
 #if defined(IS_MACOSX)
