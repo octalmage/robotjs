@@ -745,8 +745,15 @@ NAN_METHOD(getAllScreensSize)
 	{
 		Local<Object> obj = Nan::New<Object>();
 		Nan::Set(obj, Nan::New("displayID").ToLocalChecked(), Nan::New<Number>(displaySizes[i].displayID));
+		Nan::Set(obj, Nan::New("isMainDisplay").ToLocalChecked(), Nan::New<v8::Boolean>(displaySizes[i].isMainDisplay));
+		
 		Nan::Set(obj, Nan::New("width").ToLocalChecked(), Nan::New<Number>(displaySizes[i].size.width));
 		Nan::Set(obj, Nan::New("height").ToLocalChecked(), Nan::New<Number>(displaySizes[i].size.height));
+
+		Nan::Set(obj, Nan::New("x").ToLocalChecked(), Nan::New<Number>(displaySizes[i].bounds.origin.x));
+		Nan::Set(obj, Nan::New("y").ToLocalChecked(), Nan::New<Number>(displaySizes[i].bounds.origin.y));
+		Nan::Set(obj, Nan::New("w").ToLocalChecked(), Nan::New<Number>(displaySizes[i].bounds.size.width));
+		Nan::Set(obj, Nan::New("h").ToLocalChecked(), Nan::New<Number>(displaySizes[i].bounds.size.height));
 
 		Nan::Set(list, i, obj);
 	}
