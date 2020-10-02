@@ -126,8 +126,10 @@ void moveMouse(MMSignedPoint point)
 	XSync(display, false);
 #elif defined(IS_WINDOWS)
 
+	#if defined(IS_MACOSX)
 	if(vscreenWidth<0 || vscreenHeight<0)
 		updateScreenMetrics();
+	#endif
 
 	//Mouse motion is now done using SendInput with MOUSEINPUT. We use Absolute mouse positioning
 	#define MOUSE_COORD_TO_ABS(coord, width_or_height) ((65536 * (coord) / width_or_height) + ((coord) < 0 ? -1 : 1))
@@ -180,7 +182,7 @@ MMSignedPoint getMousePos()
 	XQueryPointer(display, XDefaultRootWindow(display), &garb1, &garb2,
 	              &x, &y, &garb_x, &garb_y, &more_garbage);
 
-	return MMPointMake(x, y);
+	return MMSignedPointMake(x, y);
 #elif defined(IS_WINDOWS)
 	POINT point;
 	GetCursorPos(&point);
@@ -376,8 +378,11 @@ bool smoothlyMoveMouse(MMPoint endPoint, double speed)
 	MMSignedSize screenSize = getMainDisplaySize();
 	double velo_x = 0.0, velo_y = 0.0;
 	double distance;
+	
+	#if defined(IS_MACOSX)
 	if (vscreenWidth < 0 || vscreenHeight < 0)
 		updateScreenMetrics();
+	#endif
 	double bdist = (distance = crude_hypot((double)pos.x - endPoint.x,(double)pos.y - endPoint.y));
 	while ((distance = crude_hypot((double)pos.x - endPoint.x,
 								   (double)pos.y - endPoint.y)) > 1.0) {
@@ -403,7 +408,7 @@ bool smoothlyMoveMouse(MMPoint endPoint, double speed)
 		moveMouse(MMSignedPointMake(pos.x, pos.y));
 
 		/* Wait 1 - (speed) milliseconds. */
-		microsleep(DEADBEEF_UNIFORM((min(0.7,speed) + (1-(distance / ((bdist + 0.0001) * 2)))), (max(0.7, speed) - (distance / ((bdist + 0.0001) * 1.5)))));
+		microsleep(DEADBEEF_UNIFORM((fmin(0.7,speed) + (1-(distance / ((bdist + 0.0001) * 2)))), (fmax(0.7, speed) - (distance / ((bdist + 0.0001) * 1.5)))));
 	}
 
 	return true;
