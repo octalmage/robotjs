@@ -171,7 +171,7 @@ MMSignedPoint getMousePos()
 	CGPoint point = CGEventGetLocation(event);
 	CFRelease(event);
 
-	return MMPointFromCGPoint(point);
+	return MMSignedPointFromCGPoint(point);
 #elif defined(USE_X11)
 	int x, y; /* This is all we care about. Seriously. */
 	Window garb1, garb2; /* Why you can't specify NULL as a parameter */
@@ -380,7 +380,7 @@ bool smoothlyMoveMouse(MMPoint endPoint, double speed)
 	double velo_x = 0.0, velo_y = 0.0;
 	double distance;
 	
-	#if defined(IS_MACOSX)
+	#if defined(IS_WINDOWS)
 	if (vscreenWidth < 0 || vscreenHeight < 0)
 		updateScreenMetrics();
 	#endif
