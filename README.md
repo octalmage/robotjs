@@ -154,7 +154,7 @@ We've been implementing keys as we need them. Feel free to create an issue or su
 
 #### How about multi-monitor support?
 
-The library doesn't have explicit multi-monitor support, so anything that works is kind of on accident. Subscribe to [#88](https://github.com/octalmage/robotjs/issues/88) for updates.
+Multi-monitor support was introduced in release [0.5.1](https://github.com/octalmage/robotjs/tree/v0.5.1), but it still needs work. Check out [#307](https://github.com/octalmage/robotjs/pull/307) for more info.
 
 For any other questions please [submit an issue](https://github.com/octalmage/robotjs/issues/new).
 
