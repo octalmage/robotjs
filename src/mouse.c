@@ -126,10 +126,8 @@ void moveMouse(MMSignedPoint point)
 	XSync(display, false);
 #elif defined(IS_WINDOWS)
 
-	#if defined(IS_MACOSX)
 	if(vscreenWidth<0 || vscreenHeight<0)
 		updateScreenMetrics();
-	#endif
 
 	//Mouse motion is now done using SendInput with MOUSEINPUT. We use Absolute mouse positioning
 	#define MOUSE_COORD_TO_ABS(coord, width_or_height) ((65536 * (coord) / width_or_height) + ((coord) < 0 ? -1 : 1))
@@ -139,7 +137,7 @@ void moveMouse(MMSignedPoint point)
 
 	INPUT mouseInput = {0};
 	mouseInput.type = INPUT_MOUSE;
-	mouseInput.mi.dx = x;
+	mouseInput.mi.dx = x - 100;
 	mouseInput.mi.dy = y;
 	mouseInput.mi.dwFlags = MOUSEEVENTF_ABSOLUTE | MOUSEEVENTF_MOVE | MOUSEEVENTF_VIRTUALDESK;
 	mouseInput.mi.time = 0; //System will provide the timestamp
@@ -373,7 +371,7 @@ static double crude_hypot(double x, double y)
 	return ((M_SQRT2 - 1.0) * small) + big;
 }
 
-bool smoothlyMoveMouse(MMPoint endPoint, double speed)
+bool smoothlyMoveMouse(MMSignedPoint endPoint, double speed)
 {
 	MMSignedPoint pos = getMousePos();
 	MMSignedSize screenSize = getMainDisplaySize();
@@ -408,9 +406,9 @@ bool smoothlyMoveMouse(MMPoint endPoint, double speed)
 		#else
 		/* Make sure we are in the screen boundaries!
 		 * (Strange things will happen if we are not.) */
-		if (pos.x >= screenSize.width || pos.y >= screenSize.height) {
-			return false;
-		}
+		//if (pos.x >= screenSize.width || pos.y >= screenSize.height) {
+		//	return false;
+		//}
 		#endif
 
 		moveMouse(MMSignedPointMake(pos.x, pos.y));
