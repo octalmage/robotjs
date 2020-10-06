@@ -14,31 +14,34 @@
 	#include "xdisplay.h"
 #endif
 
-#include <windows.h>
-#include <iostream>
+
+#if defined(IS_WINDOWS)
+	#include <windows.h>
+
+	struct MonitorRects
+	{
+		std::vector<RECT>   rcMonitors;
+
+		static BOOL CALLBACK MonitorEnum(HMONITOR hMon,HDC hdc,LPRECT lprcMonitor,LPARAM pData)
+		{
+			MonitorRects* pThis = reinterpret_cast<MonitorRects*>(pData);
+			pThis->rcMonitors.push_back(*lprcMonitor);
+			return TRUE;
+		}
+
+		MonitorRects()
+		{
+			EnumDisplayMonitors(0, 0, MonitorEnum, (LPARAM)this);
+		}
+	};
+#endif
+
 
 using namespace v8;
 
 //Global delays.
 int mouseDelay = 10;
 int keyboardDelay = 10;
-
-struct MonitorRects
-{
-    std::vector<RECT>   rcMonitors;
-
-    static BOOL CALLBACK MonitorEnum(HMONITOR hMon,HDC hdc,LPRECT lprcMonitor,LPARAM pData)
-    {
-        MonitorRects* pThis = reinterpret_cast<MonitorRects*>(pData);
-        pThis->rcMonitors.push_back(*lprcMonitor);
-        return TRUE;
-    }
-
-    MonitorRects()
-    {
-        EnumDisplayMonitors(0, 0, MonitorEnum, (LPARAM)this);
-    }
-};
 
 /*
  __  __
@@ -746,16 +749,16 @@ NAN_METHOD(getScreenSize)
 }
 
 
-NAN_METHOD(getScreenSizes)
+
+NAN_METHOD(getScreenRects)
 {
+	#if defined(IS_WINDOWS)
 	
 	MonitorRects monitors;
 	
 	Local<Array> a = Nan::New<Array>(monitors.rcMonitors.size());
 	
 	for (int i = 0; i < monitors.rcMonitors.size(); ++i){
-		std::cout <<  monitors.rcMonitors[i].left << " " << monitors.rcMonitors[i].right << " " << monitors.rcMonitors[i].top  << " " << monitors.rcMonitors[i].bottom << "\n";			
-		//Create our return object.
 		Local<Object> obj = Nan::New<Object>();
 		Nan::Set(obj, Nan::New("left").ToLocalChecked(), Nan::New<Number>(monitors.rcMonitors[i].left));
 		Nan::Set(obj, Nan::New("top").ToLocalChecked(), Nan::New<Number>(monitors.rcMonitors[i].top));
@@ -763,9 +766,13 @@ NAN_METHOD(getScreenSizes)
 		Nan::Set(obj, Nan::New("bottom").ToLocalChecked(), Nan::New<Number>(monitors.rcMonitors[i].bottom));
 		Nan::Set(a, i, obj);
 	}
-	//Return our object with .width and .height.
+
 	info.GetReturnValue().Set(a);
+	#else
+		Nan::ThrowError("getScreenRects is not supported on your OS");
+	#endif
 }
+
 
 NAN_METHOD(getXDisplayName)
 {
@@ -961,8 +968,8 @@ NAN_MODULE_INIT(InitAll)
 	Nan::Set(target, Nan::New("getScreenSize").ToLocalChecked(),
 		Nan::GetFunction(Nan::New<FunctionTemplate>(getScreenSize)).ToLocalChecked());
 		
-	Nan::Set(target, Nan::New("getScreenSizes").ToLocalChecked(),
-		Nan::GetFunction(Nan::New<FunctionTemplate>(getScreenSizes)).ToLocalChecked());
+	Nan::Set(target, Nan::New("getScreenRects").ToLocalChecked(),
+		Nan::GetFunction(Nan::New<FunctionTemplate>(getScreenRects)).ToLocalChecked());
 
 	Nan::Set(target, Nan::New("captureScreen").ToLocalChecked(),
 		Nan::GetFunction(Nan::New<FunctionTemplate>(captureScreen)).ToLocalChecked());
