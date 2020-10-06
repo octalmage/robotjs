@@ -126,10 +126,8 @@ void moveMouse(MMSignedPoint point)
 	XSync(display, false);
 #elif defined(IS_WINDOWS)
 
-	#if defined(IS_MACOSX)
 	if(vscreenWidth<0 || vscreenHeight<0)
 		updateScreenMetrics();
-	#endif
 
 	//Mouse motion is now done using SendInput with MOUSEINPUT. We use Absolute mouse positioning
 	#define MOUSE_COORD_TO_ABS(coord, width_or_height) ((65536 * (coord) / width_or_height) + ((coord) < 0 ? -1 : 1))
@@ -373,7 +371,7 @@ static double crude_hypot(double x, double y)
 	return ((M_SQRT2 - 1.0) * small) + big;
 }
 
-bool smoothlyMoveMouse(MMPoint endPoint, double speed)
+bool smoothlyMoveMouse(MMSignedPoint endPoint, double speed)
 {
 	MMSignedPoint pos = getMousePos();
 	MMSignedSize screenSize = getMainDisplaySize();
@@ -401,18 +399,15 @@ bool smoothlyMoveMouse(MMPoint endPoint, double speed)
 		pos.y += floor(velo_y + 0.5);
 
 		
-		#if defined(IS_MACOSX)
-			/**
-			* Dirty hack for move mouse smooth on mac with multiple displays
-			*/		
-		#else
+		/**
+		* Dirty hack for move mouse smooth on all displays with multiple displays
+		*/		
 		/* Make sure we are in the screen boundaries!
 		 * (Strange things will happen if we are not.) */
-		if (pos.x >= screenSize.width || pos.y >= screenSize.height) {
-			return false;
-		}
-		#endif
-
+		// if (pos.x >= screenSize.width || pos.y >= screenSize.height) {
+		// 	return false;
+		// }
+	
 		moveMouse(MMSignedPointMake(pos.x, pos.y));
 
 		/* Wait 1 - (speed) milliseconds. */
