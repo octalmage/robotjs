@@ -933,7 +933,7 @@ NAN_MODULE_INIT(InitAll)
 
 #if NODE_MAJOR_VERSION >= 10
 NODE_MODULE_INIT() {
-    InitAll(exports);
+	InitAll(exports);
 }
 #else
 NODE_MODULE(robotjs, InitAll)
