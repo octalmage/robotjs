@@ -1,11 +1,10 @@
-sudo: false
 language: cpp
 
 env:
   matrix:
-    - TRAVIS_NODE_VERSION="8"
     - TRAVIS_NODE_VERSION="10"
     - TRAVIS_NODE_VERSION="12"
+    - TRAVIS_NODE_VERSION="14"
     - TRAVIS_NODE_VERSION="stable"
 
 os:
