@@ -1,7 +1,7 @@
 language: cpp
 
 env:
-  matrix:
+  jobs:
     - TRAVIS_NODE_VERSION="10"
     - TRAVIS_NODE_VERSION="12"
     - TRAVIS_NODE_VERSION="14"
@@ -10,6 +10,12 @@ env:
 os:
   - linux
   - osx
+
+jobs:
+  allow_failures:
+    - env:
+        TRAVIS_NODE_VERSION="stable"
+      os: linux
 
 cache:
   directories:
@@ -34,8 +40,6 @@ before_install:
   - rm -rf ~/.nvm && git clone https://github.com/creationix/nvm.git ~/.nvm && (cd ~/.nvm && git checkout `git describe --abbrev=0 --tags`) && source ~/.nvm/nvm.sh
   - nvm install $TRAVIS_NODE_VERSION
   - PATH=$PATH:`pwd`/node_modules/.bin
-  - npm install --global node-gyp@latest
-  - npm config set node_gyp $(npm prefix -g)/lib/node_modules/node-gyp/bin/node-gyp.js
   # print versions
   - node --version
   - npm --version
@@ -45,6 +49,8 @@ before_install:
   - $CXX --version
 
 install:
+  - npm install --global node-gyp@latest
+  - npm config set node_gyp $(npm prefix -g)/lib/node_modules/node-gyp/bin/node-gyp.js
   - npm install
 
 script:
