@@ -34,6 +34,7 @@ before_install:
   - rm -rf ~/.nvm && git clone https://github.com/creationix/nvm.git ~/.nvm && (cd ~/.nvm && git checkout `git describe --abbrev=0 --tags`) && source ~/.nvm/nvm.sh
   - nvm install $TRAVIS_NODE_VERSION
   - PATH=$PATH:`pwd`/node_modules/.bin
+  - npm install --global node-gyp @ latest
   # print versions
   - node --version
   - npm --version
