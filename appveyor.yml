@@ -25,6 +25,8 @@ install:
   - npm -g install npm
   - set PATH=%APPDATA%\npm;%PATH%
   # Typical npm stuff.
+  - npm install --global node-gyp@latest
+  - npm config set node_gyp $(npm prefix -g)/lib/node_modules/node-gyp/bin/node-gyp.js
   - npm install
 
 test_script:
