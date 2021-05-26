@@ -162,14 +162,14 @@ void dragMouse(MMSignedPoint point, const MMMouseButton button)
 #endif
 }
 
-MMPoint getMousePos()
+MMSignedPoint getMousePos()
 {
 #if defined(IS_MACOSX)
 	CGEventRef event = CGEventCreate(NULL);
 	CGPoint point = CGEventGetLocation(event);
 	CFRelease(event);
 
-	return MMPointFromCGPoint(point);
+	return MMSignedPointFromCGPoint(point);
 #elif defined(USE_X11)
 	int x, y; /* This is all we care about. Seriously. */
 	Window garb1, garb2; /* Why you can't specify NULL as a parameter */
@@ -197,7 +197,7 @@ MMPoint getMousePos()
 void toggleMouse(bool down, MMMouseButton button)
 {
 #if defined(IS_MACOSX)
-	const CGPoint currentPos = CGPointFromMMPoint(getMousePos());
+	const CGPoint currentPos = CGPointFromMMSignedPoint(getMousePos());
 	const CGEventType mouseType = MMMouseToCGEventType(down, button);
 	CGEventRef event = CGEventCreateMouseEvent(NULL,
 	                                           mouseType,
@@ -238,7 +238,7 @@ void doubleClick(MMMouseButton button)
 #if defined(IS_MACOSX)
 
 	/* Double click for Mac. */
-	const CGPoint currentPos = CGPointFromMMPoint(getMousePos());
+	const CGPoint currentPos = CGPointFromMMSignedPoint(getMousePos());
 	const CGEventType mouseTypeDown = MMMouseToCGEventType(true, button);
 	const CGEventType mouseTypeUP = MMMouseToCGEventType(false, button);
 
@@ -373,7 +373,7 @@ static double crude_hypot(double x, double y)
 
 bool smoothlyMoveMouse(MMPoint endPoint,double speed)
 {
-	MMPoint pos = getMousePos();
+	MMSignedPoint pos = getMousePos();
 	MMSize screenSize = getMainDisplaySize();
 	double velo_x = 0.0, velo_y = 0.0;
 	double distance;
@@ -395,11 +395,11 @@ bool smoothlyMoveMouse(MMPoint endPoint,double speed)
 
 		/* Make sure we are in the screen boundaries!
 		 * (Strange things will happen if we are not.) */
-		if (pos.x >= screenSize.width || pos.y >= screenSize.height) {
+		if (pos.x >= (int32_t)screenSize.width || pos.y >= (int32_t)screenSize.height) {
 			return false;
 		}
 
-		moveMouse(MMSignedPointMake((int32_t)pos.x, (int32_t)pos.y));
+		moveMouse(pos);
 
 		/* Wait 1 - (speed) milliseconds. */
 		microsleep(DEADBEEF_UNIFORM(0.7, speed));

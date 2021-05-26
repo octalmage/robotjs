@@ -74,11 +74,8 @@ H_INLINE MMRect MMRectMake(size_t x, size_t y, size_t width, size_t height)
 
 #if defined(IS_MACOSX)
 
-#define CGPointFromMMPoint(p) CGPointMake((CGFloat)(p).x, (CGFloat)(p).y)
-#define MMPointFromCGPoint(p) MMPointMake((size_t)(p).x, (size_t)(p).y)
-
 #define CGPointFromMMSignedPoint(p) CGPointMake((CGFloat)(p).x, (CGFloat)(p).y)
-#define MMSignedPointFromCGPoint(p) MMPointMake((int32_t)(p).x, (int32_t)(p).y)
+#define MMSignedPointFromCGPoint(p) MMSignedPointMake((int32_t)(p).x, (int32_t)(p).y)
 
 #elif defined(IS_WINDOWS)
 
