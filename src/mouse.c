@@ -180,12 +180,12 @@ MMSignedPoint getMousePos()
 	XQueryPointer(display, XDefaultRootWindow(display), &garb1, &garb2,
 	              &x, &y, &garb_x, &garb_y, &more_garbage);
 
-	return MMPointMake(x, y);
+	return MMSignedPointMake(x, y);
 #elif defined(IS_WINDOWS)
 	POINT point;
 	GetCursorPos(&point);
 
-	return MMPointFromPOINT(point);
+	return MMSignedPointFromPOINT(point);
 #endif
 }
 

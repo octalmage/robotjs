@@ -79,7 +79,7 @@ H_INLINE MMRect MMRectMake(size_t x, size_t y, size_t width, size_t height)
 
 #elif defined(IS_WINDOWS)
 
-#define MMPointFromPOINT(p) MMPointMake((size_t)p.x, (size_t)p.y)
+#define MMSignedPointFromPOINT(p) MMSignedPointMake((size_t)p.x, (size_t)p.y)
 
 #endif
 
