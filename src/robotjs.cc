@@ -931,4 +931,10 @@ NAN_MODULE_INIT(InitAll)
 		Nan::GetFunction(Nan::New<FunctionTemplate>(setXDisplayName)).ToLocalChecked());
 }
 
+#if NODE_MAJOR_VERSION >= 10
+NODE_MODULE_INIT() {
+	InitAll(exports);
+}
+#else
 NODE_MODULE(robotjs, InitAll)
+#endif
