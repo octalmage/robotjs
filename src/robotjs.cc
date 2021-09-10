@@ -689,15 +689,22 @@ NAN_METHOD(getPixelColor)
 	MMBitmapRef bitmap;
 	MMRGBHex color;
 
-	size_t x = Nan::To<int32_t>(info[0]).FromJust();
-	size_t y = Nan::To<int32_t>(info[1]).FromJust();
+	float x = Nan::To<int32_t>(info[0]).FromJust();
+	float y = Nan::To<int32_t>(info[1]).FromJust();
 
-	if (!pointVisibleOnMainDisplay(MMPointMake(x, y)))
+	CGPoint mouse = CGPointMake(x, y);
+
+	uint32_t count = 0;
+	CGDirectDisplayID displayID;
+	if (CGGetDisplaysWithPoint(mouse, 1, &displayID, &count) != kCGErrorSuccess)
 	{
-		return Nan::ThrowError("Requested coordinates are outside the main screen's dimensions.");
+		return Nan::ThrowError("Could not find a display for the coordinates of the mosue.");
 	}
 
-	bitmap = copyMMBitmapFromDisplayInRect(MMRectMake(x, y, 1, 1));
+	CGRect displayPosition = CGDisplayBounds(displayID);
+	MMRect adjustedRect = MMRectMake(x - displayPosition.origin.x, y - displayPosition.origin.y, 1, 1);
+
+	bitmap = copyMMBitmapFromDisplayInRect(displayID, adjustedRect);
 
 	color = MMRGBHexAtPoint(bitmap, 0, 0);
 
@@ -722,6 +729,37 @@ NAN_METHOD(getScreenSize)
 
 	//Return our object with .width and .height.
 	info.GetReturnValue().Set(obj);
+}
+
+NAN_METHOD(getAllScreensSize)
+{
+	//Get all active display sizes.
+	uint32_t numDisplays = 0;
+	MMDisplaySize displaySizes[10];
+
+	getAllDisplaySize(&numDisplays, displaySizes);
+
+	//Create our return object.
+	Local<Array> list = Nan::New<Array>(numDisplays);
+	for (uint32_t i = 0; i < numDisplays; i++)
+	{
+		Local<Object> obj = Nan::New<Object>();
+		Nan::Set(obj, Nan::New("displayID").ToLocalChecked(), Nan::New<Number>(displaySizes[i].displayID));
+		Nan::Set(obj, Nan::New("isMainDisplay").ToLocalChecked(), Nan::New<v8::Boolean>(displaySizes[i].isMainDisplay));
+		
+		Nan::Set(obj, Nan::New("width").ToLocalChecked(), Nan::New<Number>(displaySizes[i].size.width));
+		Nan::Set(obj, Nan::New("height").ToLocalChecked(), Nan::New<Number>(displaySizes[i].size.height));
+
+		Nan::Set(obj, Nan::New("x").ToLocalChecked(), Nan::New<Number>(displaySizes[i].bounds.origin.x));
+		Nan::Set(obj, Nan::New("y").ToLocalChecked(), Nan::New<Number>(displaySizes[i].bounds.origin.y));
+		Nan::Set(obj, Nan::New("w").ToLocalChecked(), Nan::New<Number>(displaySizes[i].bounds.size.width));
+		Nan::Set(obj, Nan::New("h").ToLocalChecked(), Nan::New<Number>(displaySizes[i].bounds.size.height));
+
+		Nan::Set(list, i, obj);
+	}
+
+	//Return our list with many [{ width, height }, ...]
+	info.GetReturnValue().Set(list);
 }
 
 NAN_METHOD(getXDisplayName)
@@ -775,7 +813,8 @@ NAN_METHOD(captureScreen)
 		h = displaySize.height;
 	}
 
-	MMBitmapRef bitmap = copyMMBitmapFromDisplayInRect(MMRectMake(x, y, w, h));
+	CGDirectDisplayID displayID = CGMainDisplayID();
+	MMBitmapRef bitmap = copyMMBitmapFromDisplayInRect(displayID, MMRectMake(x, y, w, h));
 
 	uint32_t bufferSize = bitmap->bytewidth * bitmap->height;
 	Local<Object> buffer = Nan::NewBuffer((char*)bitmap->imageBuffer, bufferSize, destroyMMBitmapBuffer, NULL).ToLocalChecked();
@@ -917,6 +956,9 @@ NAN_MODULE_INIT(InitAll)
 
 	Nan::Set(target, Nan::New("getScreenSize").ToLocalChecked(),
 		Nan::GetFunction(Nan::New<FunctionTemplate>(getScreenSize)).ToLocalChecked());
+
+	Nan::Set(target, Nan::New("getAllScreensSize").ToLocalChecked(),
+		Nan::GetFunction(Nan::New<FunctionTemplate>(getAllScreensSize)).ToLocalChecked());
 
 	Nan::Set(target, Nan::New("captureScreen").ToLocalChecked(),
 		Nan::GetFunction(Nan::New<FunctionTemplate>(captureScreen)).ToLocalChecked());

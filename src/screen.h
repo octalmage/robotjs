@@ -18,6 +18,9 @@ extern "C"
 /* Returns the size of the main display. */
 MMSize getMainDisplaySize(void);
 
+/* Returns a list of displayID, with their sizes. */
+void getAllDisplaySize(uint32_t *_Nullable numDisplays, MMDisplaySize *_Nullable displaySizes);
+
 /* Convenience function that returns whether the given point is in the bounds
  * of the main screen. */
 bool pointVisibleOnMainDisplay(MMPoint point);

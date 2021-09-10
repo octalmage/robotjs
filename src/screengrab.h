@@ -12,7 +12,7 @@ extern "C"
 
 /* Returns a raw bitmap of screengrab of the display (to be destroyed()'d by
  * caller), or NULL on error. */
-MMBitmapRef copyMMBitmapFromDisplayInRect(MMRect rect);
+MMBitmapRef copyMMBitmapFromDisplayInRect(int32_t displayID, MMRect rect);
 
 #ifdef __cplusplus
 }
