@@ -1,3 +1,6 @@
+This properly fixes the multi-monitor support for windows(tested only on 10, assuming 7+ will work)<br><br>
+Also supports user defined speed of smooth mouse movement (original randomness updated to alter a bit based on distance)<br><br>
+=================Original ReadMe To Follow==================
 <p align="center"><img src="https://cldup.com/1ATDf2JMtv.png"></p>
 
 <p align="center"><a href="https://travis-ci.org/octalmage/robotjs"><img src="https://api.travis-ci.org/octalmage/robotjs.svg?branch=master"></a> <a href="https://ci.appveyor.com/project/octalmage/robotjs"><img src="https://ci.appveyor.com/api/projects/status/qh2eqb37j7ap6x36?svg=true"></a> <a href="https://www.npmjs.com/package/robotjs"><img src="https://img.shields.io/npm/v/robotjs.svg"></a> <a href="https://gitter.im/octalmage/robotjs?utm_source=badge&utm_medium=badge&utm_campaign=pr-badge&utm_content=badge"><img src="https://img.shields.io/badge/gitter-join%20chat-blue.svg"></a> <a href="http://waffle.io/octalmage/robotjs"><img src="https://img.shields.io/waffle/label/octalmage/robotjs/ready.svg?maxAge=3600"></a></p>
@@ -153,8 +156,7 @@ Soon! This is a bit more complicated than the rest of the features, so I saved i
 We've been implementing keys as we need them. Feel free to create an issue or submit a pull request!
 
 #### How about multi-monitor support?
-
-The library doesn't have explicit multi-monitor support, so anything that works is kind of on accident. Subscribe to [#88](https://github.com/octalmage/robotjs/issues/88) for updates.
+Multiple monitor support working. Tested in windows only, need additional feedback for mac/nix.
 
 For any other questions please [submit an issue](https://github.com/octalmage/robotjs/issues/new).
 
