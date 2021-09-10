@@ -332,7 +332,8 @@ void scrollMouse(int x, int y)
 	mouseScrollInputs[0].mi.dwFlags = MOUSEEVENTF_WHEEL;
 	mouseScrollInputs[0].mi.time = 0;
 	mouseScrollInputs[0].mi.dwExtraInfo = 0;
-	mouseScrollInputs[0].mi.mouseData = y;
+	// Flip x to match other platforms.
+	mouseScrollInputs[0].mi.mouseData = -x;
 
 	mouseScrollInputs[1].type = INPUT_MOUSE;
 	mouseScrollInputs[1].mi.dx = 0;
@@ -340,8 +341,7 @@ void scrollMouse(int x, int y)
 	mouseScrollInputs[1].mi.dwFlags = MOUSEEVENTF_HWHEEL;
 	mouseScrollInputs[1].mi.time = 0;
 	mouseScrollInputs[1].mi.dwExtraInfo = 0;
-	// Flip x to match other platforms.
-	mouseScrollInputs[1].mi.mouseData = -x;
+	mouseScrollInputs[1].mi.mouseData = y;
 
 	SendInput(2, mouseScrollInputs, sizeof(INPUT));
 #endif
