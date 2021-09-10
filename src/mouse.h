@@ -79,10 +79,10 @@ void dragMouse(MMSignedPoint point, const MMMouseButton button);
  *
  * Returns false if unsuccessful (i.e. a point was hit that is outside of the
  * screen boundaries), or true if successful. */
-bool smoothlyMoveMouse(MMPoint point,double speed);
+bool smoothlyMoveMouse(MMSignedPoint point,double speed);
 
 /* Returns the coordinates of the mouse on the current screen. */
-MMPoint getMousePos(void);
+MMSignedPoint getMousePos(void);
 
 /* Holds down or releases the mouse with the given button in the current
  * position. */

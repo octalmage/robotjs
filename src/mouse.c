@@ -132,12 +132,12 @@ void moveMouse(MMSignedPoint point)
 	//Mouse motion is now done using SendInput with MOUSEINPUT. We use Absolute mouse positioning
 	#define MOUSE_COORD_TO_ABS(coord, width_or_height) ((65536 * (coord) / width_or_height) + ((coord) < 0 ? -1 : 1))
 
-	size_t x = MOUSE_COORD_TO_ABS(point.x-vscreenMinX, vscreenWidth);
-	size_t y = MOUSE_COORD_TO_ABS(point.y-vscreenMinY, vscreenHeight);
+	int32_t x = MOUSE_COORD_TO_ABS(point.x - vscreenMinX, vscreenWidth);
+	int32_t y = MOUSE_COORD_TO_ABS(point.y - vscreenMinY, vscreenHeight);
 
 	INPUT mouseInput = {0};
 	mouseInput.type = INPUT_MOUSE;
-	mouseInput.mi.dx = x;
+	mouseInput.mi.dx = x - 100;
 	mouseInput.mi.dy = y;
 	mouseInput.mi.dwFlags = MOUSEEVENTF_ABSOLUTE | MOUSEEVENTF_MOVE | MOUSEEVENTF_VIRTUALDESK;
 	mouseInput.mi.time = 0; //System will provide the timestamp
@@ -162,14 +162,14 @@ void dragMouse(MMSignedPoint point, const MMMouseButton button)
 #endif
 }
 
-MMPoint getMousePos()
+MMSignedPoint getMousePos()
 {
 #if defined(IS_MACOSX)
 	CGEventRef event = CGEventCreate(NULL);
 	CGPoint point = CGEventGetLocation(event);
 	CFRelease(event);
 
-	return MMPointFromCGPoint(point);
+	return MMSignedPointFromCGPoint(point);
 #elif defined(USE_X11)
 	int x, y; /* This is all we care about. Seriously. */
 	Window garb1, garb2; /* Why you can't specify NULL as a parameter */
@@ -180,12 +180,12 @@ MMPoint getMousePos()
 	XQueryPointer(display, XDefaultRootWindow(display), &garb1, &garb2,
 	              &x, &y, &garb_x, &garb_y, &more_garbage);
 
-	return MMPointMake(x, y);
+	return MMSignedPointMake(x, y);
 #elif defined(IS_WINDOWS)
 	POINT point;
 	GetCursorPos(&point);
 
-	return MMPointFromPOINT(point);
+	return MMSignedPointFromPOINT(point);
 #endif
 }
 
@@ -371,15 +371,20 @@ static double crude_hypot(double x, double y)
 	return ((M_SQRT2 - 1.0) * small) + big;
 }
 
-bool smoothlyMoveMouse(MMPoint endPoint,double speed)
+bool smoothlyMoveMouse(MMSignedPoint endPoint, double speed)
 {
-	MMPoint pos = getMousePos();
-	MMSize screenSize = getMainDisplaySize();
+	MMSignedPoint pos = getMousePos();
+	MMSignedSize screenSize = getMainDisplaySize();
 	double velo_x = 0.0, velo_y = 0.0;
 	double distance;
-
+	
+	#if defined(IS_WINDOWS)
+	if (vscreenWidth < 0 || vscreenHeight < 0)
+		updateScreenMetrics();
+	#endif
+	double bdist = (distance = crude_hypot((double)pos.x - endPoint.x,(double)pos.y - endPoint.y));
 	while ((distance = crude_hypot((double)pos.x - endPoint.x,
-	                               (double)pos.y - endPoint.y)) > 1.0) {
+								   (double)pos.y - endPoint.y)) > 1.0) {
 		double gravity = DEADBEEF_UNIFORM(5.0, 500.0);
 		double veloDistance;
 		velo_x += (gravity * ((double)endPoint.x - pos.x)) / distance;
@@ -393,16 +398,20 @@ bool smoothlyMoveMouse(MMPoint endPoint,double speed)
 		pos.x += floor(velo_x + 0.5);
 		pos.y += floor(velo_y + 0.5);
 
+		
+		/**
+		* Dirty hack for move mouse smooth on all displays with multiple displays
+		*/		
 		/* Make sure we are in the screen boundaries!
 		 * (Strange things will happen if we are not.) */
-		if (pos.x >= screenSize.width || pos.y >= screenSize.height) {
-			return false;
-		}
 
-		moveMouse(MMSignedPointMake((int32_t)pos.x, (int32_t)pos.y));
+		//if (pos.x >= screenSize.width || pos.y >= screenSize.height) {
+		//	return false;
+		//}
+		moveMouse(MMSignedPointMake(pos.x, pos.y));
 
 		/* Wait 1 - (speed) milliseconds. */
-		microsleep(DEADBEEF_UNIFORM(0.7, speed));
+		microsleep(DEADBEEF_UNIFORM((fmin(0.7,speed) + (1-(distance / ((bdist + 0.0001) * 2)))), (fmax(0.7, speed) - (distance / ((bdist + 0.0001) * 1.5)))));
 	}
 
 	return true;

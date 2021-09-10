@@ -21,6 +21,9 @@
           'System/Library/Frameworks/ApplicationServices.framework/Headers',
           'System/Library/Frameworks/OpenGL.framework/Headers',
         ],
+        'xcode_settings': {
+          'MACOSX_DEPLOYMENT_TARGET': '10.12',
+        },
         'link_settings': {
           'libraries': [
             '-framework Carbon',

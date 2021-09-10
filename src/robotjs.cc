@@ -14,6 +14,29 @@
 	#include "xdisplay.h"
 #endif
 
+
+#if defined(IS_WINDOWS)
+	#include <windows.h>
+
+	struct MonitorRects
+	{
+		std::vector<RECT>   rcMonitors;
+
+		static BOOL CALLBACK MonitorEnum(HMONITOR hMon,HDC hdc,LPRECT lprcMonitor,LPARAM pData)
+		{
+			MonitorRects* pThis = reinterpret_cast<MonitorRects*>(pData);
+			pThis->rcMonitors.push_back(*lprcMonitor);
+			return TRUE;
+		}
+
+		MonitorRects()
+		{
+			EnumDisplayMonitors(0, 0, MonitorEnum, (LPARAM)this);
+		}
+	};
+#endif
+
+
 using namespace v8;
 
 //Global delays.
@@ -122,8 +145,8 @@ NAN_METHOD(moveMouseSmooth)
 	size_t x = Nan::To<int32_t>(info[0]).FromJust();
 	size_t y = Nan::To<int32_t>(info[1]).FromJust();
 
-	MMPoint point;
-	point = MMPointMake(x, y);
+	MMSignedPoint point;
+	point = MMSignedPointMake(x, y);
 	if (info.Length() == 3)
 	{
 		size_t speed = Nan::To<int32_t>(info[2]).FromJust();
@@ -140,7 +163,7 @@ NAN_METHOD(moveMouseSmooth)
 
 NAN_METHOD(getMousePos)
 {
-	MMPoint pos = getMousePos();
+	MMSignedPoint pos = getMousePos();
 
 	//Return object with .x and .y.
 	Local<Object> obj = Nan::New<Object>();
@@ -710,10 +733,11 @@ NAN_METHOD(getPixelColor)
 	info.GetReturnValue().Set(Nan::New(hex).ToLocalChecked());
 }
 
+
 NAN_METHOD(getScreenSize)
 {
 	//Get display size.
-	MMSize displaySize = getMainDisplaySize();
+	MMSignedSize displaySize = getMainDisplaySize();
 
 	//Create our return object.
 	Local<Object> obj = Nan::New<Object>();
@@ -723,6 +747,32 @@ NAN_METHOD(getScreenSize)
 	//Return our object with .width and .height.
 	info.GetReturnValue().Set(obj);
 }
+
+
+
+NAN_METHOD(getScreenRects)
+{
+	#if defined(IS_WINDOWS)
+	
+	MonitorRects monitors;
+	
+	Local<Array> a = Nan::New<Array>(monitors.rcMonitors.size());
+	
+	for (int i = 0; i < monitors.rcMonitors.size(); ++i){
+		Local<Object> obj = Nan::New<Object>();
+		Nan::Set(obj, Nan::New("left").ToLocalChecked(), Nan::New<Number>(monitors.rcMonitors[i].left));
+		Nan::Set(obj, Nan::New("top").ToLocalChecked(), Nan::New<Number>(monitors.rcMonitors[i].top));
+		Nan::Set(obj, Nan::New("right").ToLocalChecked(), Nan::New<Number>(monitors.rcMonitors[i].right));
+		Nan::Set(obj, Nan::New("bottom").ToLocalChecked(), Nan::New<Number>(monitors.rcMonitors[i].bottom));
+		Nan::Set(a, i, obj);
+	}
+
+	info.GetReturnValue().Set(a);
+	#else
+		Nan::ThrowError("getScreenRects is not supported on your OS");
+	#endif
+}
+
 
 NAN_METHOD(getXDisplayName)
 {
@@ -770,7 +820,7 @@ NAN_METHOD(captureScreen)
 		y = 0;
 
 		//Get screen size.
-		MMSize displaySize = getMainDisplaySize();
+		MMSignedSize displaySize = getMainDisplaySize();
 		w = displaySize.width;
 		h = displaySize.height;
 	}
@@ -917,6 +967,9 @@ NAN_MODULE_INIT(InitAll)
 
 	Nan::Set(target, Nan::New("getScreenSize").ToLocalChecked(),
 		Nan::GetFunction(Nan::New<FunctionTemplate>(getScreenSize)).ToLocalChecked());
+		
+	Nan::Set(target, Nan::New("getScreenRects").ToLocalChecked(),
+		Nan::GetFunction(Nan::New<FunctionTemplate>(getScreenRects)).ToLocalChecked());
 
 	Nan::Set(target, Nan::New("captureScreen").ToLocalChecked(),
 		Nan::GetFunction(Nan::New<FunctionTemplate>(captureScreen)).ToLocalChecked());
