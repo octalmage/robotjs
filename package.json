@@ -42,13 +42,8 @@
   },
   "homepage": "https://github.com/octalmage/robotjs",
   "dependencies": {
-<<<<<<< HEAD
-    "nan": "^2.14.2",
-    "prebuild-install": "^5.3.3"
-=======
     "nan": "^2.14.0",
     "prebuild-install": "^6.1.2"
->>>>>>> teamaround/master
   },
   "devDependencies": {
     "jasmine": "^2.99.0",
