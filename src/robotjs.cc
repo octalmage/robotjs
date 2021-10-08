@@ -140,7 +140,7 @@ NAN_METHOD(moveMouseSmooth)
 
 NAN_METHOD(getMousePos)
 {
-	MMPoint pos = getMousePos();
+	MMSignedPoint pos = getMousePos();
 
 	//Return object with .x and .y.
 	Local<Object> obj = Nan::New<Object>();
