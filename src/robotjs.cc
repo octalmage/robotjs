@@ -931,4 +931,4 @@ NAN_MODULE_INIT(InitAll)
 		Nan::GetFunction(Nan::New<FunctionTemplate>(setXDisplayName)).ToLocalChecked());
 }
 
-NODE_MODULE(robotjs, InitAll)
+NAN_MODULE_WORKER_ENABLED(robotjs, InitAll)
