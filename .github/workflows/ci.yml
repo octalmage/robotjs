@@ -1,0 +1,28 @@
+name: CI
+
+on:
+  pull_request:
+  release:
+    types:
+      - published
+
+jobs:
+  build:
+    name: Build on ${{ matrix.os }}
+    runs-on: ${{ matrix.os }}
+    strategy:
+      fail-fast: false
+      matrix:
+        os: [ubuntu-20.04, windows-2019, macos-11]
+    steps:
+    - uses: actions/checkout@v2
+    - uses: actions/setup-node@v2
+      with:
+        node-version: '16'
+    - name: Install dependencies
+      if: startsWith(matrix.os, 'ubuntu')
+      run: sudo apt-get install libxtst-dev libpng++-dev
+    - run: npm install
+    - name: Release prebuilt artifacts
+      if: github.event_name == 'release' && github.event.action == 'published'
+      run: npx prebuild -t 11.0.0 -t 12.0.0 -t 13.0.0 -t 14.1.1 -t 15.0.0 -r electron -u ${{ secrets.GITHUB_TOKEN }}
