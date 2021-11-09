@@ -25,4 +25,4 @@ jobs:
     - run: npm install
     - name: Release prebuilt artifacts
       if: github.event_name == 'release' && github.event.action == 'published'
-      run: npx prebuild -t 11.0.0 -t 12.0.0 -t 13.0.0 -t 14.1.1 -t 15.0.0 -r electron -u ${{ secrets.GITHUB_TOKEN }}
+      run: npx prebuild --all -r napi -u ${{ secrets.GITHUB_TOKEN }}
