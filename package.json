@@ -1,19 +1,21 @@
 {
   "name": "robotjs",
-  "version": "0.6.0",
+  "version": "0.6.5",
   "description": "Node.js Desktop Automation.",
   "main": "index.js",
   "typings": "index.d.ts",
   "scripts": {
     "test": "run-script-os",
-    "test:darwin:linux": "jasmine 'test/**/*.js'",
+    "test:darwin:linux": "jasmine test/**/*.js",
+    "test-keyboard": "node test/keyboard.js",
     "test:win32": "jasmine test/**/*.js",
     "install": "prebuild-install || node-gyp rebuild",
+    "install-debug": "prebuild-install || node-gyp rebuild --debug",
     "prebuild": "prebuild --all"
   },
   "repository": {
     "type": "git",
-    "url": "https://github.com/octalmage/robotjs.git"
+    "url": "https://github.com/csett86/robotjs.git"
   },
   "keywords": [
     "Automation",
@@ -35,18 +37,24 @@
   "author": "Jason Stallings",
   "license": "MIT",
   "gypfile": true,
+  "binary": {
+    "napi_versions": [
+      3
+    ]
+  },
   "bugs": {
     "url": "https://github.com/octalmage/robotjs/issues"
   },
   "homepage": "https://github.com/octalmage/robotjs",
   "dependencies": {
-    "nan": "^2.14.0",
+    "node-addon-api": "^4.2.0",
     "prebuild-install": "^5.3.3"
   },
   "devDependencies": {
     "jasmine": "^2.99.0",
-    "prebuild": "^9.1.1",
+    "prebuild": "^11.0.0",
     "run-script-os": "^1.0.3",
+    "tape": "^4.8.0",
     "targetpractice": "0.0.7"
   }
 }

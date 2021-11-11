@@ -16,7 +16,7 @@
 /* Convenience wrappers around ugly APIs. */
 #if defined(IS_WINDOWS)
 	#define WIN32_KEY_EVENT_WAIT(key, flags) \
-		(win32KeyEvent(key, flags), Sleep(DEADBEEF_RANDRANGE(63, 125)))
+		(win32KeyEvent(key, flags))
 #elif defined(USE_X11)
 	#define X_KEY_EVENT(display, key, is_press) \
 		(XTestFakeKeyEvent(display, \
@@ -24,8 +24,7 @@
 		                   is_press, CurrentTime), \
 		 XSync(display, false))
 	#define X_KEY_EVENT_WAIT(display, key, is_press) \
-		(X_KEY_EVENT(display, key, is_press), \
-		 microsleep(DEADBEEF_UNIFORM(62.5, 125.0)))
+		(X_KEY_EVENT(display, key, is_press))
 #endif
 
 #if defined(IS_MACOSX)
@@ -222,12 +221,12 @@ void tapKey(char c, MMKeyFlags flags)
 }
 
 #if defined(IS_MACOSX)
-void toggleUnicodeKey(unsigned long ch, const bool down)
+void toggleUnicode(UniChar ch, const bool down)
 {
 	/* This function relies on the convenient
 	 * CGEventKeyboardSetUnicodeString(), which allows us to not have to
 	 * convert characters to a keycode, but does not support adding modifier
-	 * flags. It is therefore only used in typeString() and typeStringDelayed()
+	 * flags. It is therefore only used in typeStringDelayed()
 	 * -- if you need modifier keys, use the above functions instead. */
 	CGEventRef keyEvent = CGEventCreateKeyboardEvent(NULL, 0, down);
 	if (keyEvent == NULL) {
@@ -250,28 +249,50 @@ void toggleUnicodeKey(unsigned long ch, const bool down)
 	CGEventPost(kCGSessionEventTap, keyEvent);
 	CFRelease(keyEvent);
 }
-
-void toggleUniKey(char c, const bool down)
-{
-	toggleUnicodeKey(c, down);
-}
-#else
+#elif defined(USE_X11)
 	#define toggleUniKey(c, down) toggleKey(c, down, MOD_NONE)
 #endif
 
-static void tapUniKey(char c)
+void unicodeTap(const unsigned value)
 {
-	toggleUniKey(c, true);
-	toggleUniKey(c, false);
+	#if defined(USE_X11)
+		char ch = (char)value;
+
+		toggleUniKey(ch, true);
+		toggleUniKey(ch, false);
+	#elif defined(IS_MACOSX)
+		UniChar ch = (UniChar)value; // Convert to unsigned char
+
+		toggleUnicode(ch, true);
+		toggleUnicode(ch, false);
+	#elif defined(IS_WINDOWS)
+		INPUT ip;
+
+		// Set up a generic keyboard event.
+		ip.type = INPUT_KEYBOARD;
+		ip.ki.wVk = 0; // Virtual-key code
+		ip.ki.wScan = value; // Hardware scan code for key
+		ip.ki.time = 0; // System will provide its own time stamp.
+		ip.ki.dwExtraInfo = 0; // No extra info. Use the GetMessageExtraInfo function to obtain this information if needed.
+		ip.ki.dwFlags = KEYEVENTF_UNICODE; // KEYEVENTF_KEYUP for key release.
+
+		SendInput(1, &ip, sizeof(INPUT));
+	#endif
 }
 
-void typeString(const char *str)
+void typeStringDelayed(const char *str, const unsigned cpm)
 {
+	unsigned long n;
 	unsigned short c;
 	unsigned short c1;
 	unsigned short c2;
 	unsigned short c3;
-	unsigned long n;
+
+	/* Characters per second */
+	const double cps = (double)cpm / 60.0;
+
+	/* Average milli-seconds per character */
+	const double mspc = (cps == 0.0) ? 0.0 : 1000.0 / cps;
 
 	while (*str != '\0') {
 		c = *str++;
@@ -298,27 +319,10 @@ void typeString(const char *str)
 			n = ((c & 0x07) << 18) | (c1 << 12) | (c2 << 6) | c3;
 		}
 
-		#if defined(IS_MACOSX)
-		toggleUnicodeKey(n, true);
-		toggleUnicodeKey(n, false);
-		#else
-		toggleUniKey(n, true);
-		toggleUniKey(n, false);
-		#endif
+		unicodeTap(n);
 
-	}
-}
-
-void typeStringDelayed(const char *str, const unsigned cpm)
-{
-	/* Characters per second */
-	const double cps = (double)cpm / 60.0;
-
-	/* Average milli-seconds per character */
-	const double mspc = (cps == 0.0) ? 0.0 : 1000.0 / cps;
-
-	while (*str != '\0') {
-		tapUniKey(*str++);
-		microsleep(mspc + (DEADBEEF_UNIFORM(0.0, 62.5)));
+		if (mspc > 0) {
+			microsleep(mspc);
+		}
 	}
 }
