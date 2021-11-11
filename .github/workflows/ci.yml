@@ -26,3 +26,9 @@ jobs:
     - name: Release prebuilt artifacts
       if: github.event_name == 'release' && github.event.action == 'published'
       run: npx prebuild --all -r napi -u ${{ secrets.GITHUB_TOKEN }}
+    - name: Release prebuilt artifacts (mac arm64)
+      if: github.event_name == 'release' && github.event.action == 'published' && startsWith(matrix.os, 'macos')
+      run: npx prebuild --all -r napi --arch arm64 -u ${{ secrets.GITHUB_TOKEN }}
+    - name: Release prebuilt artifacts (win ia32)
+      if: github.event_name == 'release' && github.event.action == 'published' && startsWith(matrix.os, 'windows')
+      run: npx prebuild --all -r napi --arch ia32 -u ${{ secrets.GITHUB_TOKEN }}
