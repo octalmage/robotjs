@@ -9,9 +9,9 @@
     "test:darwin:linux": "jasmine test/**/*.js",
     "test-keyboard": "node test/keyboard.js",
     "test:win32": "jasmine test/**/*.js",
-    "install": "prebuild-install || node-gyp rebuild",
-    "install-debug": "prebuild-install || node-gyp rebuild --debug",
-    "prebuild": "prebuild --all"
+    "install": "prebuild-install --runtime napi || node-gyp rebuild",
+    "install-debug": "prebuild-install --runtime napi || node-gyp rebuild --debug",
+    "prebuild": "prebuild --all --runtime napi"
   },
   "repository": {
     "type": "git",
@@ -48,7 +48,7 @@
   "homepage": "https://github.com/jitsi/robotjs",
   "dependencies": {
     "node-addon-api": "^4.2.0",
-    "prebuild-install": "^5.3.3"
+    "prebuild-install": "^7.0.0"
   },
   "devDependencies": {
     "jasmine": "^2.99.0",
