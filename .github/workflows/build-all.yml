@@ -1,0 +1,48 @@
+name: "Build All Versions"
+on: [push]
+jobs:
+  BuildAll:
+    strategy:
+      fail-fast: false
+      matrix:
+        os: [macos-latest, ubuntu-latest, windows-latest]
+        arch: [ia32, x64]
+        nodeBuild: [16.13.0, 14.18.1]
+        electBuild: [15.3.2, 14.2.1]
+    runs-on: ${{ matrix.os }}
+    steps:
+    - name: "Checkout Code"
+      uses: actions/checkout@v2
+    - name: "Setup Node"
+      uses: actions/setup-node@v2
+      with:
+        node-version: '16'
+    - name: "Install OS Dependencies"
+      if: ${{ runner.os == 'Linux' }}
+      run: sudo apt-get install libxtst-dev libpng++-dev
+    - name: "Install"
+      run: npm install
+    - name: "Install Prebuild"
+      run: npm install -g prebuild
+    - name: "Prebuild Node"
+      run: prebuild -t ${{ matrix.nodeBuild }} --arch=${{ matrix.arch }} -u ${{ secrets.GITHUB_TOKEN }}
+    - name: "Prebuild Latest Electron"
+      run: prebuild -t ${{ matrix.electBuild }} -r electron --arch=${{ matrix.arch }} -u ${{ secrets.GITHUB_TOKEN }}
+  Publish-NPM:
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: ./
+    steps:
+    - name: "Checkout Code"
+      uses: actions/checkout@v2
+    - name: "Setup Node"
+      uses: actions/setup-node@v2
+      with:
+        node-version: '16'
+    - name: Publish
+      run: |
+        npm config set //registry.npmjs.org/:_authToken ${NPM_TOKEN}
+        npm publish --ignore-scripts
+      env:
+        NPM_TOKEN: ${{ secrets.NPM_TOKEN }}
