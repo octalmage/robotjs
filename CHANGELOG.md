@@ -1,3 +1,10 @@
+## [0.8.3](https://github.com/hurdlegroup/robotjs/compare/v0.8.2...v0.8.3) (2021-11-28)
+
+
+### Bug Fixes
+
+* **build:** fix replacing package.json ([3d27f9e](https://github.com/hurdlegroup/robotjs/commit/3d27f9e68b786a8c7233786060ecf8eed9ebfa44))
+
 ## [0.8.2](https://github.com/hurdlegroup/robotjs/compare/v0.8.1...v0.8.2) (2021-11-28)
 
 
