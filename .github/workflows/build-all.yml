@@ -48,13 +48,13 @@ jobs:
         node-version: 'lts/*'
     - name: Install OS Dependencies
       if: ${{ runner.os == 'Linux' }}
-      run: sudo apt-get install libxtst-dev libpng++-dev gcc-multilib -y
+      run: sudo apt-get install libxtst-dev libpng++-dev gcc-multilib g++-multilib -y
     - name: Remove existing package.json (Unix)
       if: ${{ runner.os != 'Windows' }}
       run: rm -f package.json
     - name: Remove existing package.json (Unix)
       if: ${{ runner.os == 'Windows' }}
-      run: del /f package.json
+      run: Remove-Item "package.json" -ErrorAction Ignore
     - uses: actions/download-artifact@v2
       with:
         name: package-json
