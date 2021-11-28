@@ -1,3 +1,10 @@
+## [0.8.6](https://github.com/hurdlegroup/robotjs/compare/v0.8.5...v0.8.6) (2021-11-28)
+
+
+### Bug Fixes
+
+* **build:** fix removing file on windows ([026c771](https://github.com/hurdlegroup/robotjs/commit/026c771d269449d2223a481ad1b0fbeee81a78f2))
+
 ## [0.8.5](https://github.com/hurdlegroup/robotjs/compare/v0.8.4...v0.8.5) (2021-11-28)
 
 
