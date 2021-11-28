@@ -1,3 +1,10 @@
+# [0.9.0](https://github.com/hurdlegroup/robotjs/compare/v0.8.7...v0.9.0) (2021-11-28)
+
+
+### Features
+
+* simplify build ([e63714e](https://github.com/hurdlegroup/robotjs/commit/e63714e9d25b560982e1c39b5f5bccbca576ed5f))
+
 ## [0.8.7](https://github.com/hurdlegroup/robotjs/compare/v0.8.6...v0.8.7) (2021-11-28)
 
 
