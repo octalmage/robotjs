@@ -1,3 +1,10 @@
+## [0.8.4](https://github.com/hurdlegroup/robotjs/compare/v0.8.3...v0.8.4) (2021-11-28)
+
+
+### Bug Fixes
+
+* **build:** fix download dir ([f057d90](https://github.com/hurdlegroup/robotjs/commit/f057d908ff5de6867151605d4d2458ab497935ce))
+
 ## [0.8.3](https://github.com/hurdlegroup/robotjs/compare/v0.8.2...v0.8.3) (2021-11-28)
 
 
