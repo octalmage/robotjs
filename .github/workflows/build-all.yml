@@ -54,7 +54,6 @@ jobs:
     - uses: actions/download-artifact@v2
       with:
         name: package-json
-        path: package.json
     - name: Install dependencies
       run: npm ci
     - name: Prebuild Node
