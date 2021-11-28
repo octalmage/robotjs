@@ -1,3 +1,10 @@
+## [0.8.5](https://github.com/hurdlegroup/robotjs/compare/v0.8.4...v0.8.5) (2021-11-28)
+
+
+### Bug Fixes
+
+* **build:** fix build on Windows ([5c1c1ee](https://github.com/hurdlegroup/robotjs/commit/5c1c1ee175c25e250934ab8e6f18101adbf330a2))
+
 ## [0.8.4](https://github.com/hurdlegroup/robotjs/compare/v0.8.3...v0.8.4) (2021-11-28)
 
 
