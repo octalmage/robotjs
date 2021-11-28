@@ -3,8 +3,6 @@ on:
   push:
     branches:
       - 'master'
-    tags:
-      - 'v*'
 jobs:
   Publish-NPM:
     runs-on: ubuntu-latest
