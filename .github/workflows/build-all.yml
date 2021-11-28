@@ -36,8 +36,6 @@ jobs:
       matrix:
         os: [macos-latest, ubuntu-latest, windows-latest]
         arch: [ia32, x64]
-        nodeBuild: [16.13.0, 14.18.1]
-        electBuild: [15.3.2, 14.2.1, 13.6.1]
     runs-on: ${{ matrix.os }}
     steps:
     - name: Checkout Code
@@ -64,6 +62,6 @@ jobs:
     - name: Install dependencies
       run: npm ci
     - name: Prebuild Node
-      run: npx prebuild -t ${{ matrix.nodeBuild }} --arch=${{ matrix.arch }} -u ${{ secrets.GITHUB_TOKEN }}
+      run: npx prebuild -t 16.13.0 -t 14.18.1 --arch=${{ matrix.arch }} -u ${{ secrets.GITHUB_TOKEN }}
     - name: Prebuild Latest Electron
-      run: npx prebuild -t ${{ matrix.electBuild }} -r electron --arch=${{ matrix.arch }} -u ${{ secrets.GITHUB_TOKEN }}
+      run: npx prebuild -t 16.0.0 -t 15.3.2 -t 14.2.1 -t 13.6.1 -r electron --arch=${{ matrix.arch }} -u ${{ secrets.GITHUB_TOKEN }}
