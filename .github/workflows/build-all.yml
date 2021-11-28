@@ -37,7 +37,7 @@ jobs:
         os: [macos-latest, ubuntu-latest, windows-latest]
         arch: [ia32, x64]
         nodeBuild: [16.13.0, 14.18.1]
-        electBuild: [15.3.2, 14.2.1]
+        electBuild: [15.3.2, 14.2.1, 13.6.1]
     runs-on: ${{ matrix.os }}
     steps:
     - name: Checkout Code
@@ -47,8 +47,11 @@ jobs:
       with:
         node-version: 'lts/*'
     - name: Install OS Dependencies
-      if: ${{ runner.os == 'Linux' }}
+      if: ${{ runner.os == 'Linux' && matrix.arch == 'x64' }}
       run: sudo apt-get install libxtst-dev libpng++-dev gcc-multilib g++-multilib -y
+    - name: Install OS Dependencies (32-bit)
+      if: ${{ runner.os == 'Linux' && matrix.arch == 'ia32' }}
+      run: sudo apt-get install libxtst-dev:i386 libpng++-dev:i386 gcc-multilib g++-multilib -y
     - name: Remove existing package.json (Unix)
       if: ${{ runner.os != 'Windows' }}
       run: rm -f package.json
