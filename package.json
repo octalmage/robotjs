@@ -1,6 +1,6 @@
 {
   "name": "@hurdlegroup/robotjs",
-  "version": "0.7.0",
+  "version": "0.0.0-development",
   "description": "Node.js Desktop Automation.",
   "main": "index.js",
   "typings": "index.d.ts",
@@ -16,6 +16,12 @@
     "type": "git",
     "url": "https://github.com/hurdlegroup/robotjs"
   },
+  "maintainers": [
+    {
+      "name": "Daniel McAssey",
+      "email": "daniel.mcassey@hurdle.live"
+    }
+  ],
   "keywords": [
     "Automation",
     "GUI",
@@ -42,12 +48,15 @@
     ]
   },
   "bugs": {
-    "url": "https://github.com/octalmage/robotjs/issues"
+    "url": "https://github.com/hurdlegroup/robotjs/issues"
   },
-  "homepage": "https://github.com/octalmage/robotjs",
+  "homepage": "https://github.com/hurdlegroup/robotjs",
   "dependencies": {
     "node-addon-api": "^4.2.0",
     "prebuild-install": "^7.0.0"
+  },
+  "publishConfig": {
+    "access": "public"
   },
   "devDependencies": {
     "jasmine": "^2.99.0",
