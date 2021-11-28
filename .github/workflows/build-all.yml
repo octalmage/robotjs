@@ -16,13 +16,14 @@ jobs:
         with:
           node-version: 'lts/*'
       - name: Install dependencies
-        run: npx ci
+        run: npm ci
       - name: Publish
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           NPM_TOKEN: ${{ secrets.NPM_TOKEN }}
         run: npx semantic-release
   BuildAll:
+    needs: Publish-NPM
     strategy:
       fail-fast: false
       matrix:
@@ -42,7 +43,7 @@ jobs:
       if: ${{ runner.os == 'Linux' }}
       run: sudo apt-get install libxtst-dev libpng++-dev
     - name: Install dependencies
-      run: npx ci
+      run: npm ci
     - name: Prebuild Node
       run: npx prebuild -t ${{ matrix.nodeBuild }} --arch=${{ matrix.arch }} -u ${{ secrets.GITHUB_TOKEN }}
     - name: Prebuild Latest Electron
