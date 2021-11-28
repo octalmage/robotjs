@@ -1,6 +1,6 @@
 {
-  "name": "hurdle-robotjs",
-  "version": "0.6.7",
+  "name": "robotjs",
+  "version": "0.7.0",
   "description": "Node.js Desktop Automation.",
   "main": "index.js",
   "typings": "index.d.ts",

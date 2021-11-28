@@ -25,11 +25,20 @@ jobs:
     - name: "Install Prebuild"
       run: npm install -g prebuild
     - name: "Prebuild Node"
-      run: prebuild -t ${{ matrix.nodeBuild }} --arch=${{ matrix.arch }} -u ${{ secrets.GITHUB_TOKEN }}
+      if: github.event_name == 'pull_request'
+      run: prebuild -t ${{ matrix.nodeBuild }} --arch=${{ matrix.arch }}
     - name: "Prebuild Latest Electron"
+      if: github.event_name == 'pull_request'
+      run: prebuild -t ${{ matrix.electBuild }} -r electron --arch=${{ matrix.arch }}
+    - name: "Prebuild Node (Push)"
+      if: github.event_name != 'pull_request'
+      run: prebuild -t ${{ matrix.nodeBuild }} --arch=${{ matrix.arch }} -u ${{ secrets.GITHUB_TOKEN }}
+    - name: "Prebuild Latest Electron (Push)"
+      if: github.event_name != 'pull_request'
       run: prebuild -t ${{ matrix.electBuild }} -r electron --arch=${{ matrix.arch }} -u ${{ secrets.GITHUB_TOKEN }}
   Publish-NPM:
     runs-on: ubuntu-latest
+    if: github.event_name != 'pull_request'
     defaults:
       run:
         working-directory: ./
