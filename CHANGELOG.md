@@ -1,3 +1,10 @@
+## [0.8.7](https://github.com/hurdlegroup/robotjs/compare/v0.8.6...v0.8.7) (2021-11-28)
+
+
+### Bug Fixes
+
+* **build:** add support for more electron versions ([cfd659a](https://github.com/hurdlegroup/robotjs/commit/cfd659a6f7414f84b1475034ed93676cc366dc43))
+
 ## [0.8.6](https://github.com/hurdlegroup/robotjs/compare/v0.8.5...v0.8.6) (2021-11-28)
 
 
