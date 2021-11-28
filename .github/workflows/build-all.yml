@@ -17,7 +17,7 @@ jobs:
           node-version: 'lts/*'
       - name: Install OS Dependencies
         if: ${{ runner.os == 'Linux' }}
-        run: sudo apt-get install libxtst-dev libpng++-dev
+        run: sudo apt-get install libxtst-dev libpng++-dev -y
       - name: Install dependencies
         run: npm ci
       - name: Publish
@@ -48,9 +48,13 @@ jobs:
         node-version: 'lts/*'
     - name: Install OS Dependencies
       if: ${{ runner.os == 'Linux' }}
-      run: sudo apt-get install libxtst-dev libpng++-dev
-    - name: Remove existing package.json
+      run: sudo apt-get install libxtst-dev libpng++-dev gcc-multilib -y
+    - name: Remove existing package.json (Unix)
+      if: ${{ runner.os != 'Windows' }}
       run: rm -f package.json
+    - name: Remove existing package.json (Unix)
+      if: ${{ runner.os == 'Windows' }}
+      run: del /f package.json
     - uses: actions/download-artifact@v2
       with:
         name: package-json
