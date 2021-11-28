@@ -1,3 +1,10 @@
+# [0.8.0](https://github.com/hurdlegroup/robotjs/compare/v0.7.0...v0.8.0) (2021-11-28)
+
+
+### Features
+
+* initial release ([43c26f8](https://github.com/hurdlegroup/robotjs/commit/43c26f8e4ca93ccd4b1deea6cd4621a21b8bb8db))
+
 ## <small>0.5.1 (2018-03-03)</small>
 
 * 0.5.1 ([b9b0ab6](https://github.com/octalmage/robotjs/commit/b9b0ab6))
@@ -604,6 +611,3 @@
 * Moved some files around. ([aad9e6d](https://github.com/octalmage/robotjs/commit/aad9e6d))
 * Removed unnecessary files. ([d2f1a3d](https://github.com/octalmage/robotjs/commit/d2f1a3d))
 * Update README.md ([4cee4c5](https://github.com/octalmage/robotjs/commit/4cee4c5))
-
-
-
