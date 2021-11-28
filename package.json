@@ -1,5 +1,5 @@
 {
-  "name": "robotjs",
+  "name": "@hurdlegroup/robotjs",
   "version": "0.7.0",
   "description": "Node.js Desktop Automation.",
   "main": "index.js",
