@@ -10,8 +10,7 @@
     "test-keyboard": "node test/keyboard.js",
     "test:win32": "jasmine test/**/*.js",
     "install": "prebuild-install || node-gyp rebuild",
-    "install-debug": "prebuild-install || node-gyp rebuild --debug",
-    "prebuild": "prebuild --all"
+    "install-debug": "prebuild-install || node-gyp rebuild --debug"
   },
   "repository": {
     "type": "git",

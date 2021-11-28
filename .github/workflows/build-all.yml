@@ -6,6 +6,22 @@ on:
     tags:
       - 'v*'
 jobs:
+  Publish-NPM:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout Code
+        uses: actions/checkout@v2
+      - name: Setup Node
+        uses: actions/setup-node@v2
+        with:
+          node-version: 'lts/*'
+      - name: Install dependencies
+        run: npx ci
+      - name: Publish
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          NPM_TOKEN: ${{ secrets.NPM_TOKEN }}
+        run: npx semantic-release
   BuildAll:
     strategy:
       fail-fast: false
@@ -16,36 +32,18 @@ jobs:
         electBuild: [15.3.2, 14.2.1]
     runs-on: ${{ matrix.os }}
     steps:
-    - name: "Checkout Code"
+    - name: Checkout Code
       uses: actions/checkout@v2
-    - name: "Setup Node"
-      uses: actions/setup-node@v2
-      with:
-        node-version: '16'
-    - name: "Install OS Dependencies"
-      if: ${{ runner.os == 'Linux' }}
-      run: sudo apt-get install libxtst-dev libpng++-dev
-    - name: "Install"
-      run: npm install
-    - name: "Install Prebuild"
-      run: npm install -g prebuild
-    - name: "Prebuild Node"
-      if: github.event_name != 'pull_request'
-      run: prebuild -t ${{ matrix.nodeBuild }} --arch=${{ matrix.arch }} -u ${{ secrets.GITHUB_TOKEN }}
-    - name: "Prebuild Latest Electron"
-      if: github.event_name != 'pull_request'
-      run: prebuild -t ${{ matrix.electBuild }} -r electron --arch=${{ matrix.arch }} -u ${{ secrets.GITHUB_TOKEN }}
-  Publish-NPM:
-    runs-on: ubuntu-latest
-    steps:
-    - name: "Checkout Code"
-      uses: actions/checkout@v2
-    - name: "Setup Node"
+    - name: Setup Node
       uses: actions/setup-node@v2
       with:
         node-version: 'lts/*'
-    - name: Publish
-      env:
-        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-        NPM_TOKEN: ${{ secrets.NPM_TOKEN }}
-      run: npx semantic-release
+    - name: Install OS Dependencies
+      if: ${{ runner.os == 'Linux' }}
+      run: sudo apt-get install libxtst-dev libpng++-dev
+    - name: Install dependencies
+      run: npx ci
+    - name: Prebuild Node
+      run: npx prebuild -t ${{ matrix.nodeBuild }} --arch=${{ matrix.arch }} -u ${{ secrets.GITHUB_TOKEN }}
+    - name: Prebuild Latest Electron
+      run: npx prebuild -t ${{ matrix.electBuild }} -r electron --arch=${{ matrix.arch }} -u ${{ secrets.GITHUB_TOKEN }}
