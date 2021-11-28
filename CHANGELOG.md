@@ -1,3 +1,10 @@
+## [0.8.1](https://github.com/hurdlegroup/robotjs/compare/v0.8.0...v0.8.1) (2021-11-28)
+
+
+### Bug Fixes
+
+* **npm:** update package access ([8f3e1d1](https://github.com/hurdlegroup/robotjs/commit/8f3e1d1323aa23557a1b6ed3b55990015e2bd71a))
+
 # [0.8.0](https://github.com/hurdlegroup/robotjs/compare/v0.7.0...v0.8.0) (2021-11-28)
 
 
