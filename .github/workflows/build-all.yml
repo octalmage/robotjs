@@ -1,5 +1,10 @@
-name: "Build All Versions"
-on: [push]
+name: Build all versions and publish to NPM
+on:
+  push:
+    branches:
+      - 'master'
+    tags:
+      - 'v*'
 jobs:
   BuildAll:
     strategy:
@@ -25,33 +30,22 @@ jobs:
     - name: "Install Prebuild"
       run: npm install -g prebuild
     - name: "Prebuild Node"
-      if: github.event_name == 'pull_request'
-      run: prebuild -t ${{ matrix.nodeBuild }} --arch=${{ matrix.arch }}
-    - name: "Prebuild Latest Electron"
-      if: github.event_name == 'pull_request'
-      run: prebuild -t ${{ matrix.electBuild }} -r electron --arch=${{ matrix.arch }}
-    - name: "Prebuild Node (Push)"
       if: github.event_name != 'pull_request'
       run: prebuild -t ${{ matrix.nodeBuild }} --arch=${{ matrix.arch }} -u ${{ secrets.GITHUB_TOKEN }}
-    - name: "Prebuild Latest Electron (Push)"
+    - name: "Prebuild Latest Electron"
       if: github.event_name != 'pull_request'
       run: prebuild -t ${{ matrix.electBuild }} -r electron --arch=${{ matrix.arch }} -u ${{ secrets.GITHUB_TOKEN }}
   Publish-NPM:
     runs-on: ubuntu-latest
-    if: github.event_name != 'pull_request'
-    defaults:
-      run:
-        working-directory: ./
     steps:
     - name: "Checkout Code"
       uses: actions/checkout@v2
     - name: "Setup Node"
       uses: actions/setup-node@v2
       with:
-        node-version: '16'
+        node-version: 'lts/*'
     - name: Publish
-      run: |
-        npm config set //registry.npmjs.org/:_authToken ${NPM_TOKEN}
-        npm publish --ignore-scripts
       env:
+        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         NPM_TOKEN: ${{ secrets.NPM_TOKEN }}
+      run: npx semantic-release
