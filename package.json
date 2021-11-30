@@ -9,9 +9,13 @@
     "test:darwin:linux": "jasmine test/**/*.js",
     "test-keyboard": "node test/keyboard.js",
     "test:win32": "jasmine test/**/*.js",
-    "install": "prebuild-install --runtime napi || node-gyp rebuild",
-    "install-debug": "prebuild-install --runtime napi || node-gyp rebuild --debug",
-    "prebuild": "prebuild --all --runtime napi"
+    "install": "node-gyp-build",
+    "prebuild": "prebuildify -t 16.0.0 --napi --strip",
+    "prebuild-darwin-universal": "prebuildify -t 16.0.0 --napi --strip --arch x64+arm64",
+    "prebuild-linux-x64": "prebuildify -t 16.0.0 --napi --strip",
+    "prebuild-win32-x86": "prebuildify -t 16.0.0 --napi --strip",
+    "prebuild-win32-x64": "prebuildify -t 16.0.0 --napi --strip"
+
   },
   "repository": {
     "type": "git",
@@ -48,11 +52,11 @@
   "homepage": "https://github.com/jitsi/robotjs",
   "dependencies": {
     "node-addon-api": "^4.2.0",
-    "prebuild-install": "^7.0.0"
+    "node-gyp-build": "^4.3.0"
   },
   "devDependencies": {
     "jasmine": "^2.99.0",
-    "prebuild": "^11.0.0",
+    "prebuildify": "^5.0.0",
     "run-script-os": "^1.0.3",
     "tape": "^4.8.0",
     "targetpractice": "0.0.7"

@@ -175,8 +175,7 @@ I like AutoHotkey, but I like Node.js more. By developing RobotJS I get an AutoH
 1. Increment the version: `npm version patch`
 2. Push to github: `git push --follow-tags`
 3. Create and publish Github release: `gh release create v1.2.3`, replacing v1.2.3 with the actual release number
-4. Github action will prebuild binaries and attach to the published release
-5. Github action will publish release to npm
+4. Github action will prebuildify and publish release to npm
 
 ## License
 

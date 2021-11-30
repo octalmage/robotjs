@@ -1,0 +1,6 @@
+build/
+node_modules/
+/.idea
+.github
+appveyor.yml
+.travis.yml

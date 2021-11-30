@@ -8,33 +8,59 @@ on:
 
 jobs:
   build:
-    name: Build on ${{ matrix.os }}
+    name: Build ${{ matrix.build-group }}
     runs-on: ${{ matrix.os }}
     strategy:
       fail-fast: false
       matrix:
-        os: [ubuntu-20.04, windows-2019, macos-11]
+        include:
+          - os: ubuntu-20.04
+            arch: x64
+            build-group: linux-x64
+          - os: macos-11
+            arch: x64
+            build-group: darwin-universal
+          - os: windows-2019
+            arch: x86
+            build-group: win32-x86
+          - os: windows-2019
+            arch: x64
+            build-group: win32-x64
+    env:
+      BUILD_GROUP: ${{ matrix.build-group }}
+    steps:
+    - uses: actions/checkout@v2
+    - uses: actions/setup-node@v2
+      with:
+        node-version: '16'
+        architecture: ${{ matrix.arch }}
+    - name: Install linux dependencies
+      if: startsWith(matrix.os, 'ubuntu')
+      run: sudo apt-get install libxtst-dev libpng++-dev
+    - run: npm install
+    - name: Prebuildify
+      run: npm run prebuild-$BUILD_GROUP
+      shell: bash
+    - uses: actions/upload-artifact@v2
+      with:
+        name: prebuilds
+        path: prebuilds/
+  publish:
+    name: Publish to npm
+    if: github.event_name == 'release' && github.event.action == 'published'
+    runs-on: ubuntu-20.04
+    needs: build
     steps:
     - uses: actions/checkout@v2
     - uses: actions/setup-node@v2
       with:
         node-version: '16'
         registry-url: 'https://registry.npmjs.org'
-    - name: Install dependencies
-      if: startsWith(matrix.os, 'ubuntu')
-      run: sudo apt-get install libxtst-dev libpng++-dev
-    - run: npm install
-    - name: Release prebuilt artifacts
-      if: github.event_name == 'release' && github.event.action == 'published'
-      run: npx prebuild --all -r napi -u ${{ secrets.GITHUB_TOKEN }}
-    - name: Release prebuilt artifacts (mac arm64)
-      if: github.event_name == 'release' && github.event.action == 'published' && startsWith(matrix.os, 'macos')
-      run: npx prebuild --all -r napi --arch arm64 -u ${{ secrets.GITHUB_TOKEN }}
-    - name: Release prebuilt artifacts (win ia32)
-      if: github.event_name == 'release' && github.event.action == 'published' && startsWith(matrix.os, 'windows')
-      run: npx prebuild --all -r napi --arch ia32 -u ${{ secrets.GITHUB_TOKEN }}
-    - name: Release to npm
-      if: github.event_name == 'release' && github.event.action == 'published' && startsWith(matrix.os, 'macos')
-      run: npm publish --access public
+    - uses: actions/download-artifact@v2
+      with:
+        name: prebuilds
+        path: prebuilds
+    - run: npm publish --access public
       env:
         NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
+      
