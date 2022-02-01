@@ -137,7 +137,7 @@ void moveMouse(MMSignedPoint point)
 
 	INPUT mouseInput = {0};
 	mouseInput.type = INPUT_MOUSE;
-	mouseInput.mi.dx = x - 100;
+	mouseInput.mi.dx = x;
 	mouseInput.mi.dy = y;
 	mouseInput.mi.dwFlags = MOUSEEVENTF_ABSOLUTE | MOUSEEVENTF_MOVE | MOUSEEVENTF_VIRTUALDESK;
 	mouseInput.mi.time = 0; //System will provide the timestamp
