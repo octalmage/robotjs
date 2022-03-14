@@ -509,10 +509,9 @@ Napi::Value keyTapWrapper(const Napi::CallbackInfo& info)
 
 	MMKeyFlags flags = MOD_NONE;
 	MMKeyCode key;
-	const char *k;
 
-	Napi::String kstr(env, info[0].ToString());
-	k = kstr.Utf8Value().c_str();
+	std::string kstr = info[0].As<Napi::String>();
+	const char *k = kstr.c_str();
 
 	switch (info.Length())
 	{
