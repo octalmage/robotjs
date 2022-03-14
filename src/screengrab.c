@@ -28,10 +28,10 @@ MMBitmapRef copyMMBitmapFromDisplayInRect(MMRect rect)
 	CGRect bounds = CGDisplayBounds(displayID);
 
 	CGImageRef image = CGDisplayCreateImageForRect(displayID,
-																								 CGRectMake(rect.origin.x - (int32_t) bounds.origin.x,
-																														rect.origin.y - (int32_t) bounds.origin.y,
-																														rect.size.width,
-																														rect.size.height));
+		CGRectMake(rect.origin.x - (int32_t) bounds.origin.x,
+			rect.origin.y - (int32_t) bounds.origin.y,
+			rect.size.width,
+			rect.size.height));
 
 	if (!image) { return NULL; }
 
