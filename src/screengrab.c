@@ -4,6 +4,7 @@
 #include <stdlib.h> /* malloc() */
 
 #if defined(IS_MACOSX)
+	#include "screen.h"
 	#include <OpenGL/OpenGL.h>
 	#include <OpenGL/gl.h>
 	#include <ApplicationServices/ApplicationServices.h>
@@ -23,13 +24,14 @@ MMBitmapRef copyMMBitmapFromDisplayInRect(MMRect rect)
 	uint8_t *buffer = NULL;
 	size_t bufferSize = 0;
 
-	CGDirectDisplayID displayID = CGMainDisplayID();
+	CGDirectDisplayID displayID = getIDOfDisplayWithRect(rect);
+	CGRect bounds = CGDisplayBounds(displayID);
 
 	CGImageRef image = CGDisplayCreateImageForRect(displayID,
-		CGRectMake(rect.origin.x,
-			rect.origin.y,
-			rect.size.width,
-			rect.size.height));
+																								 CGRectMake(rect.origin.x - (int32_t) bounds.origin.x,
+																														rect.origin.y - (int32_t) bounds.origin.y,
+																														rect.size.width,
+																														rect.size.height));
 
 	if (!image) { return NULL; }
 

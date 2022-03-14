@@ -8,6 +8,42 @@
 	#include "xdisplay.h"
 #endif
 
+#if defined(IS_MACOSX)
+uint32_t getIDOfDisplayWithRect(MMRect rect)
+{
+	CGError cgErr;
+	CGDisplayCount displayCount;
+	CGDisplayCount maxDisplays = 1;
+	CGDirectDisplayID onlineDisplays[1];
+	CGRect cgRect = CGRectMake(rect.origin.x,
+														 rect.origin.y,
+														 rect.size.width,
+														 rect.size.height);
+
+	// If CGGetOnlineDisplayList() is not called, CGGetDisplaysWithRect() fails
+	CGGetOnlineDisplayList(maxDisplays, onlineDisplays, &displayCount);
+	cgErr = CGGetDisplaysWithRect(cgRect, maxDisplays, onlineDisplays, &displayCount);
+
+	if (cgErr != kCGErrorSuccess)
+	{
+		fprintf(stderr, "CGGetDisplaysWithRect: error %d.\n", cgErr);
+		exit(1);
+	}
+	if (displayCount == 0)
+	{
+		fprintf(stderr, 
+						"No display with rect with origin (%d, %d), width %d and height %d.\n", 
+						(int) cgRect.origin.x,
+						(int) cgRect.origin.y,
+						(int) cgRect.size.width,
+						(int) cgRect.size.height);
+		exit(1);
+	}
+
+	return onlineDisplays[0];
+};
+#endif
+
 MMSignedSize getMainDisplaySize(void)
 {
 #if defined(IS_MACOSX)
