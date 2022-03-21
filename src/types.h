@@ -39,7 +39,7 @@ struct _MMSignedSize {
 typedef struct _MMSignedSize MMSignedSize;
 
 struct _MMRect {
-	MMPoint origin;
+	MMSignedPoint origin;
 	MMSize size;
 };
 
@@ -76,10 +76,10 @@ H_INLINE MMSignedSize MMSignedSizeMake(int32_t width, int32_t height)
 	return size;
 }
 
-H_INLINE MMRect MMRectMake(size_t x, size_t y, size_t width, size_t height)
+H_INLINE MMRect MMRectMake(int32_t x, int32_t y, size_t width, size_t height)
 {
 	MMRect rect;
-	rect.origin = MMPointMake(x, y);
+	rect.origin = MMSignedPointMake(x, y);
 	rect.size = MMSizeMake(width, height);
 	return rect;
 }

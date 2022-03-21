@@ -15,6 +15,10 @@ extern "C"
 {
 #endif
 
+#if defined(IS_MACOSX)
+	uint32_t getIDOfDisplayWithRect(MMRect rect);
+#endif
+
 /* Returns the size of the main display. */
 MMSignedSize getMainDisplaySize(void);
 

@@ -712,8 +712,8 @@ NAN_METHOD(getPixelColor)
 	MMBitmapRef bitmap;
 	MMRGBHex color;
 
-	size_t x = Nan::To<int32_t>(info[0]).FromJust();
-	size_t y = Nan::To<int32_t>(info[1]).FromJust();
+	int32_t x = Nan::To<int32_t>(info[0]).FromJust();
+	int32_t y = Nan::To<int32_t>(info[1]).FromJust();
 
 	if (!pointVisibleOnMainDisplay(MMPointMake(x, y)))
 	{
@@ -797,8 +797,8 @@ NAN_METHOD(setXDisplayName)
 
 NAN_METHOD(captureScreen)
 {
-	size_t x;
-	size_t y;
+	int32_t x;
+	int32_t y;
 	size_t w;
 	size_t h;
 
