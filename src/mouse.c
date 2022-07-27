@@ -123,7 +123,7 @@ void moveMouse(MMSignedPoint point)
 	Display *display = XGetMainDisplay();
 	XWarpPointer(display, None, DefaultRootWindow(display),
 	             0, 0, 0, 0, point.x, point.y);
-	XSync(display, false);
+	XFlush(display);
 #elif defined(IS_WINDOWS)
 
 	if(vscreenWidth<0 || vscreenHeight<0)
@@ -208,7 +208,7 @@ void toggleMouse(bool down, MMMouseButton button)
 #elif defined(USE_X11)
 	Display *display = XGetMainDisplay();
 	XTestFakeButtonEvent(display, button, down ? True : False, CurrentTime);
-	XSync(display, false);
+	XFlush(display);
 #elif defined(IS_WINDOWS)
 	INPUT mouseInput;
 	mouseInput.type = INPUT_MOUSE;
@@ -321,7 +321,7 @@ void scrollMouse(int x, int y)
 		XTestFakeButtonEvent(display, ydir, 0, CurrentTime);
 	}
 
-	XSync(display, false);
+	XFlush(display);
 
 #elif defined(IS_WINDOWS)
 
