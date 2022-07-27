@@ -22,7 +22,7 @@
 		(XTestFakeKeyEvent(display, \
 		                   XKeysymToKeycode(display, key), \
 		                   is_press, CurrentTime), \
-		 XSync(display, false))
+		 XFlush(display))
 	#define X_KEY_EVENT_WAIT(display, key, is_press) \
 		(X_KEY_EVENT(display, key, is_press))
 #endif
