@@ -9,13 +9,16 @@
     "test:darwin:linux": "jasmine test/**/*.js",
     "test-keyboard": "node test/keyboard.js",
     "test:win32": "jasmine test/**/*.js",
-    "install": "prebuild-install || node-gyp rebuild",
-    "install-debug": "prebuild-install || node-gyp rebuild --debug",
-    "prebuild": "prebuild --all"
+    "install": "node-gyp-build",
+    "prebuild": "prebuildify -t 16.0.0 --napi --strip",
+    "prebuild-darwin-universal": "prebuildify -t 16.0.0 --napi --strip --arch x64+arm64",
+    "prebuild-linux-x64": "prebuildify -t 16.0.0 --napi --strip",
+    "prebuild-win32-x86": "prebuildify -t 16.0.0 --napi --strip",
+    "prebuild-win32-x64": "prebuildify -t 16.0.0 --napi --strip"
   },
   "repository": {
     "type": "git",
-    "url": "https://github.com/octalmage/robotjs.git"
+    "url": "https://github.com/jc-public/robotjs.git"
   },
   "keywords": [
     "Automation",
@@ -37,19 +40,24 @@
   "author": "Jason Stallings",
   "license": "MIT",
   "gypfile": true,
-  "bugs": {
-    "url": "https://github.com/octalmage/robotjs/issues"
+  "binary": {
+    "napi_versions": [
+      3
+    ]
   },
-  "homepage": "https://github.com/octalmage/robotjs",
+  "bugs": {
+    "url": "https://github.com/jc-public/robotjs/issues"
+  },
+  "homepage": "https://github.com/jc-public/robotjs",
   "dependencies": {
-    "nan": "^2.14.2",
-    "prebuild-install": "^5.3.3"
+    "node-addon-api": "^4.2.0",
+    "node-gyp-build": "^4.3.0"
   },
   "devDependencies": {
-    "tape": "^4.8.0",
     "jasmine": "^2.99.0",
-    "prebuild": "^9.1.1",
+    "prebuildify": "^5.0.0",
     "run-script-os": "^1.0.3",
+    "tape": "^4.8.0",
     "targetpractice": "0.0.7"
   }
 }
