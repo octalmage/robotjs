@@ -20,7 +20,7 @@ extern "C"
 #endif
 
 char *getXDisplay(void);
-void setXDisplay(char *name);
+void setXDisplay(const char *name);
 
 #ifdef __cplusplus
 }
