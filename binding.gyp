@@ -4,7 +4,7 @@
     'include_dirs': [
         "<!(node -e \"require('nan')\")"
     ],
-    
+
     'cflags': [
       '-Wall',
       '-Wparentheses',
@@ -12,7 +12,7 @@
       '-Wbad-function-cast',
       '-Wdisabled-optimization'
     ],
-    
+
     'conditions': [
       ['OS == "mac"', {
         'include_dirs': [
@@ -30,7 +30,7 @@
           ]
         }
       }],
-      
+
       ['OS == "linux"', {
         'link_settings': {
           'libraries': [
@@ -40,17 +40,22 @@
             '-lXtst'
           ]
         },
-        
+
         'sources': [
           'src/xdisplay.c'
         ]
       }],
 
       ["OS=='win'", {
-        'defines': ['IS_WINDOWS']
+        'defines': ['IS_WINDOWS'],
+         "msvs_settings": {
+            "VCCLCompilerTool": {
+                "AdditionalOptions": ["-std:c++17"],
+            },
+         },
       }]
     ],
-    
+
     'sources': [
       'src/robotjs.cc',
       'src/deadbeef_rand.c',
