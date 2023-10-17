@@ -47,7 +47,7 @@
   },
   "devDependencies": {
     "jasmine": "^2.99.0",
-    "prebuild": "^10.0.1",
+    "prebuild": "^12.1.0",
     "run-script-os": "^1.0.3",
     "tape": "^4.8.0"
   }
