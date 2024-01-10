@@ -9,6 +9,7 @@
     "test:darwin:linux": "jasmine test/**/*.js",
     "test-keyboard": "node test/keyboard.js",
     "test:win32": "jasmine test/**/*.js",
+    "install" : "echo",
     "install-debug": "prebuild-install || node-gyp rebuild --debug",
     "prebuild": "prebuild --all"
   },
