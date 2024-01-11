@@ -1,0 +1,31 @@
+name: Build and upload
+
+on:
+  push:
+    branches: [master, remove-install-script]
+
+jobs:
+  build-windows:
+    name: windows prebuilts
+    runs-on: windows-2019
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v3
+
+      - name: Set Node.js
+        uses: actions/setup-node@v3
+        with:
+          node-version-file: '.nvmrc'
+
+      - name: Install dependencies
+        shell: bash
+        run: npm ci --no-audit --no-fund
+
+      - name: Rebuild native modules
+        run: npm run rebuild -- -a x64
+
+      - name: Upload native module binary
+        uses: actions/upload-artifact@v4
+        with:
+          name: windows-build-archive
+          path: bin

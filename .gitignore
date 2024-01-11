@@ -2,3 +2,4 @@ build/
 node_modules/
 prebuilds/
 /.idea
+bin
