@@ -10,8 +10,7 @@
     "test-keyboard": "node test/keyboard.js",
     "test:win32": "jasmine test/**/*.js",
     "install": "echo",
-    "install-debug": "prebuild-install || node-gyp rebuild --debug",
-    "prebuild": "prebuild --all",
+    "install-debug": "node-gyp rebuild --debug",
     "rebuild": "node ./scripts/rebuild.js --electron=27.0.2 --forceabi=118"
   },
   "repository": {
@@ -43,13 +42,11 @@
   },
   "homepage": "https://github.com/TeamAround/robotjs",
   "dependencies": {
-    "nan": "^2.17.0",
-    "prebuild-install": "^6.1.2"
+    "nan": "^2.17.0"
   },
   "devDependencies": {
     "@electron/rebuild": "^3.2.10",
     "jasmine": "^2.99.0",
-    "prebuild": "^12.1.0",
     "run-script-os": "^1.0.3",
     "tape": "^4.8.0",
     "yargs": "^17.6.2"

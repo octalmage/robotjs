@@ -5,9 +5,25 @@ on:
     branches: [master, remove-install-script]
 
 jobs:
-  build-windows:
-    name: windows prebuilts
-    runs-on: windows-2019
+  build:
+    name: Build binary
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - platform: linux
+            agent: ubuntu-20.04
+            arch: x64
+          - platform: windows
+            agent: windows-2019
+            arch: x64
+          - platform: macos
+            agent: macos-11
+            arch: x64
+          - platform: macos-arm
+            agent: macos-13-large
+            arch: arm64
+    runs-on: ${{ matrix.agent }}
     steps:
       - name: Checkout
         uses: actions/checkout@v3
@@ -22,10 +38,10 @@ jobs:
         run: npm ci --no-audit --no-fund
 
       - name: Rebuild native modules
-        run: npm run rebuild -- -a x64
+        run: "npm run rebuild -- -a ${{ matrix.arch }}"
 
       - name: Upload native module binary
         uses: actions/upload-artifact@v4
         with:
-          name: windows-build-archive
+          name: "${{ matrix.platform }}-build-archive"
           path: build
