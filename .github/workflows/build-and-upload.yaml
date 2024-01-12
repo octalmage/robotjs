@@ -33,6 +33,10 @@ jobs:
         with:
           python-version: '3.10'
 
+      - name: Install dependencies (Linux)
+        if: matrix.platform == 'linux'
+        run: sudo apt-get install libxtst-dev libpng++-dev
+
       - name: Set Node.js
         uses: actions/setup-node@v3
         with:
