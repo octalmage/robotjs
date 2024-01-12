@@ -2,7 +2,7 @@ name: Build and upload
 
 on:
   push:
-    branches: [master, remove-install-script]
+    branches: [master]
 
 jobs:
   build:
