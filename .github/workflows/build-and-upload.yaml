@@ -1,0 +1,56 @@
+name: Build and upload
+
+on:
+  push:
+    branches: [master]
+
+jobs:
+  build:
+    name: Build binary
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - platform: linux
+            agent: ubuntu-20.04
+            arch: x64
+          - platform: windows
+            agent: windows-2019
+            arch: x64
+          - platform: macos
+            agent: macos-11
+            arch: x64
+          - platform: macos-arm
+            agent: macos-13-large
+            arch: arm64
+    runs-on: ${{ matrix.agent }}
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v3
+
+      - name: Setup Python
+        uses: actions/setup-python@v4
+        with:
+          python-version: '3.10'
+
+      - name: Install dependencies (Linux)
+        if: matrix.platform == 'linux'
+        run: sudo apt-get install libxtst-dev libpng++-dev
+
+      - name: Set Node.js
+        uses: actions/setup-node@v3
+        with:
+          node-version-file: '.nvmrc'
+
+      - name: Install dependencies
+        shell: bash
+        run: npm ci --no-audit --no-fund
+
+      - name: Rebuild native modules
+        run: "npm run rebuild -- -a ${{ matrix.arch }}"
+
+      - name: Upload native module binary
+        uses: actions/upload-artifact@v4
+        with:
+          name: "${{ matrix.platform }}-build-archive"
+          path: build
