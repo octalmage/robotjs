@@ -18,7 +18,7 @@ platform:
   - x86
   - x64
 
-# Install scripts. (runs after repo cloning)
+# Install scripts (runs after repo cloning).
 install:
   # Get the latest stable version of Node 0.STABLE.latest
   - ps: Install-Product node $env:nodejs_version
