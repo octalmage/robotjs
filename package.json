@@ -11,7 +11,7 @@
     "test:win32": "jasmine test/**/*.js",
     "install": "echo",
     "install-debug": "node-gyp rebuild --debug",
-    "rebuild": "node ./scripts/rebuild.js --electron=27.0.2 --forceabi=118"
+    "rebuild": "node ./scripts/rebuild.js --electron=29.1.1 --forceabi=121"
   },
   "repository": {
     "type": "git",
@@ -42,7 +42,7 @@
   },
   "homepage": "https://github.com/TeamAround/robotjs",
   "dependencies": {
-    "nan": "^2.17.0"
+    "nan": "2.19.0"
   },
   "devDependencies": {
     "@electron/rebuild": "^3.2.10",
