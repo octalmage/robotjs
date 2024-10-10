@@ -147,7 +147,7 @@
 * Readme updates! ([2756b3e](https://github.com/octalmage/robotjs/commit/2756b3e))
 * Release mode and pixEnc. ([58f6c52](https://github.com/octalmage/robotjs/commit/58f6c52))
 * Remove whitespace. ([cea1cae](https://github.com/octalmage/robotjs/commit/cea1cae))
-* Seperate before_install and before_script. ([f0e067a](https://github.com/octalmage/robotjs/commit/f0e067a))
+* Separate before_install and before_script. ([f0e067a](https://github.com/octalmage/robotjs/commit/f0e067a))
 * Space before comment. ([e2ff6cd](https://github.com/octalmage/robotjs/commit/e2ff6cd))
 * Test that numpad throws on Linux. ([7543df7](https://github.com/octalmage/robotjs/commit/7543df7))
 
