@@ -31,6 +31,13 @@ struct _MMSize {
 
 typedef struct _MMSize MMSize;
 
+struct _MMSignedSize {
+	int32_t width;
+	int32_t height;
+};
+
+typedef struct _MMSignedSize MMSignedSize;
+
 struct _MMRect {
 	MMPoint origin;
 	MMSize size;
@@ -61,6 +68,13 @@ H_INLINE MMSize MMSizeMake(size_t width, size_t height)
 	size.height = height;
 	return size;
 }
+H_INLINE MMSignedSize MMSignedSizeMake(int32_t width, int32_t height)
+{
+	MMSignedSize size;
+	size.width = width;
+	size.height = height;
+	return size;
+}
 
 H_INLINE MMRect MMRectMake(size_t x, size_t y, size_t width, size_t height)
 {
@@ -83,6 +97,7 @@ H_INLINE MMRect MMRectMake(size_t x, size_t y, size_t width, size_t height)
 #elif defined(IS_WINDOWS)
 
 #define MMPointFromPOINT(p) MMPointMake((size_t)p.x, (size_t)p.y)
+#define MMSignedPointFromPOINT(p) MMSignedPointMake((int32_t)p.x, (int32_t)p.y)
 
 #endif
 

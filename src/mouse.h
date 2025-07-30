@@ -82,7 +82,7 @@ void dragMouse(MMSignedPoint point, const MMMouseButton button);
 bool smoothlyMoveMouse(MMPoint point,double speed);
 
 /* Returns the coordinates of the mouse on the current screen. */
-MMPoint getMousePos(void);
+MMSignedPoint getMousePos(void);
 
 /* Holds down or releases the mouse with the given button in the current
  * position. */

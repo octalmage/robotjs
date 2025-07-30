@@ -132,8 +132,8 @@ void moveMouse(MMSignedPoint point)
 	//Mouse motion is now done using SendInput with MOUSEINPUT. We use Absolute mouse positioning
 	#define MOUSE_COORD_TO_ABS(coord, width_or_height) ((65536 * (coord) / width_or_height) + ((coord) < 0 ? -1 : 1))
 
-	size_t x = MOUSE_COORD_TO_ABS(point.x-vscreenMinX, vscreenWidth);
-	size_t y = MOUSE_COORD_TO_ABS(point.y-vscreenMinY, vscreenHeight);
+	int32_t x = MOUSE_COORD_TO_ABS(point.x - vscreenMinX, vscreenWidth);
+	int32_t y = MOUSE_COORD_TO_ABS(point.y - vscreenMinY, vscreenHeight);
 
 	INPUT mouseInput = {0};
 	mouseInput.type = INPUT_MOUSE;
@@ -162,7 +162,7 @@ void dragMouse(MMSignedPoint point, const MMMouseButton button)
 #endif
 }
 
-MMPoint getMousePos()
+MMSignedPoint getMousePos()
 {
 #if defined(IS_MACOSX)
 	CGEventRef event = CGEventCreate(NULL);
@@ -185,7 +185,7 @@ MMPoint getMousePos()
 	POINT point;
 	GetCursorPos(&point);
 
-	return MMPointFromPOINT(point);
+	return MMSignedPointFromPOINT(point);
 #endif
 }
 
@@ -371,15 +371,17 @@ static double crude_hypot(double x, double y)
 	return ((M_SQRT2 - 1.0) * small) + big;
 }
 
-bool smoothlyMoveMouse(MMPoint endPoint,double speed)
+bool smoothlyMoveMouse(MMPoint endPoint, double speed)
 {
-	MMPoint pos = getMousePos();
-	MMSize screenSize = getMainDisplaySize();
+	MMSignedPoint pos = getMousePos();
+	MMSignedSize screenSize = getMainDisplaySize();
 	double velo_x = 0.0, velo_y = 0.0;
 	double distance;
-
+	if (vscreenWidth < 0 || vscreenHeight < 0)
+		updateScreenMetrics();
+	double bdist = (distance = crude_hypot((double)pos.x - endPoint.x,(double)pos.y - endPoint.y));
 	while ((distance = crude_hypot((double)pos.x - endPoint.x,
-	                               (double)pos.y - endPoint.y)) > 1.0) {
+								   (double)pos.y - endPoint.y)) > 1.0) {
 		double gravity = DEADBEEF_UNIFORM(5.0, 500.0);
 		double veloDistance;
 		velo_x += (gravity * ((double)endPoint.x - pos.x)) / distance;
@@ -399,10 +401,10 @@ bool smoothlyMoveMouse(MMPoint endPoint,double speed)
 			return false;
 		}
 
-		moveMouse(MMSignedPointMake((int32_t)pos.x, (int32_t)pos.y));
+		moveMouse(MMSignedPointMake(pos.x, pos.y));
 
 		/* Wait 1 - (speed) milliseconds. */
-		microsleep(DEADBEEF_UNIFORM(0.7, speed));
+		microsleep(DEADBEEF_UNIFORM((min(0.7,speed) + (1-(distance / ((bdist + 0.0001) * 2)))), (max(0.7, speed) - (distance / ((bdist + 0.0001) * 1.5)))));
 	}
 
 	return true;
