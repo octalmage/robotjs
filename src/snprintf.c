@@ -325,6 +325,13 @@
 #include <assert.h>
 #include <errno.h>
 
+#if defined(__GNUC__)
+#pragma GCC diagnostic push
+#pragma GCC diagnostic ignored "-Wsign-compare"
+#pragma GCC diagnostic ignored "-Wunused-but-set-variable"
+#pragma GCC diagnostic ignored "-Wmaybe-uninitialized"
+#endif
+
 #ifdef isdigit
 #undef isdigit
 #endif
@@ -1016,4 +1023,8 @@ int portable_vsnprintf(char *str, size_t str_m, const char *fmt, va_list ap) {
    */
   return (int) str_l;
 }
+
+#if defined(__GNUC__)
+#pragma GCC diagnostic pop
+#endif
 #endif
