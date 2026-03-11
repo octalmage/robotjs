@@ -1,3 +1,40 @@
+## 0.7.0 (2026-03-11)
+
+* build: Bump prebuild version and MACOSX_DEPLOYMENT_TARGET. ([7bcd7ff](https://github.com/octalmage/robotjs/commit/7bcd7ff))
+* Fix multi-monitor mouse coordinates and remove targetpractice ([7aef129](https://github.com/octalmage/robotjs/commit/7aef129)), closes [#693](https://github.com/octalmage/robotjs/issues/693)
+* Don't wait for a response from X when typing a key ([087ec35](https://github.com/octalmage/robotjs/commit/087ec35))
+* Apply to mouse as well ([bf54f85](https://github.com/octalmage/robotjs/commit/bf54f85))
+* Fixed scrollMouse() bug on windows ([c10ffdd](https://github.com/octalmage/robotjs/commit/c10ffdd))
+* src/keycode: fix buffer overflow ([274d03b](https://github.com/octalmage/robotjs/commit/274d03b))
+* Support typing of Unicode Characters (similar to keyTap) ([94ed67c](https://github.com/octalmage/robotjs/commit/94ed67c))
+* Support Unicode for typeString() in Windows. ([3d7e7cf](https://github.com/octalmage/robotjs/commit/3d7e7cf))
+* fix: scrolling on Windows ([cb0da09](https://github.com/octalmage/robotjs/commit/cb0da09))
+* fix: improve y scrolling on Windows by send y-scrolling event first ([a348c0e](https://github.com/octalmage/robotjs/commit/a348c0e))
+
+
+## 0.6.0 (2019-12-08)
+
+* 0.6.0 ([99021d8](https://github.com/octalmage/robotjs/commit/99021d8))
+* Add changelog ([7e067cf](https://github.com/octalmage/robotjs/commit/7e067cf))
+* Fix deprecations ([4f16371](https://github.com/octalmage/robotjs/commit/4f16371))
+* Fix cpp deprecation ([3b93d07](https://github.com/octalmage/robotjs/commit/3b93d07))
+* Update packages ([77d7cd9](https://github.com/octalmage/robotjs/commit/77d7cd9))
+* Update 3rd party builder configs ([28a428d](https://github.com/octalmage/robotjs/commit/28a428d))
+* Make keypress/release order more "human" ([ec88aa8](https://github.com/octalmage/robotjs/commit/ec88aa8))
+* Use scancodes instead of virtual keys ([bd93bdf](https://github.com/octalmage/robotjs/commit/bd93bdf))
+* Added parameter to change the speed of mouse in movemouseSmooth ([1fad4c8](https://github.com/octalmage/robotjs/commit/1fad4c8))
+* Fix error with mouse moving in Windows with multiple displays ([45e323a](https://github.com/octalmage/robotjs/commit/45e323a))
+* Migrate to SendInput for toggleMouse ([1c7b96a](https://github.com/octalmage/robotjs/commit/1c7b96a))
+* Upgrade to SendInput for win32KeyEvent ([218e208](https://github.com/octalmage/robotjs/commit/218e208))
+* Migrate to windows-build-tools as a dev dependency for Windows ([e5469fa](https://github.com/octalmage/robotjs/commit/e5469fa))
+* Reduce compilation warnings ([da17c61](https://github.com/octalmage/robotjs/commit/da17c61))
+* Reduce repeated SendInput calls in scroll Mouse ([ee432a6](https://github.com/octalmage/robotjs/commit/ee432a6))
+* Updated node_version 12 ([42e6d28](https://github.com/octalmage/robotjs/commit/42e6d28))
+* node v8 deprecated errors fixed. Added support for node v12.x.x ([77f741f](https://github.com/octalmage/robotjs/commit/77f741f))
+* v8::{Handle => Local} for node 12 compatibility ([9a3b161](https://github.com/octalmage/robotjs/commit/9a3b161))
+
+
+
 ## <small>0.5.1 (2018-03-03)</small>
 
 * 0.5.1 ([b9b0ab6](https://github.com/octalmage/robotjs/commit/b9b0ab6))
