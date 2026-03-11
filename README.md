@@ -8,13 +8,11 @@ This is a work in progress so the exported functions could change at any time be
 
 [Check out some of the cool things people are making with  RobotJS](https://github.com/octalmage/robotjs/wiki/Projects-using-RobotJS)! Have your own rad RobotJS project? Feel free to add it!
 
-<p align="center"><a href="https://twitter.com/robotjavascript"><img width="300" src="https://cldup.com/Et-C6_ue45.png"></a><a href="http://blog.robotjs.io"><img width="300" src="https://cldup.com/3apDirNmSB.png"></a></p>
-
 ## Contents
 
 - [Installation](#installation)
 - [Examples](#examples)
-- [API](https://robotjs.io/docs/syntax)
+- [API](https://robotjs.dev/docs/syntax)
 - [Building](#building)
 - [Plans](#plans)
 - [Progress](#progress)
@@ -87,9 +85,9 @@ console.log("#" + hex + " at x:" + mouse.x + " y:" + mouse.y);
 ```
 Read the [Wiki](https://github.com/octalmage/robotjs/wiki) for more information!
 
-## [API](http://robotjs.io/docs/syntax)
+## [API](http://robotjs.dev/docs/syntax)
 
-The RobotJS API is hosted at <https://robotjs.io/docs/syntax>.
+The RobotJS API is hosted at <https://robotjs.dev/docs/syntax>.
 
 ## Building
 
