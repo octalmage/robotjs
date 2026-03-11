@@ -11,7 +11,8 @@
     "test:win32": "jasmine test/**/*.js",
     "install": "prebuild-install --runtime napi || node-gyp rebuild",
     "install-debug": "prebuild-install --runtime napi || node-gyp rebuild --debug",
-    "prebuild": "prebuild --all --runtime napi"
+    "prebuild": "prebuild --all --runtime napi",
+    "build": "node-gyp rebuild"
   },
   "repository": {
     "type": "git",
@@ -53,7 +54,7 @@
   "devDependencies": {
     "jasmine": "^2.99.0",
     "node-gyp": "^12.2.0",
-    "prebuild": "^9.1.1",
+    "prebuild": "^13",
     "run-script-os": "^1.0.3",
     "tape": "^4.8.0"
   }
