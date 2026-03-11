@@ -151,7 +151,7 @@ Napi::Value getMousePosWrapper(const Napi::CallbackInfo& info)
 {
 	Napi::Env env = info.Env();
 
-	MMPoint pos = getMousePos();
+	MMSignedPoint pos = getMousePos();
 
 	//Return object with .x and .y.
 	Napi::Object obj = Napi::Object::New(env);
