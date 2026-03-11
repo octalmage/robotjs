@@ -1,17 +1,16 @@
 {
   'targets': [{
     'target_name': 'robotjs',
-    'include_dirs': [],
+    'include_dirs': [
+        "<!(node -e \"require('nan')\")"
+    ],
     
     'cflags': [
       '-Wall',
       '-Wparentheses',
       '-Winline',
+      '-Wbad-function-cast',
       '-Wdisabled-optimization'
-    ],
-
-    'cflags_c': [
-      '-Wbad-function-cast'
     ],
     
     'conditions': [

@@ -1,6 +1,7 @@
-#include <node_api.h>
+#include <node.h>
+#include <nan.h>
+#include <v8.h>
 #include <vector>
-#include <string.h>
 #include "mouse.h"
 #include "deadbeef_rand.h"
 #include "keypress.h"
@@ -13,7 +14,9 @@
 	#include "xdisplay.h"
 #endif
 
-// Global delays.
+using namespace v8;
+
+//Global delays.
 int mouseDelay = 10;
 int keyboardDelay = 10;
 
@@ -25,276 +28,249 @@ int keyboardDelay = 10;
 |_|  |_|\___/ \__,_|___/\___|
 
 */
-int CheckMouseButton(const char * const b, MMMouseButton * const button) {
+
+int CheckMouseButton(const char * const b, MMMouseButton * const button)
+{
 	if (!button) return -1;
-	if (strcmp(b, "left") == 0) {
+
+	if (strcmp(b, "left") == 0)
+	{
 		*button = LEFT_BUTTON;
-	} else if (strcmp(b, "right") == 0) {
+	}
+	else if (strcmp(b, "right") == 0)
+	{
 		*button = RIGHT_BUTTON;
-	} else if (strcmp(b, "middle") == 0) {
+	}
+	else if (strcmp(b, "middle") == 0)
+	{
 		*button = CENTER_BUTTON;
-	} else {
+	}
+	else
+	{
 		return -2;
 	}
+
 	return 0;
 }
 
-napi_value DragMouse(napi_env env, napi_callback_info info) {
-	size_t argc = 3;
-	napi_value args[3];
-	napi_get_cb_info(env, info, &argc, args, NULL, NULL);
-
-	if (argc < 2 || argc > 3) {
-		napi_throw_error(env, NULL, "Invalid number of arguments.");
-		return NULL;
+NAN_METHOD(dragMouse)
+{
+	if (info.Length() < 2 || info.Length() > 3)
+	{
+		return Nan::ThrowError("Invalid number of arguments.");
 	}
 
-	int32_t x, y;
-	napi_get_value_int32(env, args[0], &x);
-	napi_get_value_int32(env, args[1], &y);
+	const int32_t x = Nan::To<int32_t>(info[0]).FromJust();
+	const int32_t y = Nan::To<int32_t>(info[1]).FromJust();
 	MMMouseButton button = LEFT_BUTTON;
 
-	if (argc == 3) {
-		size_t str_size;
-		napi_get_value_string_utf8(env, args[2], NULL, 0, &str_size);
-		char* b = (char*)malloc(str_size + 1);
-		napi_get_value_string_utf8(env, args[2], b, str_size + 1, &str_size);
+	if (info.Length() == 3)
+	{
+		Nan::Utf8String bstr(info[2]);
+		const char * const b = *bstr;
 
-		switch (CheckMouseButton(b, &button)) {
+		switch (CheckMouseButton(b, &button))
+		{
 			case -1:
-				napi_throw_error(env, NULL, "Null pointer in mouse button code.");
-				free(b);
-				return NULL;
+				return Nan::ThrowError("Null pointer in mouse button code.");
+				break;
 			case -2:
-				napi_throw_error(env, NULL, "Invalid mouse button specified.");
-				free(b);
-				return NULL;
+				return Nan::ThrowError("Invalid mouse button specified.");
+				break;
 		}
-		free(b);
 	}
 
-	MMSignedPoint point = MMSignedPointMake(x, y);
+	MMSignedPoint point;
+	point = MMSignedPointMake(x, y);
 	dragMouse(point, button);
 	microsleep(mouseDelay);
 
-	napi_value result;
-	napi_get_boolean(env, true, &result);
-	return result;
+	info.GetReturnValue().Set(Nan::New(1));
 }
 
-napi_value UpdateScreenMetrics(napi_env env, napi_callback_info info) {
+NAN_METHOD(updateScreenMetrics)
+{
 	updateScreenMetrics();
 
-	napi_value result;
-	napi_get_boolean(env, true, &result);
-	return result;
+	info.GetReturnValue().Set(Nan::New(1));
 }
 
-napi_value MoveMouse(napi_env env, napi_callback_info info) {
-	size_t argc = 2;
-	napi_value args[2];
-	napi_get_cb_info(env, info, &argc, args, NULL, NULL);
-
-	if (argc != 2) {
-		napi_throw_error(env, NULL, "Invalid number of arguments.");
-		return NULL;
+NAN_METHOD(moveMouse)
+{
+	if (info.Length() != 2)
+	{
+		return Nan::ThrowError("Invalid number of arguments.");
 	}
 
-	int32_t x, y;
-	napi_get_value_int32(env, args[0], &x);
-	napi_get_value_int32(env, args[1], &y);
+	int32_t x = Nan::To<int32_t>(info[0]).FromJust();
+	int32_t y = Nan::To<int32_t>(info[1]).FromJust();
 
-	MMSignedPoint point = MMSignedPointMake(x, y);
+	MMSignedPoint point;
+	point = MMSignedPointMake(x, y);
 	moveMouse(point);
 	microsleep(mouseDelay);
 
-	napi_value result;
-	napi_get_boolean(env, true, &result);
-	return result;
+	info.GetReturnValue().Set(Nan::New(1));
 }
 
-napi_value MoveMouseSmooth(napi_env env, napi_callback_info info) {
-	size_t argc = 3;
-	napi_value args[3];
-	napi_get_cb_info(env, info, &argc, args, NULL, NULL);
-
-	if (argc < 2 || argc > 3) {
-		napi_throw_error(env, NULL, "Invalid number of arguments.");
-		return NULL;
+NAN_METHOD(moveMouseSmooth)
+{
+	if (info.Length() > 3 || info.Length() < 2 )
+	{
+		return Nan::ThrowError("Invalid number of arguments.");
 	}
+	size_t x = Nan::To<int32_t>(info[0]).FromJust();
+	size_t y = Nan::To<int32_t>(info[1]).FromJust();
 
-	int32_t x, y;
-	napi_get_value_int32(env, args[0], &x);
-	napi_get_value_int32(env, args[1], &y);
-
-	MMPoint point = MMPointMake(x, y);
-	if (argc == 3) {
-		int32_t speed;
-		napi_get_value_int32(env, args[2], &speed);
+	MMPoint point;
+	point = MMPointMake(x, y);
+	if (info.Length() == 3)
+	{
+		size_t speed = Nan::To<int32_t>(info[2]).FromJust();
 		smoothlyMoveMouse(point, speed);
-	} else {
+	}
+	else
+	{
 		smoothlyMoveMouse(point, 3.0);
 	}
 	microsleep(mouseDelay);
 
-	napi_value result;
-	napi_get_boolean(env, true, &result);
-	return result;
+	info.GetReturnValue().Set(Nan::New(1));
 }
 
-napi_value GetMousePos(napi_env env, napi_callback_info info) {
+NAN_METHOD(getMousePos)
+{
 	MMPoint pos = getMousePos();
 
-	napi_value obj;
-	napi_create_object(env, &obj);
-	napi_value x, y;
-	napi_create_int32(env, (int)pos.x, &x);
-	napi_create_int32(env, (int)pos.y, &y);
-	napi_set_named_property(env, obj, "x", x);
-	napi_set_named_property(env, obj, "y", y);
-
-	return obj;
+	//Return object with .x and .y.
+	Local<Object> obj = Nan::New<Object>();
+	Nan::Set(obj, Nan::New("x").ToLocalChecked(), Nan::New((int)pos.x));
+	Nan::Set(obj, Nan::New("y").ToLocalChecked(), Nan::New((int)pos.y));
+	info.GetReturnValue().Set(obj);
 }
 
-napi_value MouseClick(napi_env env, napi_callback_info info) {
-	size_t argc = 2;
-	napi_value args[2];
-	napi_get_cb_info(env, info, &argc, args, NULL, NULL);
-
+NAN_METHOD(mouseClick)
+{
 	MMMouseButton button = LEFT_BUTTON;
 	bool doubleC = false;
 
-	if (argc > 0) {
-		size_t str_size;
-		napi_get_value_string_utf8(env, args[0], NULL, 0, &str_size);
-		char* b = (char*)malloc(str_size + 1);
-		napi_get_value_string_utf8(env, args[0], b, str_size + 1, &str_size);
+	if (info.Length() > 0)
+	{
+		v8::String::Utf8Value bstr(v8::Isolate::GetCurrent(), Nan::To<v8::String>(info[0]).ToLocalChecked());
+		const char * const b = *bstr;
 
-		switch (CheckMouseButton(b, &button)) {
+		switch (CheckMouseButton(b, &button))
+		{
 			case -1:
-				napi_throw_error(env, NULL, "Null pointer in mouse button code.");
-				free(b);
-				return NULL;
+				return Nan::ThrowError("Null pointer in mouse button code.");
+				break;
 			case -2:
-				napi_throw_error(env, NULL, "Invalid mouse button specified.");
-				free(b);
-				return NULL;
+				return Nan::ThrowError("Invalid mouse button specified.");
+				break;
 		}
-		free(b);
 	}
 
-	if (argc == 2) {
-		napi_get_value_bool(env, args[1], &doubleC);
-	} else if (argc > 2) {
-		napi_throw_error(env, NULL, "Invalid number of arguments.");
-		return NULL;
+	if (info.Length() == 2)
+	{
+		doubleC = Nan::To<bool>(info[1]).FromJust();
+	}
+	else if (info.Length() > 2)
+	{
+		return Nan::ThrowError("Invalid number of arguments.");
 	}
 
-	if (!doubleC) {
+	if (!doubleC)
+	{
 		clickMouse(button);
-	} else {
+	}
+	else
+	{
 		doubleClick(button);
 	}
+
 	microsleep(mouseDelay);
 
-	napi_value result;
-	napi_get_boolean(env, true, &result);
-	return result;
+	info.GetReturnValue().Set(Nan::New(1));
 }
 
-napi_value MouseToggle(napi_env env, napi_callback_info info) {
-	size_t argc = 2;
-	napi_value args[2];
-	napi_get_cb_info(env, info, &argc, args, NULL, NULL);
-
+NAN_METHOD(mouseToggle)
+{
 	MMMouseButton button = LEFT_BUTTON;
 	bool down = false;
 
-	if (argc > 0) {
-		size_t str_size;
-		napi_get_value_string_utf8(env, args[0], NULL, 0, &str_size);
-		char* d = (char*)malloc(str_size + 1);
-		napi_get_value_string_utf8(env, args[0], d, str_size + 1, &str_size);
+	if (info.Length() > 0)
+	{
+		char *d;
 
-		if (strcmp(d, "down") == 0) {
+		Nan::Utf8String dstr(info[0]);
+		d = *dstr;
+
+		if (strcmp(d, "down") == 0)
+		{
 			down = true;
-		} else if (strcmp(d, "up") == 0) {
-			down = false;
-		} else {
-			napi_throw_error(env, NULL, "Invalid mouse button state specified.");
-			free(d);
-			return NULL;
 		}
-		free(d);
+		else if (strcmp(d, "up") == 0)
+		{
+			down = false;
+		}
+		else
+		{
+			return Nan::ThrowError("Invalid mouse button state specified.");
+		}
 	}
 
-	if (argc == 2) {
-		size_t str_size;
-		napi_get_value_string_utf8(env, args[1], NULL, 0, &str_size);
-		char* b = (char*)malloc(str_size + 1);
-		napi_get_value_string_utf8(env, args[1], b, str_size + 1, &str_size);
+	if (info.Length() == 2)
+	{
+		Nan::Utf8String bstr(info[1]);
+		const char * const b = *bstr;
 
-		switch (CheckMouseButton(b, &button)) {
+		switch (CheckMouseButton(b, &button))
+		{
 			case -1:
-				napi_throw_error(env, NULL, "Null pointer in mouse button code.");
-				free(b);
-				return NULL;
+				return Nan::ThrowError("Null pointer in mouse button code.");
+				break;
 			case -2:
-				napi_throw_error(env, NULL, "Invalid mouse button specified.");
-				free(b);
-				return NULL;
+				return Nan::ThrowError("Invalid mouse button specified.");
+				break;
 		}
-		free(b);
-	} else if (argc > 2) {
-		napi_throw_error(env, NULL, "Invalid number of arguments.");
-		return NULL;
+	}
+	else if (info.Length() > 2)
+	{
+		return Nan::ThrowError("Invalid number of arguments.");
 	}
 
 	toggleMouse(down, button);
 	microsleep(mouseDelay);
 
-	napi_value result;
-	napi_get_boolean(env, true, &result);
-	return result;
+	info.GetReturnValue().Set(Nan::New(1));
 }
 
-napi_value SetMouseDelay(napi_env env, napi_callback_info info) {
-	size_t argc = 1;
-	napi_value args[1];
-	napi_get_cb_info(env, info, &argc, args, NULL, NULL);
-
-	if (argc != 1) {
-		napi_throw_error(env, NULL, "Invalid number of arguments.");
-		return NULL;
+NAN_METHOD(setMouseDelay)
+{
+	if (info.Length() != 1)
+	{
+		return Nan::ThrowError("Invalid number of arguments.");
 	}
 
-	napi_get_value_int32(env, args[0], &mouseDelay);
+	mouseDelay = Nan::To<int32_t>(info[0]).FromJust();
 
-	napi_value result;
-	napi_get_boolean(env, true, &result);
-	return result;
+	info.GetReturnValue().Set(Nan::New(1));
 }
 
-napi_value ScrollMouse(napi_env env, napi_callback_info info) {
-	size_t argc = 2;
-	napi_value args[2];
-	napi_get_cb_info(env, info, &argc, args, NULL, NULL);
-
-	if (argc != 2) {
-		napi_throw_error(env, NULL, "Invalid number of arguments.");
-		return NULL;
+NAN_METHOD(scrollMouse)
+{
+	if (info.Length() != 2)
+	{
+    	return Nan::ThrowError("Invalid number of arguments.");
 	}
 
-	int32_t x, y;
-	napi_get_value_int32(env, args[0], &x);
-	napi_get_value_int32(env, args[1], &y);
+	int x = Nan::To<int32_t>(info[0]).FromJust();
+	int y = Nan::To<int32_t>(info[1]).FromJust();
 
 	scrollMouse(x, y);
 	microsleep(mouseDelay);
 
-	napi_value result;
-	napi_get_boolean(env, true, &result);
-	return result;
+	info.GetReturnValue().Set(Nan::New(1));
 }
 /*
  _  __          _                         _
@@ -302,7 +278,7 @@ napi_value ScrollMouse(napi_env env, napi_callback_info info) {
 | ' // _ \ | | | '_ \ / _ \ / _` | '__/ _` |
 | . \  __/ |_| | |_) | (_) | (_| | | | (_| |
 |_|\_\___|\__, |_.__/ \___/ \__,_|_|  \__,_|
-		  |___/
+          |___/
 */
 struct KeyNames
 {
@@ -403,7 +379,7 @@ static KeyNames key_names[] =
 	{ NULL,               K_NOT_A_KEY } /* end marker */
 };
 
-int CheckKeyCodes(const char* k, MMKeyCode *key)
+int CheckKeyCodes(char* k, MMKeyCode *key)
 {
 	if (!key) return -1;
 
@@ -434,7 +410,7 @@ int CheckKeyCodes(const char* k, MMKeyCode *key)
 	return 0;
 }
 
-int CheckKeyFlags(const char* f, MMKeyFlags* flags)
+int CheckKeyFlags(char* f, MMKeyFlags* flags)
 {
 	if (!flags) return -1;
 
@@ -442,7 +418,7 @@ int CheckKeyFlags(const char* f, MMKeyFlags* flags)
 	{
 		*flags = MOD_ALT;
 	}
-	else if(strcmp(f, "command") == 0 || strcmp(f, "meta") == 0)
+	else if(strcmp(f, "command") == 0)
 	{
 		*flags = MOD_META;
 	}
@@ -466,94 +442,77 @@ int CheckKeyFlags(const char* f, MMKeyFlags* flags)
 	return 0;
 }
 
-int GetFlagsFromString(napi_env env, napi_value value, MMKeyFlags* flags)
+int GetFlagsFromString(v8::Local<v8::Value> value, MMKeyFlags* flags)
 {
-	size_t str_size;
-	napi_get_value_string_utf8(env, value, NULL, 0, &str_size);
-	char* fstr = (char*)malloc(str_size + 1);
-	napi_get_value_string_utf8(env, value, fstr, str_size + 1, &str_size);
-	int result = CheckKeyFlags(fstr, flags);
-	free(fstr);
-	return result;
+	v8::String::Utf8Value fstr(v8::Isolate::GetCurrent(), Nan::To<v8::String>(value).ToLocalChecked());
+	return CheckKeyFlags(*fstr, flags);
 }
 
-int GetFlagsFromValue(napi_env env, napi_value value, MMKeyFlags* flags)
+int GetFlagsFromValue(v8::Local<v8::Value> value, MMKeyFlags* flags)
 {
 	if (!flags) return -1;
 
-	bool isArray;
-	napi_is_array(env, value, &isArray);
-
-	if (isArray)
+	//Optionally allow an array of flag strings to be passed.
+	if (value->IsArray())
 	{
-		uint32_t length;
-		napi_get_array_length(env, value, &length);
-		for (uint32_t i = 0; i < length; i++)
+		v8::Local<v8::Array> a = v8::Local<v8::Array>::Cast(value);
+		for (uint32_t i = 0; i < a->Length(); i++)
 		{
-			napi_value v;
-			napi_get_element(env, value, i, &v);
+		  if (Nan::Has(a, i).FromJust()) {
+                v8::Local<v8::Value> v(Nan::Get(a, i).ToLocalChecked());
+                if (!v->IsString()) return -2;
 
-			bool isString;
-			napi_valuetype type;
-			napi_typeof(env, v, &type);
-			isString = (type == napi_string);
-			if (!isString) return -2;
+                MMKeyFlags f = MOD_NONE;
+                const int rv = GetFlagsFromString(v, &f);
+                if (rv) return rv;
 
-			MMKeyFlags f = MOD_NONE;
-			const int rv = GetFlagsFromString(env, v, &f);
-			if (rv) return rv;
-
-			*flags = (MMKeyFlags)(*flags | f);
+                *flags = (MMKeyFlags)(*flags | f);
+			}
 		}
 		return 0;
 	}
 
-	return GetFlagsFromString(env, value, flags);
+	//If it's not an array, it should be a single string value.
+	return GetFlagsFromString(value, flags);
 }
 
-napi_value KeyTap(napi_env env, napi_callback_info info)
+NAN_METHOD(keyTap)
 {
-	size_t argc = 2;
-	napi_value args[2];
-	napi_get_cb_info(env, info, &argc, args, NULL, NULL);
-
-	if (argc < 1 || argc > 2) {
-		napi_throw_error(env, NULL, "Invalid number of arguments.");
-		return NULL;
-	}
-
 	MMKeyFlags flags = MOD_NONE;
 	MMKeyCode key;
 
-	size_t str_size;
-	napi_get_value_string_utf8(env, args[0], NULL, 0, &str_size);
-	char* k = (char*)malloc(str_size + 1);
-	napi_get_value_string_utf8(env, args[0], k, str_size + 1, &str_size);
+	char *k;
 
-	if (argc == 2) {
-		switch (GetFlagsFromValue(env, args[1], &flags))
-		{
-			case -1:
-				free(k);
-				napi_throw_error(env, NULL, "Null pointer in key flag.");
-				return NULL;
-			case -2:
-				free(k);
-				napi_throw_error(env, NULL, "Invalid key flag specified.");
-				return NULL;
-		}
+	v8::String::Utf8Value kstr(v8::Isolate::GetCurrent(), Nan::To<v8::String>(info[0]).ToLocalChecked());
+	k = *kstr;
+
+	switch (info.Length())
+	{
+		case 2:
+			switch (GetFlagsFromValue(info[1], &flags))
+			{
+				case -1:
+					return Nan::ThrowError("Null pointer in key flag.");
+					break;
+				case -2:
+					return Nan::ThrowError("Invalid key flag specified.");
+					break;
+			}
+			break;
+		case 1:
+			break;
+		default:
+			return Nan::ThrowError("Invalid number of arguments.");
 	}
 
 	switch(CheckKeyCodes(k, &key))
 	{
 		case -1:
-			free(k);
-			napi_throw_error(env, NULL, "Null pointer in key code.");
-			return NULL;
+			return Nan::ThrowError("Null pointer in key code.");
+			break;
 		case -2:
-			free(k);
-			napi_throw_error(env, NULL, "Invalid key code specified.");
-			return NULL;
+			return Nan::ThrowError("Invalid key code specified.");
+			break;
 		default:
 			toggleKeyCode(key, true, flags);
 			microsleep(keyboardDelay);
@@ -562,182 +521,141 @@ napi_value KeyTap(napi_env env, napi_callback_info info)
 			break;
 	}
 
-	free(k);
-
-	napi_value result;
-	napi_get_boolean(env, true, &result);
-	return result;
+	info.GetReturnValue().Set(Nan::New(1));
 }
 
-napi_value KeyToggle(napi_env env, napi_callback_info info)
+
+NAN_METHOD(keyToggle)
 {
-	size_t argc = 3;
-	napi_value args[3];
-	napi_get_cb_info(env, info, &argc, args, NULL, NULL);
-
-	if (argc < 1 || argc > 3) {
-		napi_throw_error(env, NULL, "Invalid number of arguments.");
-		return NULL;
-	}
-
 	MMKeyFlags flags = MOD_NONE;
 	MMKeyCode key;
 
-	size_t str_size;
-	napi_get_value_string_utf8(env, args[0], NULL, 0, &str_size);
-	char* k = (char*)malloc(str_size + 1);
-	napi_get_value_string_utf8(env, args[0], k, str_size + 1, &str_size);
+	bool down;
+	char *k;
 
-	bool down = false;
-	if (argc > 1) {
-		napi_get_value_string_utf8(env, args[1], NULL, 0, &str_size);
-		char* d = (char*)malloc(str_size + 1);
-		napi_get_value_string_utf8(env, args[1], d, str_size + 1, &str_size);
+	//Get arguments from JavaScript.
+	Nan::Utf8String kstr(info[0]);
 
-		if (strcmp(d, "down") == 0) {
-			down = true;
-		} else if (strcmp(d, "up") == 0) {
-			down = false;
-		} else {
-			free(k);
-			free(d);
-			napi_throw_error(env, NULL, "Invalid key state specified.");
-			return NULL;
-		}
-		free(d);
+	//Convert arguments to chars.
+	k = *kstr;
+
+	//Check and confirm number of arguments.
+	switch (info.Length())
+	{
+		case 3:
+			//Get key modifier.
+			switch (GetFlagsFromValue(info[2], &flags))
+			{
+				case -1:
+					return Nan::ThrowError("Null pointer in key flag.");
+					break;
+				case -2:
+					return Nan::ThrowError("Invalid key flag specified.");
+					break;
+			}
+			break;
+		case 2:
+			break;
+		default:
+			return Nan::ThrowError("Invalid number of arguments.");
 	}
 
-	if (argc == 3) {
-		switch (GetFlagsFromValue(env, args[2], &flags))
+	//Get down value if provided.
+	if (info.Length() > 1)
+	{
+		char *d;
+
+		Nan::Utf8String dstr(info[1]);
+		d = *dstr;
+
+		if (strcmp(d, "down") == 0)
 		{
-			case -1:
-				free(k);
-				napi_throw_error(env, NULL, "Null pointer in key flag.");
-				return NULL;
-			case -2:
-				free(k);
-				napi_throw_error(env, NULL, "Invalid key flag specified.");
-				return NULL;
+			down = true;
+		}
+		else if (strcmp(d, "up") == 0)
+		{
+			down = false;
+		}
+		else
+		{
+			return Nan::ThrowError("Invalid key state specified.");
 		}
 	}
 
+	//Get the actual key.
 	switch(CheckKeyCodes(k, &key))
 	{
 		case -1:
-			free(k);
-			napi_throw_error(env, NULL, "Null pointer in key code.");
-			return NULL;
+			return Nan::ThrowError("Null pointer in key code.");
+			break;
 		case -2:
-			free(k);
-			napi_throw_error(env, NULL, "Invalid key code specified.");
-			return NULL;
+			return Nan::ThrowError("Invalid key code specified.");
+			break;
 		default:
 			toggleKeyCode(key, down, flags);
 			microsleep(keyboardDelay);
 	}
 
-	free(k);
-
-	napi_value result;
-	napi_get_boolean(env, true, &result);
-	return result;
+	info.GetReturnValue().Set(Nan::New(1));
 }
 
-napi_value UnicodeTap(napi_env env, napi_callback_info info)
+NAN_METHOD(unicodeTap)
 {
-	size_t argc = 1;
-	napi_value args[1];
-	napi_get_cb_info(env, info, &argc, args, NULL, NULL);
-
-	if (argc != 1) {
-		napi_throw_error(env, NULL, "Invalid number of arguments.");
-		return NULL;
-	}
-
-	int32_t value;
-	napi_get_value_int32(env, args[0], &value);
+	size_t value = info[0]->Int32Value(Nan::GetCurrentContext()).FromJust();
 
 	if (value != 0) {
 		unicodeTap(value);
 
-		napi_value result;
-		napi_get_boolean(env, true, &result);
-		return result;
+		info.GetReturnValue().Set(Nan::New(1));
 	} else {
-		napi_throw_error(env, NULL, "Invalid character typed.");
-		return NULL;
+		return Nan::ThrowError("Invalid character typed.");
 	}
 }
 
-napi_value TypeString(napi_env env, napi_callback_info info)
+NAN_METHOD(typeString)
 {
-	size_t argc = 1;
-	napi_value args[1];
-	napi_get_cb_info(env, info, &argc, args, NULL, NULL);
+	if (info.Length() > 0) {
+		char *str;
+		Nan::Utf8String string(info[0]);
 
-	if (argc != 1) {
-		napi_throw_error(env, NULL, "Invalid number of arguments.");
-		return NULL;
+		str = *string;
+
+		typeStringDelayed(str, 0);
+
+		info.GetReturnValue().Set(Nan::New(1));
+	} else {
+		return Nan::ThrowError("Invalid number of arguments.");
 	}
-
-	size_t str_size;
-	napi_get_value_string_utf8(env, args[0], NULL, 0, &str_size);
-	char* str = (char*)malloc(str_size + 1);
-	napi_get_value_string_utf8(env, args[0], str, str_size + 1, &str_size);
-
-	typeStringDelayed(str, 0);
-
-	free(str);
-
-	napi_value result;
-	napi_get_boolean(env, true, &result);
-	return result;
 }
 
-napi_value TypeStringDelayed(napi_env env, napi_callback_info info)
+NAN_METHOD(typeStringDelayed)
 {
-	size_t argc = 2;
-	napi_value args[2];
-	napi_get_cb_info(env, info, &argc, args, NULL, NULL);
+	if (info.Length() > 0) {
+		char *str;
+		Nan::Utf8String string(info[0]);
 
-	if (argc != 2) {
-		napi_throw_error(env, NULL, "Invalid number of arguments.");
-		return NULL;
+		str = *string;
+
+	size_t cpm = Nan::To<int32_t>(info[1]).FromJust();
+
+		typeStringDelayed(str, cpm);
+
+		info.GetReturnValue().Set(Nan::New(1));
+	} else {
+		return Nan::ThrowError("Invalid number of arguments.");
 	}
-
-	size_t str_size;
-	napi_get_value_string_utf8(env, args[0], NULL, 0, &str_size);
-	char* str = (char*)malloc(str_size + 1);
-	napi_get_value_string_utf8(env, args[0], str, str_size + 1, &str_size);
-
-	int32_t cpm;
-	napi_get_value_int32(env, args[1], &cpm);
-
-	typeStringDelayed(str, cpm);
-
-	free(str);
-
-	napi_value result;
-	napi_get_boolean(env, true, &result);
-	return result;
 }
 
-napi_value SetKeyboardDelay(napi_env env, napi_callback_info info)
+NAN_METHOD(setKeyboardDelay)
 {
-	size_t argc = 1;
-	napi_value args[1];
-	napi_get_cb_info(env, info, &argc, args, NULL, NULL);
-
-	if (argc != 1) {
-		napi_throw_error(env, NULL, "Invalid number of arguments.");
-		return NULL;
+	if (info.Length() != 1)
+	{
+		return Nan::ThrowError("Invalid number of arguments.");
 	}
 
-	napi_get_value_int32(env, args[0], &keyboardDelay);
+	keyboardDelay = Nan::To<int32_t>(info[0]).FromJust();
 
-	napi_value result;
-	napi_get_boolean(env, true, &result);
-	return result;
+	info.GetReturnValue().Set(Nan::New(1));
 }
 
 /*
@@ -748,6 +666,7 @@ napi_value SetKeyboardDelay(napi_env env, napi_callback_info info)
  |____/ \___|_|  \___|\___|_| |_|
 
 */
+
 /**
  * Pad hex color code with leading zeros.
  * @param color Hex value to pad.
@@ -760,131 +679,117 @@ void padHex(MMRGBHex color, char* hex)
 	snprintf(hex, 7, "%06x", color);
 }
 
-napi_value GetPixelColor(napi_env env, napi_callback_info info) {
-	size_t argc = 2;
-	napi_value args[2];
-	napi_get_cb_info(env, info, &argc, args, NULL, NULL);
-
-	if (argc != 2) {
-		napi_throw_error(env, NULL, "Invalid number of arguments.");
-		return NULL;
+NAN_METHOD(getPixelColor)
+{
+	if (info.Length() != 2)
+	{
+		return Nan::ThrowError("Invalid number of arguments.");
 	}
 
-	int32_t x, y;
-	napi_get_value_int32(env, args[0], &x);
-	napi_get_value_int32(env, args[1], &y);
+	MMBitmapRef bitmap;
+	MMRGBHex color;
 
-	if (!pointVisibleOnMainDisplay(MMPointMake(x, y))) {
-		napi_throw_error(env, NULL, "Requested coordinates are outside the main screen's dimensions.");
-		return NULL;
+	size_t x = Nan::To<int32_t>(info[0]).FromJust();
+	size_t y = Nan::To<int32_t>(info[1]).FromJust();
+
+	if (!pointVisibleOnMainDisplay(MMPointMake(x, y)))
+	{
+		return Nan::ThrowError("Requested coordinates are outside the main screen's dimensions.");
 	}
 
-	MMBitmapRef bitmap = copyMMBitmapFromDisplayInRect(MMRectMake(x, y, 1, 1));
-	MMRGBHex color = MMRGBHexAtPoint(bitmap, 0, 0);
+	bitmap = copyMMBitmapFromDisplayInRect(MMRectMake(x, y, 1, 1));
+
+	color = MMRGBHexAtPoint(bitmap, 0, 0);
+
 	char hex[7];
+
 	padHex(color, hex);
+
 	destroyMMBitmap(bitmap);
 
-	napi_value result;
-	napi_create_string_utf8(env, hex, NAPI_AUTO_LENGTH, &result);
-	return result;
+	info.GetReturnValue().Set(Nan::New(hex).ToLocalChecked());
 }
 
-napi_value GetScreenSize(napi_env env, napi_callback_info info) {
+NAN_METHOD(getScreenSize)
+{
+	//Get display size.
 	MMSize displaySize = getMainDisplaySize();
 
-	napi_value obj;
-	napi_create_object(env, &obj);
-	napi_value width, height;
-	napi_create_int32(env, (int)displaySize.width, &width);
-	napi_create_int32(env, (int)displaySize.height, &height);
-	napi_set_named_property(env, obj, "width", width);
-	napi_set_named_property(env, obj, "height", height);
+	//Create our return object.
+	Local<Object> obj = Nan::New<Object>();
+	Nan::Set(obj, Nan::New("width").ToLocalChecked(), Nan::New<Number>(displaySize.width));
+	Nan::Set(obj, Nan::New("height").ToLocalChecked(), Nan::New<Number>(displaySize.height));
 
-	return obj;
+	//Return our object with .width and .height.
+	info.GetReturnValue().Set(obj);
 }
 
-napi_value GetXDisplayName(napi_env env, napi_callback_info info) {
-#if defined(USE_X11)
+NAN_METHOD(getXDisplayName)
+{
+	#if defined(USE_X11)
 	const char* display = getXDisplay();
-	napi_value result;
-	napi_create_string_utf8(env, display, NAPI_AUTO_LENGTH, &result);
-	return result;
-#else
-	napi_throw_error(env, NULL, "getXDisplayName is only supported on Linux");
-	return NULL;
-#endif
+	info.GetReturnValue().Set(Nan::New<String>(display).ToLocalChecked());
+	#else
+	Nan::ThrowError("getXDisplayName is only supported on Linux");
+	#endif
 }
 
-napi_value SetXDisplayName(napi_env env, napi_callback_info info) {
-#if defined(USE_X11)
-	size_t argc = 1;
-	napi_value args[1];
-	napi_get_cb_info(env, info, &argc, args, NULL, NULL);
-
-	size_t str_size;
-	napi_get_value_string_utf8(env, args[0], NULL, 0, &str_size);
-	char* display = (char*)malloc(str_size + 1);
-	napi_get_value_string_utf8(env, args[0], display, str_size + 1, &str_size);
-
-	setXDisplay(display);
-	free(display);
-
-	napi_value result;
-	napi_get_boolean(env, true, &result);
-	return result;
-#else
-	napi_throw_error(env, NULL, "setXDisplayName is only supported on Linux");
-	return NULL;
-#endif
+NAN_METHOD(setXDisplayName)
+{
+	#if defined(USE_X11)
+	Nan::Utf8String string(info[0]);
+	setXDisplay(*string);
+	info.GetReturnValue().Set(Nan::New(1));
+	#else
+	Nan::ThrowError("setXDisplayName is only supported on Linux");
+	#endif
 }
 
-napi_value CaptureScreen(napi_env env, napi_callback_info info) {
-	size_t argc = 4;
-	napi_value args[4];
-	napi_get_cb_info(env, info, &argc, args, NULL, NULL);
+NAN_METHOD(captureScreen)
+{
+	size_t x;
+	size_t y;
+	size_t w;
+	size_t h;
 
-	int32_t x, y, w, h;
+	//If user has provided screen coords, use them!
+	if (info.Length() == 4)
+	{
+		//TODO: Make sure requested coords are within the screen bounds, or we get a seg fault.
+		// 		An error message is much nicer!
 
-	if (argc == 4) {
-		napi_get_value_int32(env, args[0], &x);
-		napi_get_value_int32(env, args[1], &y);
-		napi_get_value_int32(env, args[2], &w);
-		napi_get_value_int32(env, args[3], &h);
-	} else {
+		x = Nan::To<int32_t>(info[0]).FromJust();
+		y = Nan::To<int32_t>(info[1]).FromJust();
+		w = Nan::To<int32_t>(info[2]).FromJust();
+		h = Nan::To<int32_t>(info[3]).FromJust();
+	}
+	else
+	{
+		//We're getting the full screen.
 		x = 0;
 		y = 0;
+
+		//Get screen size.
 		MMSize displaySize = getMainDisplaySize();
 		w = displaySize.width;
 		h = displaySize.height;
 	}
 
 	MMBitmapRef bitmap = copyMMBitmapFromDisplayInRect(MMRectMake(x, y, w, h));
+
 	uint32_t bufferSize = bitmap->bytewidth * bitmap->height;
-	napi_value buffer;
-	void* data;
-	napi_create_buffer_copy(env, bufferSize, bitmap->imageBuffer, &data, &buffer);
+	Local<Object> buffer = Nan::NewBuffer((char*)bitmap->imageBuffer, bufferSize, destroyMMBitmapBuffer, NULL).ToLocalChecked();
 
-	napi_value obj;
-	napi_create_object(env, &obj);
-	napi_value width, height, byteWidth, bitsPerPixel, bytesPerPixel;
-	napi_create_int32(env, bitmap->width, &width);
-	napi_create_int32(env, bitmap->height, &height);
-	napi_create_int32(env, bitmap->bytewidth, &byteWidth);
-	napi_create_int32(env, bitmap->bitsPerPixel, &bitsPerPixel);
-	napi_create_int32(env, bitmap->bytesPerPixel, &bytesPerPixel);
-	napi_set_named_property(env, obj, "width", width);
-	napi_set_named_property(env, obj, "height", height);
-	napi_set_named_property(env, obj, "byteWidth", byteWidth);
-	napi_set_named_property(env, obj, "bitsPerPixel", bitsPerPixel);
-	napi_set_named_property(env, obj, "bytesPerPixel", bytesPerPixel);
-	napi_set_named_property(env, obj, "image", buffer);
+	Local<Object> obj = Nan::New<Object>();
+	Nan::Set(obj, Nan::New("width").ToLocalChecked(), Nan::New<Number>(bitmap->width));
+	Nan::Set(obj, Nan::New("height").ToLocalChecked(), Nan::New<Number>(bitmap->height));
+	Nan::Set(obj, Nan::New("byteWidth").ToLocalChecked(), Nan::New<Number>(bitmap->bytewidth));
+	Nan::Set(obj, Nan::New("bitsPerPixel").ToLocalChecked(), Nan::New<Number>(bitmap->bitsPerPixel));
+	Nan::Set(obj, Nan::New("bytesPerPixel").ToLocalChecked(), Nan::New<Number>(bitmap->bytesPerPixel));
+	Nan::Set(obj, Nan::New("image").ToLocalChecked(), buffer);
 
-	destroyMMBitmap(bitmap);
-
-	return obj;
+	info.GetReturnValue().Set(obj);
 }
-
 
 /*
  ____  _ _
@@ -894,153 +799,136 @@ napi_value CaptureScreen(napi_env env, napi_callback_info info) {
 |____/|_|\__|_| |_| |_|\__,_| .__/
                             |_|
  */
+
 class BMP
 {
 	public:
-		uint32_t width;
-		uint32_t height;
-		uint32_t byteWidth;
-		uint32_t bitsPerPixel;
-		uint32_t bytesPerPixel;
+		size_t width;
+		size_t height;
+		size_t byteWidth;
+		uint8_t bitsPerPixel;
+		uint8_t bytesPerPixel;
 		uint8_t *image;
 };
 
 //Convert object from Javascript to a C++ class (BMP).
-BMP buildBMP(napi_env env, napi_value info)
+BMP buildBMP(Local<Object> info)
 {
+	Local<Object> obj = Nan::To<v8::Object>(info).ToLocalChecked();
+
 	BMP img;
 
-	napi_value width, height, byteWidth, bitsPerPixel, bytesPerPixel, image;
-	napi_get_named_property(env, info, "width", &width);
-	napi_get_named_property(env, info, "height", &height);
-	napi_get_named_property(env, info, "byteWidth", &byteWidth);
-	napi_get_named_property(env, info, "bitsPerPixel", &bitsPerPixel);
-	napi_get_named_property(env, info, "bytesPerPixel", &bytesPerPixel);
-	napi_get_named_property(env, info, "image", &image);
+	img.width = Nan::Get(obj, Nan::New("width").ToLocalChecked()).ToLocalChecked()->Uint32Value(Nan::GetCurrentContext()).FromJust();
+	img.height = Nan::Get(obj, Nan::New("height").ToLocalChecked()).ToLocalChecked()->Uint32Value(Nan::GetCurrentContext()).FromJust();
+	img.byteWidth = Nan::Get(obj, Nan::New("byteWidth").ToLocalChecked()).ToLocalChecked()->Uint32Value(Nan::GetCurrentContext()).FromJust();
+	img.bitsPerPixel = Nan::Get(obj, Nan::New("bitsPerPixel").ToLocalChecked()).ToLocalChecked()->Uint32Value(Nan::GetCurrentContext()).FromJust();
+	img.bytesPerPixel = Nan::Get(obj, Nan::New("bytesPerPixel").ToLocalChecked()).ToLocalChecked()->Uint32Value(Nan::GetCurrentContext()).FromJust();
 
-	napi_get_value_uint32(env, width, &img.width);
-	napi_get_value_uint32(env, height, &img.height);
-	napi_get_value_uint32(env, byteWidth, &img.byteWidth);
-	napi_get_value_uint32(env, bitsPerPixel, &img.bitsPerPixel);
-	napi_get_value_uint32(env, bytesPerPixel, &img.bytesPerPixel);
+	char* buf = node::Buffer::Data(Nan::Get(obj, Nan::New("image").ToLocalChecked()).ToLocalChecked());
 
-	void* buf;
-	size_t buf_len;
-	napi_get_buffer_info(env, image, &buf, &buf_len);
-
-	// Convert the buffer to a uint8_t which createMMBitmap requires.
+	//Convert the buffer to a uint8_t which createMMBitmap requires.
 	img.image = (uint8_t *)malloc(img.byteWidth * img.height);
 	memcpy(img.image, buf, img.byteWidth * img.height);
 
 	return img;
-}
+ }
 
-napi_value GetColor(napi_env env, napi_callback_info info)
+NAN_METHOD(getColor)
 {
-	size_t argc = 3;
-	napi_value args[3];
-	napi_get_cb_info(env, info, &argc, args, NULL, NULL);
+	MMBitmapRef bitmap;
+	MMRGBHex color;
 
-	if (argc != 3) {
-		napi_throw_error(env, NULL, "Invalid number of arguments.");
-		return NULL;
-	}
+	size_t x = Nan::To<int32_t>(info[1]).FromJust();
+	size_t y = Nan::To<int32_t>(info[2]).FromJust();
 
-	BMP img = buildBMP(env, args[0]);
+	//Get our image object from JavaScript.
+	BMP img = buildBMP(Nan::To<v8::Object>(info[0]).ToLocalChecked());
 
-	int32_t x, y;
-	napi_get_value_int32(env, args[1], &x);
-	napi_get_value_int32(env, args[2], &y);
-
-	MMBitmapRef bitmap = createMMBitmap(img.image, img.width, img.height, img.byteWidth, img.bitsPerPixel, img.bytesPerPixel);
+	//Create the bitmap.
+	bitmap = createMMBitmap(img.image, img.width, img.height, img.byteWidth, img.bitsPerPixel, img.bytesPerPixel);
 
 	// Make sure the requested pixel is inside the bitmap.
-	if (!MMBitmapPointInBounds(bitmap, MMPointMake(x, y))) {
-		destroyMMBitmap(bitmap);
-		napi_throw_error(env, NULL, "Requested coordinates are outside the bitmap's dimensions.");
-		return NULL;
+	if (!MMBitmapPointInBounds(bitmap, MMPointMake(x, y)))
+	{
+		return Nan::ThrowError("Requested coordinates are outside the bitmap's dimensions.");
 	}
 
-	MMRGBHex color = MMRGBHexAtPoint(bitmap, x, y);
+	color = MMRGBHexAtPoint(bitmap, x, y);
 
 	char hex[7];
+
 	padHex(color, hex);
 
 	destroyMMBitmap(bitmap);
 
-	napi_value result;
-	napi_create_string_utf8(env, hex, NAPI_AUTO_LENGTH, &result);
-	return result;
+	info.GetReturnValue().Set(Nan::New(hex).ToLocalChecked());
+
 }
 
+NAN_MODULE_INIT(InitAll)
+{
+	Nan::Set(target, Nan::New("dragMouse").ToLocalChecked(),
+		Nan::GetFunction(Nan::New<FunctionTemplate>(dragMouse)).ToLocalChecked());
 
-napi_value InitAll(napi_env env, napi_value exports) {
-	napi_value fn;
+	Nan::Set(target, Nan::New("updateScreenMetrics").ToLocalChecked(),
+		Nan::GetFunction(Nan::New<FunctionTemplate>(updateScreenMetrics)).ToLocalChecked());
 
-	napi_create_function(env, NULL, 0, DragMouse, NULL, &fn);
-	napi_set_named_property(env, exports, "dragMouse", fn);
+	Nan::Set(target, Nan::New("moveMouse").ToLocalChecked(),
+		Nan::GetFunction(Nan::New<FunctionTemplate>(moveMouse)).ToLocalChecked());
 
-	napi_create_function(env, NULL, 0, UpdateScreenMetrics, NULL, &fn);
-	napi_set_named_property(env, exports, "updateScreenMetrics", fn);
+	Nan::Set(target, Nan::New("moveMouseSmooth").ToLocalChecked(),
+		Nan::GetFunction(Nan::New<FunctionTemplate>(moveMouseSmooth)).ToLocalChecked());
 
-	napi_create_function(env, NULL, 0, MoveMouse, NULL, &fn);
-	napi_set_named_property(env, exports, "moveMouse", fn);
+	Nan::Set(target, Nan::New("getMousePos").ToLocalChecked(),
+		Nan::GetFunction(Nan::New<FunctionTemplate>(getMousePos)).ToLocalChecked());
 
-	napi_create_function(env, NULL, 0, MoveMouseSmooth, NULL, &fn);
-	napi_set_named_property(env, exports, "moveMouseSmooth", fn);
+	Nan::Set(target, Nan::New("mouseClick").ToLocalChecked(),
+		Nan::GetFunction(Nan::New<FunctionTemplate>(mouseClick)).ToLocalChecked());
 
-	napi_create_function(env, NULL, 0, GetMousePos, NULL, &fn);
-	napi_set_named_property(env, exports, "getMousePos", fn);
+	Nan::Set(target, Nan::New("mouseToggle").ToLocalChecked(),
+		Nan::GetFunction(Nan::New<FunctionTemplate>(mouseToggle)).ToLocalChecked());
 
-	napi_create_function(env, NULL, 0, MouseClick, NULL, &fn);
-	napi_set_named_property(env, exports, "mouseClick", fn);
+	Nan::Set(target, Nan::New("scrollMouse").ToLocalChecked(),
+		Nan::GetFunction(Nan::New<FunctionTemplate>(scrollMouse)).ToLocalChecked());
 
-	napi_create_function(env, NULL, 0, MouseToggle, NULL, &fn);
-	napi_set_named_property(env, exports, "mouseToggle", fn);
+	Nan::Set(target, Nan::New("setMouseDelay").ToLocalChecked(),
+		Nan::GetFunction(Nan::New<FunctionTemplate>(setMouseDelay)).ToLocalChecked());
 
-	napi_create_function(env, NULL, 0, SetMouseDelay, NULL, &fn);
-	napi_set_named_property(env, exports, "setMouseDelay", fn);
+	Nan::Set(target, Nan::New("keyTap").ToLocalChecked(),
+		Nan::GetFunction(Nan::New<FunctionTemplate>(keyTap)).ToLocalChecked());
 
-	napi_create_function(env, NULL, 0, ScrollMouse, NULL, &fn);
-	napi_set_named_property(env, exports, "scrollMouse", fn);
+	Nan::Set(target, Nan::New("keyToggle").ToLocalChecked(),
+		Nan::GetFunction(Nan::New<FunctionTemplate>(keyToggle)).ToLocalChecked());
 
-	napi_create_function(env, NULL, 0, KeyTap, NULL, &fn);
-	napi_set_named_property(env, exports, "keyTap", fn);
+	Nan::Set(target, Nan::New("unicodeTap").ToLocalChecked(),
+		Nan::GetFunction(Nan::New<FunctionTemplate>(unicodeTap)).ToLocalChecked());
 
-	napi_create_function(env, NULL, 0, KeyToggle, NULL, &fn);
-	napi_set_named_property(env, exports, "keyToggle", fn);
+	Nan::Set(target, Nan::New("typeString").ToLocalChecked(),
+		Nan::GetFunction(Nan::New<FunctionTemplate>(typeString)).ToLocalChecked());
 
-	napi_create_function(env, NULL, 0, UnicodeTap, NULL, &fn);
-	napi_set_named_property(env, exports, "unicodeTap", fn);
+	Nan::Set(target, Nan::New("typeStringDelayed").ToLocalChecked(),
+		Nan::GetFunction(Nan::New<FunctionTemplate>(typeStringDelayed)).ToLocalChecked());
 
-	napi_create_function(env, NULL, 0, TypeString, NULL, &fn);
-	napi_set_named_property(env, exports, "typeString", fn);
+	Nan::Set(target, Nan::New("setKeyboardDelay").ToLocalChecked(),
+		Nan::GetFunction(Nan::New<FunctionTemplate>(setKeyboardDelay)).ToLocalChecked());
 
-	napi_create_function(env, NULL, 0, TypeStringDelayed, NULL, &fn);
-	napi_set_named_property(env, exports, "typeStringDelayed", fn);
+	Nan::Set(target, Nan::New("getPixelColor").ToLocalChecked(),
+		Nan::GetFunction(Nan::New<FunctionTemplate>(getPixelColor)).ToLocalChecked());
 
-	napi_create_function(env, NULL, 0, SetKeyboardDelay, NULL, &fn);
-	napi_set_named_property(env, exports, "setKeyboardDelay", fn);
+	Nan::Set(target, Nan::New("getScreenSize").ToLocalChecked(),
+		Nan::GetFunction(Nan::New<FunctionTemplate>(getScreenSize)).ToLocalChecked());
 
-	napi_create_function(env, NULL, 0, GetPixelColor, NULL, &fn);
-	napi_set_named_property(env, exports, "getPixelColor", fn);
+	Nan::Set(target, Nan::New("captureScreen").ToLocalChecked(),
+		Nan::GetFunction(Nan::New<FunctionTemplate>(captureScreen)).ToLocalChecked());
 
-	napi_create_function(env, NULL, 0, GetScreenSize, NULL, &fn);
-	napi_set_named_property(env, exports, "getScreenSize", fn);
+	Nan::Set(target, Nan::New("getColor").ToLocalChecked(),
+		Nan::GetFunction(Nan::New<FunctionTemplate>(getColor)).ToLocalChecked());
 
-	napi_create_function(env, NULL, 0, GetXDisplayName, NULL, &fn);
-	napi_set_named_property(env, exports, "getXDisplayName", fn);
+	Nan::Set(target, Nan::New("getXDisplayName").ToLocalChecked(),
+		Nan::GetFunction(Nan::New<FunctionTemplate>(getXDisplayName)).ToLocalChecked());
 
-	napi_create_function(env, NULL, 0, SetXDisplayName, NULL, &fn);
-	napi_set_named_property(env, exports, "setXDisplayName", fn);
-
-	napi_create_function(env, NULL, 0, CaptureScreen, NULL, &fn);
-	napi_set_named_property(env, exports, "captureScreen", fn);
-
-	napi_create_function(env, NULL, 0, GetColor, NULL, &fn);
-	napi_set_named_property(env, exports, "getColor", fn);
-
-	return exports;
+	Nan::Set(target, Nan::New("setXDisplayName").ToLocalChecked(),
+		Nan::GetFunction(Nan::New<FunctionTemplate>(setXDisplayName)).ToLocalChecked());
 }
 
-NAPI_MODULE(robotjs, InitAll)
+NODE_MODULE(robotjs, InitAll)

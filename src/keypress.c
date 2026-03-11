@@ -10,7 +10,6 @@
 	#import <IOKit/hidsystem/ev_keymap.h>
 #elif defined(USE_X11)
 	#include <X11/extensions/XTest.h>
-	#include <X11/XKBlib.h>
 	#include "xdisplay.h"
 #endif
 
@@ -205,22 +204,6 @@ void toggleKey(char c, const bool down, MMKeyFlags flags)
 		flags |= MOD_SHIFT; /* Not sure if this is safe for all layouts. */
 	}
 
-#if defined(USE_X11)
-	if (!(flags & MOD_SHIFT) && keyCode != NoSymbol) {
-		Display *display = XGetMainDisplay();
-		KeyCode keycode = XKeysymToKeycode(display, keyCode);
-
-		if (keycode != 0) {
-			const KeySym level0 = XkbKeycodeToKeysym(display, keycode, 0, 0);
-			const KeySym level1 = XkbKeycodeToKeysym(display, keycode, 0, 1);
-
-			if (level1 == keyCode && level0 != keyCode) {
-				flags |= MOD_SHIFT;
-			}
-		}
-	}
-#endif
-
 #if defined(IS_WINDOWS)
 	modifiers = keyCode >> 8; // Pull out modifers.
 	if ((modifiers & 1) != 0) flags |= MOD_SHIFT; // Uptdate flags from keycode modifiers.
@@ -299,7 +282,7 @@ void unicodeTap(const unsigned value)
 
 void typeStringDelayed(const char *str, const unsigned cpm)
 {
-	unsigned long n = 0;
+	unsigned long n;
 	unsigned short c;
 	unsigned short c1;
 	unsigned short c2;
@@ -334,8 +317,6 @@ void typeStringDelayed(const char *str, const unsigned cpm)
 			c2 = (*str++) & 0x3F;
 			c3 = (*str++) & 0x3F;
 			n = ((c & 0x07) << 18) | (c1 << 12) | (c2 << 6) | c3;
-		} else {
-			continue;
 		}
 
 		unicodeTap(n);
