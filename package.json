@@ -11,7 +11,8 @@
     "test:win32": "jasmine test/**/*.js",
     "install": "prebuild-install || node-gyp rebuild",
     "install-debug": "prebuild-install || node-gyp rebuild --debug",
-    "prebuild": "prebuild --all"
+    "prebuild": "prebuild --all",
+    "rebuild": "npm rebuild --runtime=electron --target=33.0.2 --disturl=https://electronjs.org/headers --abi=130"
   },
   "repository": {
     "type": "git",
@@ -42,14 +43,14 @@
   },
   "homepage": "https://github.com/octalmage/robotjs",
   "dependencies": {
-    "nan": "^2.14.2",
-    "prebuild-install": "^5.3.3"
+    "prebuild-install": "^7.1.2"
   },
   "devDependencies": {
-    "tape": "^4.8.0",
-    "jasmine": "^2.99.0",
-    "prebuild": "^9.1.1",
-    "run-script-os": "^1.0.3",
-    "targetpractice": "0.0.7"
+    "jasmine": "^5.4.0",
+    "node-gyp": "^10.2.0",
+    "prebuild": "^13.0.1",
+    "run-script-os": "^1.1.6",
+    "tape": "^5.9.0",
+    "targetpractice": "^0.0.7"
   }
 }
