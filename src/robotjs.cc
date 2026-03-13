@@ -121,8 +121,8 @@ Napi::Value moveMouseWrapper(const Napi::CallbackInfo& info)
 return env.Null();
 	}
 
-	int32_t x = info[0].As<Napi::Number>().Int32Value();
-	int32_t y = info[1].As<Napi::Number>().Int32Value();
+	int32_t x = info[0].ToNumber().Int32Value();
+	int32_t y = info[1].ToNumber().Int32Value();
 
 	MMSignedPoint point;
 	point = MMSignedPointMake(x, y);
@@ -141,14 +141,14 @@ Napi::Value moveMouseSmoothWrapper(const Napi::CallbackInfo& info)
 		Napi::Error::New(env, "Invalid number of arguments.").ThrowAsJavaScriptException();
 return env.Null();
 	}
-	size_t x = info[0].As<Napi::Number>().Int32Value();
-	size_t y = info[1].As<Napi::Number>().Int32Value();
+	size_t x = static_cast<size_t>(info[0].ToNumber().Int32Value());
+	size_t y = static_cast<size_t>(info[1].ToNumber().Int32Value());
 
 	MMPoint point;
 	point = MMPointMake(x, y);
 	if (info.Length() == 3)
 	{
-		size_t speed = info[2].As<Napi::Number>().Int32Value();
+		size_t speed = static_cast<size_t>(info[2].ToNumber().Int32Value());
 		smoothlyMoveMouse(point, speed);
 	}
 	else
@@ -182,7 +182,7 @@ Napi::Value mouseClickWrapper(const Napi::CallbackInfo& info)
 
 	if (info.Length() > 0)
 	{
-		std::string bstr = info[0].As<Napi::String>().Utf8Value();
+		std::string bstr = info[0].ToString().Utf8Value();
 		const char * const b = bstr.c_str();
 
 		switch (CheckMouseButton(b, &button))
@@ -200,7 +200,7 @@ return env.Null();
 
 	if (info.Length() == 2)
 	{
-		doubleC = info[1].As<Napi::Boolean>().Value();
+		doubleC = info[1].ToBoolean().Value();
 	}
 	else if (info.Length() > 2)
 	{
@@ -657,7 +657,13 @@ Napi::Value unicodeTapWrapper(const Napi::CallbackInfo& info)
 {
 	Napi::Env env = info.Env();
 
-	size_t value = info[0].As<Napi::Number>().Int32Value();
+	if (info.Length() == 0)
+	{
+		Napi::Error::New(env, "Invalid character typed.").ThrowAsJavaScriptException();
+return env.Null();
+	}
+
+	size_t value = static_cast<size_t>(info[0].ToNumber().Int32Value());
 
 	if (value != 0) {
 		unicodeTap(value);
@@ -1068,8 +1074,6 @@ static bool parseImageTypeFromPath(Napi::Env env,
 Napi::Value getPixelColorWrapper(const Napi::CallbackInfo& info)
 {
 	Napi::Env env = info.Env();
-	size_t x;
-	size_t y;
 
 	if (info.Length() != 2)
 	{
@@ -1080,18 +1084,17 @@ return env.Null();
 	MMBitmapRef bitmap;
 	MMRGBHex color;
 
-	if (!parseSizeT(env, info[0], "x", &x) ||
-	    !parseSizeT(env, info[1], "y", &y)) {
-		return env.Null();
-	}
+	double x = info[0].ToNumber().DoubleValue();
+	double y = info[1].ToNumber().DoubleValue();
 
-	if (!pointVisibleOnMainDisplay(MMPointMake(x, y)))
+	if (x < 0 || y < 0 ||
+	    !pointVisibleOnMainDisplay(MMPointMake(static_cast<size_t>(x), static_cast<size_t>(y))))
 	{
 		Napi::Error::New(env, "Requested coordinates are outside the main screen's dimensions.").ThrowAsJavaScriptException();
 return env.Null();
 	}
 
-	bitmap = copyMMBitmapFromDisplayInRect(MMRectMake(x, y, 1, 1));
+	bitmap = copyMMBitmapFromDisplayInRect(MMRectMake(static_cast<size_t>(x), static_cast<size_t>(y), 1, 1));
 	if (bitmap == NULL) {
 		Napi::Error::New(env, "Failed to capture the requested pixel.")
 			.ThrowAsJavaScriptException();

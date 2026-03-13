@@ -27,9 +27,9 @@ jobs:
           - name: Linux / Node 24
             os: ubuntu-24.04
             node-version: "24"
-          - name: macOS / Node 20
+          - name: macOS / Node 24
             os: macos-15-intel
-            node-version: "20"
+            node-version: "24"
 
     steps:
       - name: Check out repository

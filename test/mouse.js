@@ -1,7 +1,7 @@
 var robot = require('..');
 var lastKnownPos, currentPos;
 
-//Increase delay to help it reliability.
+// Increase delay to help it reliability.
 robot.setMouseDelay(100);
 
 describe('Mouse', () => {
