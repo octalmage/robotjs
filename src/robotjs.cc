@@ -484,9 +484,8 @@ int CheckKeyFlags(const char* f, MMKeyFlags* flags)
 }
 
 int GetFlagsFromString(Napi::Value value, MMKeyFlags* flags) {
-	Napi::Env env = value.Env();
-	Napi::String fstr(env, value.ToString());
-	return CheckKeyFlags(fstr.Utf8Value().c_str(), flags);
+	std::string fstr = value.ToString().Utf8Value();
+	return CheckKeyFlags(fstr.c_str(), flags);
 }
 
 int GetFlagsFromValue(Napi::Value value, MMKeyFlags* flags) {
@@ -522,10 +521,8 @@ Napi::Value keyTapWrapper(const Napi::CallbackInfo& info)
 
 	MMKeyFlags flags = MOD_NONE;
 	MMKeyCode key;
-	const char *k;
-
-	Napi::String kstr(env, info[0].ToString());
-	k = kstr.Utf8Value().c_str();
+	std::string kstr = info[0].ToString().Utf8Value();
+	const char *k = kstr.c_str();
 
 	switch (info.Length())
 	{
