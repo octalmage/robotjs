@@ -7,12 +7,11 @@
 #include <assert.h>
 
 #if defined(_MSC_VER)
-	#include "ms_stdint.h"
 	#include "ms_stdbool.h"
 #else
-	#include <stdint.h>
 	#include <stdbool.h>
 #endif
+#include <stdint.h>
 
 const char *MMPNGReadErrorString(MMIOError error)
 {
