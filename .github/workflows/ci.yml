@@ -1,0 +1,134 @@
+name: CI
+
+on:
+  push:
+  pull_request:
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+concurrency:
+  group: ci-${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  test-unix:
+    name: ${{ matrix.name }}
+    runs-on: ${{ matrix.os }}
+    timeout-minutes: 30
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - name: Linux / Node 20
+            os: ubuntu-24.04
+            node-version: "20"
+          - name: Linux / Node 24
+            os: ubuntu-24.04
+            node-version: "24"
+          - name: macOS / Node 20
+            os: macos-13
+            node-version: "20"
+
+    steps:
+      - name: Check out repository
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 5
+
+      - name: Set up Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: ${{ matrix.node-version }}
+          architecture: x64
+          cache: npm
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.x"
+
+      - name: Install Linux desktop dependencies
+        if: runner.os == 'Linux'
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y \
+            libx11-dev \
+            libxtst-dev \
+            openbox \
+            xvfb
+
+      - name: Show toolchain versions
+        run: |
+          node --version
+          npm --version
+          python --version
+
+      - name: Install dependencies
+        run: npm install
+
+      - name: Run tests on macOS
+        if: runner.os == 'macOS'
+        run: npm test
+
+      - name: Run tests on Linux desktop session
+        if: runner.os == 'Linux'
+        shell: bash
+        run: |
+          xvfb-run --auto-servernum --server-args="-screen 0 1920x1080x24 -ac +extension RANDR" \
+            bash -lc 'openbox >/tmp/openbox.log 2>&1 & npm test'
+
+      - name: Print Linux desktop logs on failure
+        if: failure() && runner.os == 'Linux'
+        shell: bash
+        run: |
+          if [ -f /tmp/openbox.log ]; then
+            cat /tmp/openbox.log
+          fi
+
+  test-windows:
+    name: Windows / Node ${{ matrix.node-version }} / ${{ matrix.architecture }}
+    runs-on: windows-2022
+    timeout-minutes: 30
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - node-version: "20"
+            architecture: x64
+          - node-version: "20"
+            architecture: x86
+
+    steps:
+      - name: Check out repository
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 5
+
+      - name: Set up Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: ${{ matrix.node-version }}
+          architecture: ${{ matrix.architecture }}
+          cache: npm
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.x"
+
+      - name: Show toolchain versions
+        shell: pwsh
+        run: |
+          node --version
+          npm --version
+          python --version
+          node -p "process.arch"
+
+      - name: Install dependencies
+        run: npm install
+
+      - name: Run tests
+        run: npm test
+
