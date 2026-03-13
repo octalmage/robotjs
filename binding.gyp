@@ -1,4 +1,7 @@
 {
+  'variables': {
+    'robotjs_enable_png%': '<!(node -p "process.env.ROBOTJS_ENABLE_PNG === \'1\' ? 1 : 0")'
+  },
   'targets': [{
     'target_name': 'robotjs',
       'cflags!': [ '-fno-exceptions' ],
@@ -36,8 +39,6 @@
       ['OS == "linux"', {
         'link_settings': {
           'libraries': [
-            '-lpng',
-            '-lz',
             '-lX11',
             '-lXtst'
           ]
@@ -50,12 +51,51 @@
 
       ["OS=='win'", {
         'defines': ['IS_WINDOWS']
+      }],
+
+      ['robotjs_enable_png==1', {
+        'defines': ['ROBOTJS_HAS_PNG=1'],
+        'sources': [
+          'src/png_io.c'
+        ],
+        'conditions': [
+          ['OS == "mac"', {
+            'include_dirs': [
+              '<!@(sh -c "pkg-config --cflags-only-I libpng | sed s/-I//g")'
+            ],
+            'link_settings': {
+              'libraries': [
+                '<!@(pkg-config --libs libpng)',
+                '-lz'
+              ]
+            }
+          }],
+          ['OS == "linux"', {
+            'include_dirs': [
+              '<!@(sh -c "pkg-config --cflags-only-I libpng | sed s/-I//g")'
+            ],
+            'link_settings': {
+              'libraries': [
+                '<!@(pkg-config --libs libpng)',
+                '-lz'
+              ]
+            }
+          }]
+        ]
+      }, {
+        'defines': ['ROBOTJS_HAS_PNG=0']
       }]
     ],
     
     'sources': [
       'src/robotjs.cc',
+      'src/io.c',
+      'src/bmp_io.c',
+      'src/MMPointArray.c',
       'src/deadbeef_rand.c',
+      'src/UTHashTable.c',
+      'src/bitmap_find.c',
+      'src/color_find.c',
       'src/mouse.c',
       'src/keypress.c',
       'src/keycode.c',

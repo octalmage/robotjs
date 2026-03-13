@@ -60,13 +60,14 @@ static int findBitmapInRectAt(MMBitmapRef needle,
                                 MMPoint startPoint,
                                 UTHashTable *badShiftTable)
 {
-	const size_t scanHeight = rect.size.height - needle->height;
-	const size_t scanWidth = rect.size.width - needle->width;
+	const size_t scanHeight = rect.origin.y + rect.size.height - needle->height;
+	const size_t scanWidth = rect.origin.x + rect.size.width - needle->width;
 	MMPoint pointOffset = startPoint;
 	/* const MMPoint lastPoint = MMPointMake(needle->width - 1, needle->height - 1); */
 
 	/* Sanity check */
 	if (needle->height > haystack->height || needle->width > haystack->width ||
+	    needle->height > rect.size.height || needle->width > rect.size.width ||
 	    !MMBitmapRectInBounds(haystack, rect)) {
 		return -1;
 	}
@@ -86,8 +87,6 @@ static int findBitmapInRectAt(MMBitmapRef needle,
 		while (pointOffset.x <= scanWidth) {
 			/* Check offset in |haystack| for |needle|. */
 			if (needleAtOffset(needle, haystack, pointOffset, tolerance)) {
-				++pointOffset.x;
-				++pointOffset.y;
 				*point = pointOffset;
 				return 0;
 			}
@@ -156,7 +155,7 @@ int findBitmapInRect(MMBitmapRef needle,
 
 	initBadShiftTable(&badShiftTable, needle);
 	ret = findBitmapInRectAt(needle, haystack, point, rect,
-	                         tolerance, MMPointZero, &badShiftTable);
+	                         tolerance, rect.origin, &badShiftTable);
 	destroyBadShiftTable(&badShiftTable);
 	return ret;
 }
@@ -165,15 +164,15 @@ MMPointArrayRef findAllBitmapInRect(MMBitmapRef needle, MMBitmapRef haystack,
                                     MMRect rect, float tolerance)
 {
 	MMPointArrayRef pointArray = createMMPointArray(0);
-	MMPoint point = MMPointZero;
+	MMPoint point = rect.origin;
 	UTHashTable badShiftTable;
 
 	initBadShiftTable(&badShiftTable, needle);
 	while (findBitmapInRectAt(needle, haystack, &point, rect,
 	                          tolerance, point, &badShiftTable) == 0) {
-		const size_t scanWidth = (haystack->width - needle->width) + 1;
+		const size_t scanWidth = rect.origin.x + (rect.size.width - needle->width) + 1;
 		MMPointArrayAppendPoint(pointArray, point);
-		ITER_NEXT_POINT(point, scanWidth, 0);
+		ITER_NEXT_POINT(point, scanWidth, rect.origin.x);
 	}
 	destroyBadShiftTable(&badShiftTable);
 
@@ -184,15 +183,15 @@ size_t countOfBitmapInRect(MMBitmapRef needle, MMBitmapRef haystack,
                            MMRect rect, float tolerance)
 {
 	size_t count = 0;
-	MMPoint point = MMPointZero;
+	MMPoint point = rect.origin;
 	UTHashTable badShiftTable;
 
 	initBadShiftTable(&badShiftTable, needle);
 	while (findBitmapInRectAt(needle, haystack, &point, rect,
 	                          tolerance, point, &badShiftTable) == 0) {
-		const size_t scanWidth = (haystack->width - needle->width) + 1;
+		const size_t scanWidth = rect.origin.x + (rect.size.width - needle->width) + 1;
 		++count;
-		ITER_NEXT_POINT(point, scanWidth, 0);
+		ITER_NEXT_POINT(point, scanWidth, rect.origin.x);
 	}
 	destroyBadShiftTable(&badShiftTable);
 

@@ -6,11 +6,13 @@
 static int findColorInRectAt(MMBitmapRef image, MMRGBHex color, MMPoint *point,
                              MMRect rect, float tolerance, MMPoint startPoint)
 {
+	const size_t maxX = rect.origin.x + rect.size.width;
+	const size_t maxY = rect.origin.y + rect.size.height;
 	MMPoint scan = startPoint;
 	if (!MMBitmapRectInBounds(image, rect)) return -1;
 
-	for (; scan.y < rect.size.height; ++scan.y) {
-		for (; scan.x < rect.size.width; ++scan.x) {
+	for (; scan.y < maxY; ++scan.y) {
+		for (; scan.x < maxX; ++scan.x) {
 			MMRGBHex found = MMRGBHexAtPoint(image, scan.x, scan.y);
 			if (MMRGBHexSimilarToColor(color, found, tolerance)) {
 				if (point != NULL) *point = scan;
@@ -33,11 +35,11 @@ MMPointArrayRef findAllColorInRect(MMBitmapRef image, MMRGBHex color,
                                    MMRect rect, float tolerance)
 {
 	MMPointArrayRef pointArray = createMMPointArray(0);
-	MMPoint point = MMPointZero;
+	MMPoint point = rect.origin;
 
 	while (findColorInRectAt(image, color, &point, rect, tolerance, point) == 0) {
 		MMPointArrayAppendPoint(pointArray, point);
-		ITER_NEXT_POINT(point, rect.size.width, rect.origin.x);
+		ITER_NEXT_POINT(point, rect.origin.x + rect.size.width, rect.origin.x);
 	}
 
 	return pointArray;
@@ -47,10 +49,10 @@ size_t countOfColorsInRect(MMBitmapRef image, MMRGBHex color, MMRect rect,
                            float tolerance)
 {
 	size_t count = 0;
-	MMPoint point = MMPointZero;
+	MMPoint point = rect.origin;
 
 	while (findColorInRectAt(image, color, &point, rect, tolerance, point) == 0) {
-		ITER_NEXT_POINT(point, rect.size.width, rect.origin.x);
+		ITER_NEXT_POINT(point, rect.origin.x + rect.size.width, rect.origin.x);
 		++count;
 	}
 

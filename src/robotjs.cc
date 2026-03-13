@@ -1,4 +1,6 @@
 #include <napi.h>
+#include <ctype.h>
+#include <stdlib.h>
 #include <vector>
 #include "mouse.h"
 #include "deadbeef_rand.h"
@@ -6,10 +8,17 @@
 #include "screen.h"
 #include "screengrab.h"
 #include "MMBitmap.h"
+#include "bitmap_find.h"
+#include "color_find.h"
+#include "io.h"
 #include "snprintf.h"
 #include "microsleep.h"
 #if defined(USE_X11)
 	#include "xdisplay.h"
+#endif
+
+#if !defined(ROBOTJS_HAS_PNG)
+#define ROBOTJS_HAS_PNG 0
 #endif
 
 //Global delays.
@@ -732,9 +741,327 @@ void padHex(MMRGBHex color, char* hex)
 	snprintf(hex, 7, "%06x", color);
 }
 
+static bool multiplySizeT(size_t left, size_t right, size_t *result)
+{
+	if (left != 0 && right > (SIZE_MAX / left)) {
+		return false;
+	}
+
+	*result = left * right;
+	return true;
+}
+
+static bool parseSizeT(Napi::Env env, Napi::Value value, const char *name, size_t *result)
+{
+	if (!value.IsNumber()) {
+		Napi::Error::New(env, std::string(name) + " must be a number.")
+			.ThrowAsJavaScriptException();
+		return false;
+	}
+
+	double number = value.As<Napi::Number>().DoubleValue();
+	if (number < 0) {
+		Napi::Error::New(env, std::string(name) + " must be non-negative.")
+			.ThrowAsJavaScriptException();
+		return false;
+	}
+
+	*result = static_cast<size_t>(number);
+	return true;
+}
+
+static bool parseToleranceOption(Napi::Env env, Napi::Object options, float *tolerance)
+{
+	if (!options.Has("tolerance")) {
+		return true;
+	}
+
+	if (!options.Get("tolerance").IsNumber()) {
+		Napi::Error::New(env, "tolerance must be a number.")
+			.ThrowAsJavaScriptException();
+		return false;
+	}
+
+	double value = options.Get("tolerance").As<Napi::Number>().DoubleValue();
+	if (value < 0.0 || value > 1.0) {
+		Napi::Error::New(env, "tolerance must be between 0.0 and 1.0.")
+			.ThrowAsJavaScriptException();
+		return false;
+	}
+
+	*tolerance = static_cast<float>(value);
+	return true;
+}
+
+static MMBitmapRef createBorrowedBitmap(Napi::Env env, Napi::Object obj)
+{
+	size_t width;
+	size_t height;
+	size_t byteWidth;
+	size_t rowBytes;
+	size_t bufferSize;
+	size_t parsedBitsPerPixel;
+	size_t parsedBytesPerPixel;
+	uint8_t bitsPerPixel;
+	uint8_t bytesPerPixel;
+
+	if (!obj.Has("width") || !obj.Has("height") || !obj.Has("byteWidth") ||
+	    !obj.Has("bitsPerPixel") || !obj.Has("bytesPerPixel") || !obj.Has("image")) {
+		Napi::Error::New(env, "Bitmap object is missing required properties.")
+			.ThrowAsJavaScriptException();
+		return NULL;
+	}
+
+	if (!parseSizeT(env, obj.Get("width"), "width", &width) ||
+	    !parseSizeT(env, obj.Get("height"), "height", &height) ||
+	    !parseSizeT(env, obj.Get("byteWidth"), "byteWidth", &byteWidth) ||
+	    !parseSizeT(env, obj.Get("bitsPerPixel"), "bitsPerPixel", &parsedBitsPerPixel) ||
+	    !parseSizeT(env, obj.Get("bytesPerPixel"), "bytesPerPixel", &parsedBytesPerPixel)) {
+		return NULL;
+	}
+
+	bitsPerPixel = static_cast<uint8_t>(parsedBitsPerPixel);
+	bytesPerPixel = static_cast<uint8_t>(parsedBytesPerPixel);
+
+	if (!obj.Get("image").IsBuffer()) {
+		Napi::Error::New(env, "image must be a Buffer.").ThrowAsJavaScriptException();
+		return NULL;
+	}
+
+	if (width == 0 || height == 0) {
+		Napi::Error::New(env, "Bitmap width and height must be greater than zero.")
+			.ThrowAsJavaScriptException();
+		return NULL;
+	}
+
+	if ((bytesPerPixel != 3 && bytesPerPixel != 4) ||
+	    bitsPerPixel != (bytesPerPixel * 8)) {
+		Napi::Error::New(env, "Bitmap must use 24-bit or 32-bit pixels.")
+			.ThrowAsJavaScriptException();
+		return NULL;
+	}
+
+	if (!multiplySizeT(width, bytesPerPixel, &rowBytes) || byteWidth < rowBytes) {
+		Napi::Error::New(env, "byteWidth is smaller than the bitmap row size.")
+			.ThrowAsJavaScriptException();
+		return NULL;
+	}
+
+	if (!multiplySizeT(byteWidth, height, &bufferSize)) {
+		Napi::Error::New(env, "Bitmap buffer size is too large.")
+			.ThrowAsJavaScriptException();
+		return NULL;
+	}
+
+	Napi::Buffer<uint8_t> image = obj.Get("image").As<Napi::Buffer<uint8_t> >();
+	if (image.Length() < bufferSize) {
+		Napi::Error::New(env, "Bitmap image buffer is smaller than byteWidth * height.")
+			.ThrowAsJavaScriptException();
+		return NULL;
+	}
+
+	MMBitmapRef bitmap = createMMBitmapWithCleanup(image.Data(),
+	                                               width,
+	                                               height,
+	                                               byteWidth,
+	                                               bitsPerPixel,
+	                                               bytesPerPixel,
+	                                               NULL,
+	                                               NULL);
+	if (bitmap == NULL) {
+		Napi::Error::New(env, "Failed to create bitmap.")
+			.ThrowAsJavaScriptException();
+	}
+
+	return bitmap;
+}
+
+static bool parseSearchRect(Napi::Env env,
+                            Napi::Value optionsValue,
+                            MMBitmapRef bitmap,
+                            MMRect *rect,
+                            float *tolerance)
+{
+	size_t x = 0;
+	size_t y = 0;
+	size_t width = bitmap->width;
+	size_t height = bitmap->height;
+	bool hasWidth = false;
+	bool hasHeight = false;
+
+	*tolerance = 0.0f;
+
+	if (optionsValue.IsUndefined() || optionsValue.IsNull()) {
+		*rect = MMBitmapGetBounds(bitmap);
+		return true;
+	}
+
+	if (!optionsValue.IsObject()) {
+		Napi::Error::New(env, "Search options must be an object.")
+			.ThrowAsJavaScriptException();
+		return false;
+	}
+
+	Napi::Object options = optionsValue.As<Napi::Object>();
+	if (options.Has("x") && !parseSizeT(env, options.Get("x"), "x", &x)) {
+		return false;
+	}
+	if (options.Has("y") && !parseSizeT(env, options.Get("y"), "y", &y)) {
+		return false;
+	}
+	if (options.Has("width")) {
+		hasWidth = true;
+		if (!parseSizeT(env, options.Get("width"), "width", &width)) {
+			return false;
+		}
+	}
+	if (options.Has("height")) {
+		hasHeight = true;
+		if (!parseSizeT(env, options.Get("height"), "height", &height)) {
+			return false;
+		}
+	}
+	if (!parseToleranceOption(env, options, tolerance)) {
+		return false;
+	}
+
+	if (x > bitmap->width || y > bitmap->height) {
+		Napi::Error::New(env, "Search origin is outside the bitmap bounds.")
+			.ThrowAsJavaScriptException();
+		return false;
+	}
+
+	if (!hasWidth) {
+		width = bitmap->width - x;
+	}
+	if (!hasHeight) {
+		height = bitmap->height - y;
+	}
+
+	*rect = MMRectMake(x, y, width, height);
+	if (width == 0 || height == 0 || !MMBitmapRectInBounds(bitmap, *rect)) {
+		Napi::Error::New(env, "Search rect must stay within the bitmap bounds.")
+			.ThrowAsJavaScriptException();
+		return false;
+	}
+
+	return true;
+}
+
+static bool parseHexColor(Napi::Env env, Napi::Value value, MMRGBHex *color)
+{
+	std::string hex;
+	size_t i;
+
+	if (!value.IsString()) {
+		Napi::Error::New(env, "Color must be a 6-digit hex string.")
+			.ThrowAsJavaScriptException();
+		return false;
+	}
+
+	hex = value.As<Napi::String>().Utf8Value();
+	if (!hex.empty() && hex[0] == '#') {
+		hex.erase(0, 1);
+	}
+
+	if (hex.length() != 6) {
+		Napi::Error::New(env, "Color must be a 6-digit hex string.")
+			.ThrowAsJavaScriptException();
+		return false;
+	}
+
+	for (i = 0; i < hex.length(); ++i) {
+		if (!isxdigit((unsigned char)hex[i])) {
+			Napi::Error::New(env, "Color must be a 6-digit hex string.")
+				.ThrowAsJavaScriptException();
+			return false;
+		}
+	}
+
+	*color = static_cast<MMRGBHex>(strtoul(hex.c_str(), NULL, 16));
+	return true;
+}
+
+static Napi::Object createPointObject(Napi::Env env, MMPoint point)
+{
+	Napi::Object obj = Napi::Object::New(env);
+	obj.Set("x", Napi::Number::New(env, point.x));
+	obj.Set("y", Napi::Number::New(env, point.y));
+	return obj;
+}
+
+static Napi::Array createPointArray(Napi::Env env, MMPointArrayRef points)
+{
+	Napi::Array array = Napi::Array::New(env, points->count);
+	size_t i;
+
+	for (i = 0; i < points->count; ++i) {
+		array.Set(i, createPointObject(env, MMPointArrayGetItem(points, i)));
+	}
+
+	return array;
+}
+
+static void finalizeBitmap(Napi::Env env, uint8_t *data, MMBitmap *bitmap)
+{
+	if (bitmap != NULL) {
+		destroyMMBitmap(bitmap);
+	}
+}
+
+static Napi::Object createBitmapObject(Napi::Env env, MMBitmapRef bitmap)
+{
+	size_t bufferSize;
+
+	if (!multiplySizeT(bitmap->bytewidth, bitmap->height, &bufferSize)) {
+		destroyMMBitmap(bitmap);
+		Napi::Error::New(env, "Bitmap is too large.")
+			.ThrowAsJavaScriptException();
+		return Napi::Object::New(env);
+	}
+
+	Napi::Buffer<uint8_t> buffer = Napi::Buffer<uint8_t>::New(env,
+	                                                         bitmap->imageBuffer,
+	                                                         bufferSize,
+	                                                         finalizeBitmap,
+	                                                         bitmap);
+	Napi::Object obj = Napi::Object::New(env);
+	obj.Set("width", Napi::Number::New(env, bitmap->width));
+	obj.Set("height", Napi::Number::New(env, bitmap->height));
+	obj.Set("byteWidth", Napi::Number::New(env, bitmap->bytewidth));
+	obj.Set("bitsPerPixel", Napi::Number::New(env, bitmap->bitsPerPixel));
+	obj.Set("bytesPerPixel", Napi::Number::New(env, bitmap->bytesPerPixel));
+	obj.Set("image", buffer);
+	return obj;
+}
+
+static bool parseImageTypeFromPath(Napi::Env env,
+                                   const std::string& path,
+                                   MMImageType *imageType)
+{
+	std::string::size_type dotOffset = path.find_last_of('.');
+
+	if (dotOffset == std::string::npos || dotOffset == path.length() - 1) {
+		Napi::Error::New(env, "Unsupported image type. Use a .png or .bmp file.")
+			.ThrowAsJavaScriptException();
+		return false;
+	}
+
+	*imageType = imageTypeFromExtension(path.c_str() + dotOffset + 1);
+	if (*imageType == kInvalidImageType) {
+		Napi::Error::New(env, "Unsupported image type. Use a .png or .bmp file.")
+			.ThrowAsJavaScriptException();
+		return false;
+	}
+
+	return true;
+}
+
 Napi::Value getPixelColorWrapper(const Napi::CallbackInfo& info)
 {
 	Napi::Env env = info.Env();
+	size_t x;
+	size_t y;
 
 	if (info.Length() != 2)
 	{
@@ -745,8 +1072,10 @@ return env.Null();
 	MMBitmapRef bitmap;
 	MMRGBHex color;
 
-	size_t x = info[0].As<Napi::Number>().Int32Value();
-	size_t y = info[1].As<Napi::Number>().Int32Value();
+	if (!parseSizeT(env, info[0], "x", &x) ||
+	    !parseSizeT(env, info[1], "y", &y)) {
+		return env.Null();
+	}
 
 	if (!pointVisibleOnMainDisplay(MMPointMake(x, y)))
 	{
@@ -755,6 +1084,11 @@ return env.Null();
 	}
 
 	bitmap = copyMMBitmapFromDisplayInRect(MMRectMake(x, y, 1, 1));
+	if (bitmap == NULL) {
+		Napi::Error::New(env, "Failed to capture the requested pixel.")
+			.ThrowAsJavaScriptException();
+		return env.Null();
+	}
 
 	color = MMRGBHexAtPoint(bitmap, 0, 0);
 
@@ -813,47 +1147,54 @@ Napi::Value setXDisplayNameWrapper(const Napi::CallbackInfo& info)
 Napi::Value captureScreenWrapper(const Napi::CallbackInfo& info)
 {
 	Napi::Env env = info.Env();
-	size_t x;
-	size_t y;
+	size_t x = 0;
+	size_t y = 0;
 	size_t w;
 	size_t h;
+	MMSize displaySize = getMainDisplaySize();
 
 	//If user has provided screen coords, use them!
 	if (info.Length() == 4)
 	{
-		//TODO: Make sure requested coords are within the screen bounds, or we get a seg fault.
-		// 		An error message is much nicer!
-
-		x = info[0].As<Napi::Number>().Int32Value();
-		y = info[1].As<Napi::Number>().Int32Value();
-		w = info[2].As<Napi::Number>().Int32Value();
-		h = info[3].As<Napi::Number>().Int32Value();
+		if (!parseSizeT(env, info[0], "x", &x) ||
+		    !parseSizeT(env, info[1], "y", &y) ||
+		    !parseSizeT(env, info[2], "width", &w) ||
+		    !parseSizeT(env, info[3], "height", &h)) {
+			return env.Null();
+		}
 	}
-	else
+	else if (info.Length() == 0)
 	{
 		//We're getting the full screen.
-		x = 0;
-		y = 0;
-
-		//Get screen size.
-		MMSize displaySize = getMainDisplaySize();
 		w = displaySize.width;
 		h = displaySize.height;
 	}
+	else
+	{
+		Napi::Error::New(env, "Invalid number of arguments.").ThrowAsJavaScriptException();
+		return env.Null();
+	}
+
+	if (w == 0 || h == 0 ||
+	    x > displaySize.width || y > displaySize.height ||
+	    w > displaySize.width - x || h > displaySize.height - y) {
+		Napi::Error::New(env, "Requested capture rect is outside the main screen's dimensions.")
+			.ThrowAsJavaScriptException();
+		return env.Null();
+	}
 
 	MMBitmapRef bitmap = copyMMBitmapFromDisplayInRect(MMRectMake(x, y, w, h));
+	if (bitmap == NULL) {
+		Napi::Error::New(env, "Failed to capture the requested screen rect.")
+			.ThrowAsJavaScriptException();
+		return env.Null();
+	}
 
-	uint32_t bufferSize = bitmap->bytewidth * bitmap->height;
-	Napi::Object buffer = Napi::Buffer<char>::Copy(env, (char*)bitmap->imageBuffer, bufferSize);
-
-	Napi::Object obj = Napi::Object::New(env);
-	obj.Set("width", Napi::Number::New(env, bitmap->width));
-	obj.Set("height", Napi::Number::New(env, bitmap->height));
-	obj.Set("byteWidth", Napi::Number::New(env, bitmap->bytewidth));
-	obj.Set("bitsPerPixel", Napi::Number::New(env, bitmap->bitsPerPixel));
-	obj.Set("bytesPerPixel", Napi::Number::New(env, bitmap->bytesPerPixel));
-	obj.Set("image", buffer);
-
+	Napi::Object obj = createBitmapObject(env, bitmap);
+	obj.Set("screenX", Napi::Number::New(env, x));
+	obj.Set("screenY", Napi::Number::New(env, y));
+	obj.Set("scaleX", Napi::Number::New(env, (double)bitmap->width / (double)w));
+	obj.Set("scaleY", Napi::Number::New(env, (double)bitmap->height / (double)h));
 	return obj;
 }
 
@@ -866,57 +1207,40 @@ Napi::Value captureScreenWrapper(const Napi::CallbackInfo& info)
                             |_|
  */
 
-class BMP
-{
-	public:
-		size_t width;
-		size_t height;
-		size_t byteWidth;
-		uint8_t bitsPerPixel;
-		uint8_t bytesPerPixel;
-		uint8_t *image;
-};
-
-//Convert object from Javascript to a C++ class (BMP).
-BMP buildBMP(Napi::Object obj)
-{
-	BMP img;
-
-	img.width = obj.Get("width").As<Napi::Number>().Uint32Value();
-	img.height = obj.Get("height").As<Napi::Number>().Uint32Value();
-	img.byteWidth = obj.Get("byteWidth").As<Napi::Number>().Uint32Value();
-	img.bitsPerPixel = obj.Get("bitsPerPixel").As<Napi::Number>().Uint32Value();
-	img.bytesPerPixel = obj.Get("bytesPerPixel").As<Napi::Number>().Uint32Value();
-
-	char* buf = obj.Get("image").As<Napi::Buffer<char>>().Data();
-
-	//Convert the buffer to a uint8_t which createMMBitmap requires.
-	img.image = (uint8_t *)malloc(img.byteWidth * img.height);
-	memcpy(img.image, buf, img.byteWidth * img.height);
-
-	return img;
- }
-
 Napi::Value getColorWrapper(const Napi::CallbackInfo& info)
 {
 	Napi::Env env = info.Env();
-	MMBitmapRef bitmap;
 	MMRGBHex color;
+	size_t x;
+	size_t y;
 
-	size_t x = info[1].As<Napi::Number>().Int32Value();
-	size_t y = info[2].As<Napi::Number>().Int32Value();
+	if (info.Length() != 3)
+	{
+		Napi::Error::New(env, "Invalid number of arguments.").ThrowAsJavaScriptException();
+		return env.Null();
+	}
 
-	//Get our image object from JavaScript.
-	BMP img = buildBMP(info[0].ToObject());
+	if (!info[0].IsObject() ||
+	    !parseSizeT(env, info[1], "x", &x) ||
+	    !parseSizeT(env, info[2], "y", &y)) {
+		if (!info[0].IsObject()) {
+			Napi::Error::New(env, "First argument must be a bitmap object.")
+				.ThrowAsJavaScriptException();
+		}
+		return env.Null();
+	}
 
-	//Create the bitmap.
-	bitmap = createMMBitmap(img.image, img.width, img.height, img.byteWidth, img.bitsPerPixel, img.bytesPerPixel);
+	MMBitmapRef bitmap = createBorrowedBitmap(env, info[0].As<Napi::Object>());
+	if (bitmap == NULL) {
+		return env.Null();
+	}
 
 	// Make sure the requested pixel is inside the bitmap.
 	if (!MMBitmapPointInBounds(bitmap, MMPointMake(x, y)))
 	{
 		Napi::Error::New(env, "Requested coordinates are outside the bitmap's dimensions.").ThrowAsJavaScriptException();
-return env.Null();
+		destroyMMBitmap(bitmap);
+		return env.Null();
 	}
 
 	color = MMRGBHexAtPoint(bitmap, x, y);
@@ -929,6 +1253,340 @@ return env.Null();
 
 	return Napi::String::New(env, hex);
 
+}
+
+Napi::Value findColorWrapper(const Napi::CallbackInfo& info)
+{
+	Napi::Env env = info.Env();
+	MMBitmapRef bitmap;
+	MMRGBHex color;
+	MMRect rect;
+	MMPoint point;
+	float tolerance;
+
+	if (info.Length() < 2 || info.Length() > 3 || !info[0].IsObject()) {
+		Napi::Error::New(env, "Invalid arguments.").ThrowAsJavaScriptException();
+		return env.Null();
+	}
+
+	bitmap = createBorrowedBitmap(env, info[0].As<Napi::Object>());
+	if (bitmap == NULL) {
+		return env.Null();
+	}
+
+	if (!parseHexColor(env, info[1], &color) ||
+	    !parseSearchRect(env,
+	                     info.Length() == 3 ? info[2] : env.Undefined(),
+	                     bitmap,
+	                     &rect,
+	                     &tolerance)) {
+		destroyMMBitmap(bitmap);
+		return env.Null();
+	}
+
+	if (findColorInRect(bitmap, color, &point, rect, tolerance) != 0) {
+		destroyMMBitmap(bitmap);
+		return env.Null();
+	}
+
+	destroyMMBitmap(bitmap);
+	return createPointObject(env, point);
+}
+
+Napi::Value findColorsWrapper(const Napi::CallbackInfo& info)
+{
+	Napi::Env env = info.Env();
+	MMBitmapRef bitmap;
+	MMRGBHex color;
+	MMRect rect;
+	float tolerance;
+	MMPointArrayRef points;
+	Napi::Array result;
+
+	if (info.Length() < 2 || info.Length() > 3 || !info[0].IsObject()) {
+		Napi::Error::New(env, "Invalid arguments.").ThrowAsJavaScriptException();
+		return env.Null();
+	}
+
+	bitmap = createBorrowedBitmap(env, info[0].As<Napi::Object>());
+	if (bitmap == NULL) {
+		return env.Null();
+	}
+
+	if (!parseHexColor(env, info[1], &color) ||
+	    !parseSearchRect(env,
+	                     info.Length() == 3 ? info[2] : env.Undefined(),
+	                     bitmap,
+	                     &rect,
+	                     &tolerance)) {
+		destroyMMBitmap(bitmap);
+		return env.Null();
+	}
+
+	points = findAllColorInRect(bitmap, color, rect, tolerance);
+	if (points == NULL) {
+		destroyMMBitmap(bitmap);
+		Napi::Error::New(env, "Failed to search bitmap colors.")
+			.ThrowAsJavaScriptException();
+		return env.Null();
+	}
+
+	result = createPointArray(env, points);
+	destroyMMPointArray(points);
+	destroyMMBitmap(bitmap);
+	return result;
+}
+
+Napi::Value countColorWrapper(const Napi::CallbackInfo& info)
+{
+	Napi::Env env = info.Env();
+	MMBitmapRef bitmap;
+	MMRGBHex color;
+	MMRect rect;
+	float tolerance;
+	size_t count;
+
+	if (info.Length() < 2 || info.Length() > 3 || !info[0].IsObject()) {
+		Napi::Error::New(env, "Invalid arguments.").ThrowAsJavaScriptException();
+		return env.Null();
+	}
+
+	bitmap = createBorrowedBitmap(env, info[0].As<Napi::Object>());
+	if (bitmap == NULL) {
+		return env.Null();
+	}
+
+	if (!parseHexColor(env, info[1], &color) ||
+	    !parseSearchRect(env,
+	                     info.Length() == 3 ? info[2] : env.Undefined(),
+	                     bitmap,
+	                     &rect,
+	                     &tolerance)) {
+		destroyMMBitmap(bitmap);
+		return env.Null();
+	}
+
+	count = countOfColorsInRect(bitmap, color, rect, tolerance);
+	destroyMMBitmap(bitmap);
+	return Napi::Number::New(env, count);
+}
+
+Napi::Value findBitmapWrapper(const Napi::CallbackInfo& info)
+{
+	Napi::Env env = info.Env();
+	MMBitmapRef haystack;
+	MMBitmapRef needle;
+	MMRect rect;
+	MMPoint point;
+	float tolerance;
+
+	if (info.Length() < 2 || info.Length() > 3 ||
+	    !info[0].IsObject() || !info[1].IsObject()) {
+		Napi::Error::New(env, "Invalid arguments.").ThrowAsJavaScriptException();
+		return env.Null();
+	}
+
+	haystack = createBorrowedBitmap(env, info[0].As<Napi::Object>());
+	if (haystack == NULL) {
+		return env.Null();
+	}
+
+	needle = createBorrowedBitmap(env, info[1].As<Napi::Object>());
+	if (needle == NULL) {
+		destroyMMBitmap(haystack);
+		return env.Null();
+	}
+
+	if (!parseSearchRect(env,
+	                     info.Length() == 3 ? info[2] : env.Undefined(),
+	                     haystack,
+	                     &rect,
+	                     &tolerance)) {
+		destroyMMBitmap(needle);
+		destroyMMBitmap(haystack);
+		return env.Null();
+	}
+
+	if (findBitmapInRect(needle, haystack, &point, rect, tolerance) != 0) {
+		destroyMMBitmap(needle);
+		destroyMMBitmap(haystack);
+		return env.Null();
+	}
+
+	destroyMMBitmap(needle);
+	destroyMMBitmap(haystack);
+	return createPointObject(env, point);
+}
+
+Napi::Value findBitmapsWrapper(const Napi::CallbackInfo& info)
+{
+	Napi::Env env = info.Env();
+	MMBitmapRef haystack;
+	MMBitmapRef needle;
+	MMRect rect;
+	float tolerance;
+	MMPointArrayRef points;
+	Napi::Array result;
+
+	if (info.Length() < 2 || info.Length() > 3 ||
+	    !info[0].IsObject() || !info[1].IsObject()) {
+		Napi::Error::New(env, "Invalid arguments.").ThrowAsJavaScriptException();
+		return env.Null();
+	}
+
+	haystack = createBorrowedBitmap(env, info[0].As<Napi::Object>());
+	if (haystack == NULL) {
+		return env.Null();
+	}
+
+	needle = createBorrowedBitmap(env, info[1].As<Napi::Object>());
+	if (needle == NULL) {
+		destroyMMBitmap(haystack);
+		return env.Null();
+	}
+
+	if (!parseSearchRect(env,
+	                     info.Length() == 3 ? info[2] : env.Undefined(),
+	                     haystack,
+	                     &rect,
+	                     &tolerance)) {
+		destroyMMBitmap(needle);
+		destroyMMBitmap(haystack);
+		return env.Null();
+	}
+
+	points = findAllBitmapInRect(needle, haystack, rect, tolerance);
+	if (points == NULL) {
+		destroyMMBitmap(needle);
+		destroyMMBitmap(haystack);
+		Napi::Error::New(env, "Failed to search for bitmaps.")
+			.ThrowAsJavaScriptException();
+		return env.Null();
+	}
+
+	result = createPointArray(env, points);
+	destroyMMPointArray(points);
+	destroyMMBitmap(needle);
+	destroyMMBitmap(haystack);
+	return result;
+}
+
+Napi::Value countBitmapWrapper(const Napi::CallbackInfo& info)
+{
+	Napi::Env env = info.Env();
+	MMBitmapRef haystack;
+	MMBitmapRef needle;
+	MMRect rect;
+	float tolerance;
+	size_t count;
+
+	if (info.Length() < 2 || info.Length() > 3 ||
+	    !info[0].IsObject() || !info[1].IsObject()) {
+		Napi::Error::New(env, "Invalid arguments.").ThrowAsJavaScriptException();
+		return env.Null();
+	}
+
+	haystack = createBorrowedBitmap(env, info[0].As<Napi::Object>());
+	if (haystack == NULL) {
+		return env.Null();
+	}
+
+	needle = createBorrowedBitmap(env, info[1].As<Napi::Object>());
+	if (needle == NULL) {
+		destroyMMBitmap(haystack);
+		return env.Null();
+	}
+
+	if (!parseSearchRect(env,
+	                     info.Length() == 3 ? info[2] : env.Undefined(),
+	                     haystack,
+	                     &rect,
+	                     &tolerance)) {
+		destroyMMBitmap(needle);
+		destroyMMBitmap(haystack);
+		return env.Null();
+	}
+
+	count = countOfBitmapInRect(needle, haystack, rect, tolerance);
+	destroyMMBitmap(needle);
+	destroyMMBitmap(haystack);
+	return Napi::Number::New(env, count);
+}
+
+Napi::Value loadImageWrapper(const Napi::CallbackInfo& info)
+{
+	Napi::Env env = info.Env();
+	std::string path;
+	MMImageType imageType;
+	MMIOError error = kMMIOUnsupportedTypeError;
+	MMBitmapRef bitmap;
+
+	if (info.Length() != 1 || !info[0].IsString()) {
+		Napi::Error::New(env, "loadImage expects a single file path string.")
+			.ThrowAsJavaScriptException();
+		return env.Null();
+	}
+
+	path = info[0].As<Napi::String>().Utf8Value();
+	if (!parseImageTypeFromPath(env, path, &imageType)) {
+		return env.Null();
+	}
+
+	bitmap = newMMBitmapFromFile(path.c_str(), imageType, &error);
+	if (bitmap == NULL) {
+		const char *message = MMIOErrorString(imageType, error);
+		if (message == NULL) {
+			message = "Failed to load image.";
+		}
+		Napi::Error::New(env, message).ThrowAsJavaScriptException();
+		return env.Null();
+	}
+
+	return createBitmapObject(env, bitmap);
+}
+
+Napi::Value saveImageWrapper(const Napi::CallbackInfo& info)
+{
+	Napi::Env env = info.Env();
+	std::string path;
+	MMImageType imageType;
+	MMBitmapRef bitmap;
+
+	if (info.Length() != 2 || !info[0].IsObject() || !info[1].IsString()) {
+		Napi::Error::New(env, "saveImage expects a bitmap and a file path string.")
+			.ThrowAsJavaScriptException();
+		return env.Null();
+	}
+
+	bitmap = createBorrowedBitmap(env, info[0].As<Napi::Object>());
+	if (bitmap == NULL) {
+		return env.Null();
+	}
+
+	path = info[1].As<Napi::String>().Utf8Value();
+	if (!parseImageTypeFromPath(env, path, &imageType)) {
+		destroyMMBitmap(bitmap);
+		return env.Null();
+	}
+
+#if !ROBOTJS_HAS_PNG
+	if (imageType == kPNGImageType) {
+		destroyMMBitmap(bitmap);
+		Napi::Error::New(env, "PNG support is not enabled in this build.")
+			.ThrowAsJavaScriptException();
+		return env.Null();
+	}
+#endif
+
+	if (saveMMBitmapToFile(bitmap, path.c_str(), imageType) != 0) {
+		destroyMMBitmap(bitmap);
+		Napi::Error::New(env, "Failed to save image.")
+			.ThrowAsJavaScriptException();
+			return env.Null();
+	}
+
+	destroyMMBitmap(bitmap);
+	return Napi::Boolean::New(env, true);
 }
 
 Napi::Object InitAll(Napi::Env env, Napi::Object exports)
@@ -989,6 +1647,33 @@ Napi::Object InitAll(Napi::Env env, Napi::Object exports)
 
 	exports.Set(Napi::String::New(env, "getColor"),
 				Napi::Function::New(env, getColorWrapper));
+
+	exports.Set(Napi::String::New(env, "findColor"),
+				Napi::Function::New(env, findColorWrapper));
+
+	exports.Set(Napi::String::New(env, "findColors"),
+				Napi::Function::New(env, findColorsWrapper));
+
+	exports.Set(Napi::String::New(env, "countColor"),
+				Napi::Function::New(env, countColorWrapper));
+
+	exports.Set(Napi::String::New(env, "findImage"),
+				Napi::Function::New(env, findBitmapWrapper));
+
+	exports.Set(Napi::String::New(env, "findImages"),
+				Napi::Function::New(env, findBitmapsWrapper));
+
+	exports.Set(Napi::String::New(env, "countImage"),
+				Napi::Function::New(env, countBitmapWrapper));
+
+	exports.Set(Napi::String::New(env, "loadImage"),
+				Napi::Function::New(env, loadImageWrapper));
+
+	exports.Set(Napi::String::New(env, "saveImage"),
+				Napi::Function::New(env, saveImageWrapper));
+
+	exports.Set(Napi::String::New(env, "hasPNGSupport"),
+				Napi::Boolean::New(env, ROBOTJS_HAS_PNG != 0));
 
 	exports.Set(Napi::String::New(env, "getXDisplayName"),
 				Napi::Function::New(env, getXDisplayNameWrapper));
