@@ -16,12 +16,6 @@
 #endif
 
 #if defined(IS_MACOSX)
-static void destroyMMBitmapMacBuffer(char *bitmapBuffer, void *hint)
-{
-	if (hint != NULL) {
-		CFRelease((CFTypeRef)hint);
-	}
-}
 #elif defined(IS_WINDOWS)
 static void destroyMMBitmapWindowsDIB(char *bitmapBuffer, void *hint)
 {
@@ -36,7 +30,13 @@ MMBitmapRef copyMMBitmapFromDisplayInRect(MMRect rect)
 #if defined(IS_MACOSX)
 
 	MMBitmapRef bitmap = NULL;
-	const uint8_t *buffer = NULL;
+	CGContextRef context = NULL;
+	CGColorSpaceRef colorSpace = NULL;
+	uint8_t *buffer = NULL;
+	const size_t width = rect.size.width;
+	const size_t height = rect.size.height;
+	const size_t bytesPerPixel = 4;
+	const size_t bytesPerRow = width * bytesPerPixel;
 
 	CGDirectDisplayID displayID = CGMainDisplayID();
 
@@ -48,25 +48,54 @@ MMBitmapRef copyMMBitmapFromDisplayInRect(MMRect rect)
 
 	if (!image) { return NULL; }
 
-	CFDataRef imageData = CGDataProviderCopyData(CGImageGetDataProvider(image));
-
-	if (!imageData) {
+	colorSpace = CGColorSpaceCreateWithName(kCGColorSpaceSRGB);
+	if (colorSpace == NULL) {
 		CGImageRelease(image);
 		return NULL;
 	}
 
-	buffer = CFDataGetBytePtr(imageData);
-	bitmap = createMMBitmapWithCleanup((uint8_t *)buffer,
-	                                   CGImageGetWidth(image),
-	                                   CGImageGetHeight(image),
-	                                   CGImageGetBytesPerRow(image),
-	                                   CGImageGetBitsPerPixel(image),
-	                                   CGImageGetBitsPerPixel(image) / 8,
-	                                   destroyMMBitmapMacBuffer,
-	                                   (void *)imageData);
-	if (bitmap == NULL) {
-		CFRelease(imageData);
+	buffer = calloc(height, bytesPerRow);
+	if (buffer == NULL) {
+		CGColorSpaceRelease(colorSpace);
+		CGImageRelease(image);
+		return NULL;
 	}
+
+	context = CGBitmapContextCreate(buffer,
+	                                width,
+	                                height,
+	                                8,
+	                                bytesPerRow,
+	                                colorSpace,
+	                                kCGImageAlphaNoneSkipFirst |
+	                                kCGBitmapByteOrder32Little);
+	if (context == NULL) {
+		free(buffer);
+		CGColorSpaceRelease(colorSpace);
+		CGImageRelease(image);
+		return NULL;
+	}
+
+	/* RobotJS bitmaps use a top-left origin. Flip the Quartz context so the
+	 * captured image keeps that coordinate system after color conversion. */
+	CGContextTranslateCTM(context, 0, height);
+	CGContextScaleCTM(context, 1, -1);
+	CGContextSetBlendMode(context, kCGBlendModeCopy);
+	CGContextSetInterpolationQuality(context, kCGInterpolationNone);
+	CGContextDrawImage(context, CGRectMake(0, 0, width, height), image);
+
+	bitmap = createMMBitmap(buffer,
+	                        width,
+	                        height,
+	                        bytesPerRow,
+	                        32,
+	                        4);
+	if (bitmap == NULL) {
+		free(buffer);
+	}
+
+	CGContextRelease(context);
+	CGColorSpaceRelease(colorSpace);
 
 	CGImageRelease(image);
 
