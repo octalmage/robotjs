@@ -89,7 +89,7 @@ MMBitmapRef copyMMBitmapFromPortion(MMBitmapRef source, MMRect rect);
 do {                                           \
   if (++(pixel).x >= (width)) {                \
     (pixel).x = start_x;                       \
-    ++(point).y;                               \
+    ++(pixel).y;                               \
   }                                            \
 } while (0);
 
