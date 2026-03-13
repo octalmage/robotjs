@@ -4,6 +4,11 @@
 
 #include "types.h"
 
+#ifdef __cplusplus
+extern "C"
+{
+#endif
+
 struct _MMPointArray {
 	MMPoint *array; /* Pointer to actual data. */
 	size_t count;   /* Number of elements in array. */
@@ -29,5 +34,9 @@ void MMPointArrayAppendPoint(MMPointArrayRef pointArray, MMPoint point);
 
 /* Set point in array. */
 #define MMPointArraySetItem(a, i, item) ((a)->array[i] = item)
+
+#ifdef __cplusplus
+}
+#endif
 
 #endif /* MMARRAY_H */

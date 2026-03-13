@@ -15,8 +15,7 @@
 	#include <string.h>
 #endif
 
-#if defined(IS_MACOSX)
-#elif defined(IS_WINDOWS)
+#if defined(IS_WINDOWS)
 static void destroyMMBitmapWindowsDIB(char *bitmapBuffer, void *hint)
 {
 	if (hint != NULL) {

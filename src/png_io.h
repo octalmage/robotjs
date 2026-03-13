@@ -5,6 +5,11 @@
 #include "MMBitmap.h"
 #include "io.h"
 
+#ifdef __cplusplus
+extern "C"
+{
+#endif
+
 enum _PNGReadError {
 	kPNGGenericError = 0,
 	kPNGReadError,
@@ -33,5 +38,9 @@ int saveMMBitmapAsPNG(MMBitmapRef bitmap, const char *path);
  *
  * Responsibility for free()'ing data is left up to the caller. */
 uint8_t *createPNGData(MMBitmapRef bitmap, size_t *len);
+
+#ifdef __cplusplus
+}
+#endif
 
 #endif /* PNG_IO_H */
