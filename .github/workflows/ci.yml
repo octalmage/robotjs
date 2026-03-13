@@ -28,7 +28,7 @@ jobs:
             os: ubuntu-24.04
             node-version: "24"
           - name: macOS / Node 20
-            os: macos-13
+            os: macos-15-intel
             node-version: "20"
 
     steps:
@@ -131,4 +131,3 @@ jobs:
 
       - name: Run tests
         run: npm test
-
