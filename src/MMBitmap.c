@@ -52,10 +52,7 @@ void destroyMMBitmap(MMBitmapRef bitmap)
 		                      bitmap->bufferDestroyHint);
 	}
 
-	if (bitmap->imageBuffer != NULL) {
-		bitmap->imageBuffer = NULL;
-	}
-
+	bitmap->imageBuffer = NULL;
 	free(bitmap);
 }
 
