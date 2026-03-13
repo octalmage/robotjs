@@ -25,6 +25,10 @@
 int mouseDelay = 10;
 int keyboardDelay = 10;
 
+#if defined(IS_MACOSX)
+static const unsigned MACOS_TYPE_STRING_DEFAULT_CPM = 1000;
+#endif
+
 /*
  __  __
 |  \/  | ___  _   _ ___  ___
@@ -675,7 +679,11 @@ Napi::Value typeStringWrapper(const Napi::CallbackInfo& info)
 
 		s = str.c_str();
 
-		typeStringDelayed(s, 0);
+		#if defined(IS_MACOSX)
+			typeStringDelayed(s, MACOS_TYPE_STRING_DEFAULT_CPM);
+		#else
+			typeStringDelayed(s, 0);
+		#endif
 
 		return Napi::Number::New(env, 1);
 	} else {
