@@ -5,6 +5,9 @@ on:
   pull_request:
   workflow_dispatch:
 
+env:
+  FORCE_JAVASCRIPT_ACTIONS_TO_NODE24: "true"
+
 permissions:
   contents: write
 
@@ -21,31 +24,32 @@ jobs:
       fail-fast: false
       matrix:
         include:
-          - name: Linux / Node 20
-            os: ubuntu-24.04
-            node-version: "20"
           - name: Linux / Node 24
             os: ubuntu-24.04
             node-version: "24"
-          - name: macOS / Node 24
+          - name: Linux / Node 25
+            os: ubuntu-24.04
+            node-version: "25"
+          - name: macOS / Node 25
             os: macos-15-intel
-            node-version: "24"
+            node-version: "25"
 
     steps:
       - name: Check out repository
-        uses: actions/checkout@v4
+        uses: actions/checkout@v6
         with:
           fetch-depth: 5
 
       - name: Set up Node.js
-        uses: actions/setup-node@v4
+        uses: actions/setup-node@v6
         with:
           node-version: ${{ matrix.node-version }}
           architecture: x64
           cache: npm
+          check-latest: true
 
       - name: Set up Python
-        uses: actions/setup-python@v5
+        uses: actions/setup-python@v6
         with:
           python-version: "3.x"
 
@@ -117,26 +121,29 @@ jobs:
       fail-fast: false
       matrix:
         include:
-          - node-version: "20"
+          - node-version: "24"
             architecture: x64
-          - node-version: "20"
+          - node-version: "24"
             architecture: x86
+          - node-version: "25"
+            architecture: x64
 
     steps:
       - name: Check out repository
-        uses: actions/checkout@v4
+        uses: actions/checkout@v6
         with:
           fetch-depth: 5
 
       - name: Set up Node.js
-        uses: actions/setup-node@v4
+        uses: actions/setup-node@v6
         with:
           node-version: ${{ matrix.node-version }}
           architecture: ${{ matrix.architecture }}
           cache: npm
+          check-latest: true
 
       - name: Set up Python
-        uses: actions/setup-python@v5
+        uses: actions/setup-python@v6
         with:
           python-version: "3.x"
 
