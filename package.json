@@ -5,10 +5,7 @@
   "main": "index.js",
   "typings": "index.d.ts",
   "scripts": {
-    "test": "run-script-os",
-    "test:darwin:linux": "jasmine test/**/*.js",
-    "test-keyboard": "node test/keyboard.js",
-    "test:win32": "jasmine test/**/*.js",
+    "test": "jasmine \"test/**/*.js\"",
     "install": "prebuild-install --runtime napi || node-gyp rebuild",
     "install-debug": "prebuild-install --runtime napi || node-gyp rebuild --debug",
     "prebuild": "prebuild --all --runtime napi",
@@ -55,7 +52,6 @@
     "jasmine": "^2.99.0",
     "node-gyp": "^12.2.0",
     "prebuild": "^13",
-    "run-script-os": "^1.0.3",
-    "tape": "^4.8.0"
+    "targetpractice": "github:octalmage/targetpractice"
   }
 }

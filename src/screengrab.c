@@ -15,13 +15,28 @@
 	#include <string.h>
 #endif
 
+#if defined(IS_MACOSX)
+#elif defined(IS_WINDOWS)
+static void destroyMMBitmapWindowsDIB(char *bitmapBuffer, void *hint)
+{
+	if (hint != NULL) {
+		DeleteObject((HGDIOBJ)hint);
+	}
+}
+#endif
+
 MMBitmapRef copyMMBitmapFromDisplayInRect(MMRect rect)
 {
 #if defined(IS_MACOSX)
 
 	MMBitmapRef bitmap = NULL;
+	CGContextRef context = NULL;
+	CGColorSpaceRef colorSpace = NULL;
 	uint8_t *buffer = NULL;
-	size_t bufferSize = 0;
+	const size_t width = rect.size.width;
+	const size_t height = rect.size.height;
+	const size_t bytesPerPixel = 4;
+	const size_t bytesPerRow = width * bytesPerPixel;
 
 	CGDirectDisplayID displayID = CGMainDisplayID();
 
@@ -33,23 +48,50 @@ MMBitmapRef copyMMBitmapFromDisplayInRect(MMRect rect)
 
 	if (!image) { return NULL; }
 
-	CFDataRef imageData = CGDataProviderCopyData(CGImageGetDataProvider(image));
+	colorSpace = CGColorSpaceCreateWithName(kCGColorSpaceSRGB);
+	if (colorSpace == NULL) {
+		CGImageRelease(image);
+		return NULL;
+	}
 
-	if (!imageData) { return NULL; }
+	buffer = calloc(height, bytesPerRow);
+	if (buffer == NULL) {
+		CGColorSpaceRelease(colorSpace);
+		CGImageRelease(image);
+		return NULL;
+	}
 
-	bufferSize = CFDataGetLength(imageData);
-	buffer = malloc(bufferSize);
+	context = CGBitmapContextCreate(buffer,
+	                                width,
+	                                height,
+	                                8,
+	                                bytesPerRow,
+	                                colorSpace,
+	                                kCGImageAlphaNoneSkipFirst |
+	                                kCGBitmapByteOrder32Little);
+	if (context == NULL) {
+		free(buffer);
+		CGColorSpaceRelease(colorSpace);
+		CGImageRelease(image);
+		return NULL;
+	}
 
-	CFDataGetBytes(imageData, CFRangeMake(0,bufferSize), buffer);
+	CGContextSetBlendMode(context, kCGBlendModeCopy);
+	CGContextSetInterpolationQuality(context, kCGInterpolationNone);
+	CGContextDrawImage(context, CGRectMake(0, 0, width, height), image);
 
 	bitmap = createMMBitmap(buffer,
-		CGImageGetWidth(image),
-		CGImageGetHeight(image),
-		CGImageGetBytesPerRow(image),
-		CGImageGetBitsPerPixel(image),
-		CGImageGetBitsPerPixel(image) / 8);
+	                        width,
+	                        height,
+	                        bytesPerRow,
+	                        32,
+	                        4);
+	if (bitmap == NULL) {
+		free(buffer);
+	}
 
-	CFRelease(imageData);
+	CGContextRelease(context);
+	CGColorSpaceRelease(colorSpace);
 
 	CGImageRelease(image);
 
@@ -85,6 +127,7 @@ MMBitmapRef copyMMBitmapFromDisplayInRect(MMRect rect)
 	void *data;
 	HDC screen = NULL, screenMem = NULL;
 	HBITMAP dib;
+	HGDIOBJ previousObject = NULL;
 	BITMAPINFO bi;
 
 	/* Initialize bitmap info. */
@@ -105,10 +148,15 @@ MMBitmapRef copyMMBitmapFromDisplayInRect(MMRect rect)
 
 	/* Get screen data in display device context. */
    	dib = CreateDIBSection(screen, &bi, DIB_RGB_COLORS, &data, NULL, 0);
+	if (dib == NULL || data == NULL) {
+		if (dib != NULL) DeleteObject(dib);
+		ReleaseDC(NULL, screen);
+		return NULL;
+	}
 
 	/* Copy the data into a bitmap struct. */
 	if ((screenMem = CreateCompatibleDC(screen)) == NULL ||
-	    SelectObject(screenMem, dib) == NULL ||
+	    (previousObject = SelectObject(screenMem, dib)) == NULL ||
 	    !BitBlt(screenMem,
 	            (int)0,
 	            (int)0,
@@ -127,21 +175,22 @@ MMBitmapRef copyMMBitmapFromDisplayInRect(MMRect rect)
 		return NULL;
 	}
 
-	bitmap = createMMBitmap(NULL,
-	                        rect.size.width,
-	                        rect.size.height,
-	                        4 * rect.size.width,
-	                        (uint8_t)bi.bmiHeader.biBitCount,
-	                        4);
-
-	/* Copy the data to our pixel buffer. */
-	if (bitmap != NULL) {
-		bitmap->imageBuffer = malloc(bitmap->bytewidth * bitmap->height);
-		memcpy(bitmap->imageBuffer, data, bitmap->bytewidth * bitmap->height);
+	bitmap = createMMBitmapWithCleanup((uint8_t *)data,
+	                                   rect.size.width,
+	                                   rect.size.height,
+	                                   4 * rect.size.width,
+	                                   (uint8_t)bi.bmiHeader.biBitCount,
+	                                   4,
+	                                   destroyMMBitmapWindowsDIB,
+	                                   dib);
+	if (previousObject != NULL) {
+		SelectObject(screenMem, previousObject);
+	}
+	if (bitmap == NULL) {
+		DeleteObject(dib);
 	}
 
 	ReleaseDC(NULL, screen);
-	DeleteObject(dib);
 	DeleteDC(screenMem);
 
 	return bitmap;

@@ -6,6 +6,11 @@
 #include "MMBitmap.h"
 #include "MMPointArray.h"
 
+#ifdef __cplusplus
+extern "C"
+{
+#endif
+
 /* Convenience wrapper around findBitmapInRect(), where |rect| is the bounds
  * of |haystack|. */
 #define findBitmapInBitmap(needle, haystack, pointPtr, tol) \
@@ -48,5 +53,9 @@ MMPointArrayRef findAllBitmapInRect(MMBitmapRef needle, MMBitmapRef haystack,
  * of |rect|. */
 size_t countOfBitmapInRect(MMBitmapRef needle, MMBitmapRef haystack,
                            MMRect rect, float tolerance);
+
+#ifdef __cplusplus
+}
+#endif
 
 #endif /* BITMAP_H */

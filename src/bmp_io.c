@@ -6,11 +6,10 @@
 
 #if defined(_MSC_VER)
 	#include "ms_stdbool.h"
-	#include "ms_stdint.h"
 #else
 	#include <stdbool.h>
-	#include <stdint.h>
 #endif
+#include <stdint.h>
 
 #pragma pack(push, 1) /* The following structs should be continguous, so we can
                        * copy them in one read. */
@@ -371,10 +370,12 @@ static uint8_t *readImageData(FILE *fp, size_t width, size_t height,
 
 static void copyBGRDataFromMMBitmap(MMBitmapRef bitmap, uint8_t *dest)
 {
-	if (MMRGB_IS_BGR && (bitmap->bytewidth % 4) == 0) { /* No conversion needed. */
-		memcpy(dest, bitmap->imageBuffer, bitmap->bytewidth * bitmap->height);
+	const size_t bytewidth = (bitmap->width * bitmap->bytesPerPixel + 3) & ~3;
+
+	if (MMRGB_IS_BGR && bitmap->bytewidth == bytewidth) { /* No conversion needed. */
+		memcpy(dest, bitmap->imageBuffer, bytewidth * bitmap->height);
 	} else { /* Convert to RGB with other-than-4-byte alignment. */
-		const size_t bytewidth = (bitmap->width * bitmap->bytesPerPixel + 3) & ~3;
+		const size_t outputBytesPerPixel = 3;
 		size_t y;
 
 		/* Copy image data row by row. */
@@ -389,7 +390,7 @@ static void copyBGRDataFromMMBitmap(MMBitmapRef bitmap, uint8_t *dest)
 				rowptr[1] = color->green;
 				rowptr[2] = color->red;
 
-				rowptr += bitmap->bytesPerPixel;
+				rowptr += outputBytesPerPixel;
 			}
 		}
 	}

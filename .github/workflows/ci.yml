@@ -1,0 +1,162 @@
+name: CI
+
+on:
+  push:
+  pull_request:
+  workflow_dispatch:
+
+env:
+  FORCE_JAVASCRIPT_ACTIONS_TO_NODE24: "true"
+
+permissions:
+  contents: write
+
+concurrency:
+  group: ci-${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  test-unix:
+    name: ${{ matrix.name }}
+    runs-on: ${{ matrix.os }}
+    timeout-minutes: 30
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - name: Linux / Node 24
+            os: ubuntu-24.04
+            node-version: "24"
+          - name: Linux / Node 25
+            os: ubuntu-24.04
+            node-version: "25"
+          - name: macOS / Node 25
+            os: macos-15-intel
+            node-version: "25"
+
+    steps:
+      - name: Check out repository
+        uses: actions/checkout@v6
+        with:
+          fetch-depth: 5
+
+      - name: Set up Node.js
+        uses: actions/setup-node@v6
+        with:
+          node-version: ${{ matrix.node-version }}
+          architecture: x64
+          cache: npm
+          check-latest: true
+
+      - name: Set up Python
+        uses: actions/setup-python@v6
+        with:
+          python-version: "3.x"
+
+      - name: Install Linux desktop dependencies
+        if: runner.os == 'Linux'
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y \
+            libasound2t64 \
+            libatk-bridge2.0-0 \
+            libatk1.0-0 \
+            libcups2t64 \
+            libdbus-1-3 \
+            libdrm2 \
+            libgbm1 \
+            libglib2.0-0 \
+            libgtk-3-0 \
+            libnspr4 \
+            libnss3 \
+            libpango-1.0-0 \
+            libx11-dev \
+            libx11-xcb1 \
+            libxcb1 \
+            libxcomposite1 \
+            libxdamage1 \
+            libxext6 \
+            libxfixes3 \
+            libxkbcommon0 \
+            libxrandr2 \
+            libxshmfence1 \
+            libxtst-dev \
+            openbox \
+            xauth \
+            xvfb
+
+      - name: Show toolchain versions
+        run: |
+          node --version
+          npm --version
+          python --version
+
+      - name: Install dependencies
+        run: npm install
+
+      - name: Run tests on macOS
+        if: runner.os == 'macOS'
+        run: npm test
+
+      - name: Run tests on Linux desktop session
+        if: runner.os == 'Linux'
+        shell: bash
+        run: |
+          xvfb-run --auto-servernum --server-args="-screen 0 1920x1080x24 -ac +extension RANDR" \
+            bash -lc 'openbox >/tmp/openbox.log 2>&1 & npm test'
+
+      - name: Print Linux desktop logs on failure
+        if: failure() && runner.os == 'Linux'
+        shell: bash
+        run: |
+          if [ -f /tmp/openbox.log ]; then
+            cat /tmp/openbox.log
+          fi
+
+  test-windows:
+    name: Windows / Node ${{ matrix.node-version }} / ${{ matrix.architecture }}
+    runs-on: windows-2022
+    timeout-minutes: 30
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - node-version: "24"
+            architecture: x64
+          - node-version: "22"
+            architecture: x86
+          - node-version: "25"
+            architecture: x64
+
+    steps:
+      - name: Check out repository
+        uses: actions/checkout@v6
+        with:
+          fetch-depth: 5
+
+      - name: Set up Node.js
+        uses: actions/setup-node@v6
+        with:
+          node-version: ${{ matrix.node-version }}
+          architecture: ${{ matrix.architecture }}
+          cache: npm
+          check-latest: true
+
+      - name: Set up Python
+        uses: actions/setup-python@v6
+        with:
+          python-version: "3.x"
+
+      - name: Show toolchain versions
+        shell: pwsh
+        run: |
+          node --version
+          npm --version
+          python --version
+          node -p "process.arch"
+
+      - name: Install dependencies
+        run: npm install
+
+      - name: Run tests
+        run: npm test
