@@ -1,11 +1,10 @@
 /* jshint esversion: 6 */
 var robot = require('../..');
-var targetpractice = require('./targetpractice.js');
+var targetpractice = require('targetpractice/index.js');
 var elements, target;
 
 describe('Integration/Screen', () => {
 	beforeEach(done => {
-		elements = null;
 		target = targetpractice.start();
 		target.once('error', done.fail);
 		target.once('elements', message => {

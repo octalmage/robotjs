@@ -1,6 +1,6 @@
 /* jshint esversion: 6 */
 var robot = require('../..');
-var targetpractice = require('./targetpractice.js');
+var targetpractice = require('targetpractice/index.js');
 var os = require('os');
 
 robot.setMouseDelay(100);
@@ -9,7 +9,6 @@ var target, elements;
 
 describe('Integration/Keyboard', () => {
 	beforeEach(done => {
-		elements = null;
 		target = targetpractice.start();
 		target.once('error', done.fail);
 		target.once('elements', message => {
