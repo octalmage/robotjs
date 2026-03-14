@@ -1,6 +1,7 @@
 /* jshint esversion: 6 */
 var spawn = require('child_process').spawn;
 var EventEmitter = require('events').EventEmitter;
+var os = require('os');
 var path = require('path');
 var electron = require('electron');
 
@@ -27,7 +28,15 @@ module.exports.start = function start() {
 	var stdoutBuffer = '';
 	var stderrBuffer = '';
 	var appDir = path.dirname(require.resolve('targetpractice/main.js'));
-	var child = spawn(electron, [appDir], {
+	var args = [];
+
+	if (os.platform() === 'linux') {
+		args.push('--no-sandbox', '--disable-setuid-sandbox');
+	}
+
+	args.push(appDir);
+
+	var child = spawn(electron, args, {
 		detached: false,
 		stdio: ['ignore', 'pipe', 'pipe']
 	});
