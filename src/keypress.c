@@ -261,17 +261,20 @@ void unicodeTap(const unsigned value)
 		toggleUnicode(ch, true);
 		toggleUnicode(ch, false);
 	#elif defined(IS_WINDOWS)
-		INPUT ip;
+		INPUT ip[2];
 
-		// Set up a generic keyboard event.
-		ip.type = INPUT_KEYBOARD;
-		ip.ki.wVk = 0; // Virtual-key code
-		ip.ki.wScan = value; // Hardware scan code for key
-		ip.ki.time = 0; // System will provide its own time stamp.
-		ip.ki.dwExtraInfo = 0; // No extra info. Use the GetMessageExtraInfo function to obtain this information if needed.
-		ip.ki.dwFlags = KEYEVENTF_UNICODE; // KEYEVENTF_KEYUP for key release.
+		// Send a complete Unicode key press so repeated characters do not get dropped.
+		ip[0].type = INPUT_KEYBOARD;
+		ip[0].ki.wVk = 0;
+		ip[0].ki.wScan = value;
+		ip[0].ki.time = 0;
+		ip[0].ki.dwExtraInfo = 0;
+		ip[0].ki.dwFlags = KEYEVENTF_UNICODE;
 
-		SendInput(1, &ip, sizeof(INPUT));
+		ip[1] = ip[0];
+		ip[1].ki.dwFlags = KEYEVENTF_UNICODE | KEYEVENTF_KEYUP;
+
+		SendInput(2, ip, sizeof(INPUT));
 	#endif
 }
 
