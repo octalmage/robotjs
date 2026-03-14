@@ -123,7 +123,7 @@ jobs:
         include:
           - node-version: "24"
             architecture: x64
-          - node-version: "24"
+          - node-version: "22"
             architecture: x86
           - node-version: "25"
             architecture: x64

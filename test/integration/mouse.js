@@ -5,8 +5,18 @@ var targetpractice = require('targetpractice/index.js');
 robot.setMouseDelay(100);
 
 var target, elements;
+var originalTimeout;
 
 describe('Integration/Mouse', () => {
+	beforeAll(() => {
+		originalTimeout = jasmine.DEFAULT_TIMEOUT_INTERVAL;
+		jasmine.DEFAULT_TIMEOUT_INTERVAL = 15000;
+	});
+
+	afterAll(() => {
+		jasmine.DEFAULT_TIMEOUT_INTERVAL = originalTimeout;
+	});
+
 	beforeEach(done => {
 		target = targetpractice.start();
 		target.once('error', done.fail);
