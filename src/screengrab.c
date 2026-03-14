@@ -76,10 +76,6 @@ MMBitmapRef copyMMBitmapFromDisplayInRect(MMRect rect)
 		return NULL;
 	}
 
-	/* RobotJS bitmaps use a top-left origin. Flip the Quartz context so the
-	 * captured image keeps that coordinate system after color conversion. */
-	CGContextTranslateCTM(context, 0, height);
-	CGContextScaleCTM(context, 1, -1);
 	CGContextSetBlendMode(context, kCGBlendModeCopy);
 	CGContextSetInterpolationQuality(context, kCGInterpolationNone);
 	CGContextDrawImage(context, CGRectMake(0, 0, width, height), image);
