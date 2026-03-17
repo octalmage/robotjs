@@ -521,6 +521,13 @@ Napi::Value keyTapWrapper(const Napi::CallbackInfo& info)
 
 	MMKeyFlags flags = MOD_NONE;
 	MMKeyCode key;
+
+	if (info.Length() < 1 || info.Length() > 2)
+	{
+		Napi::Error::New(env, "Invalid number of arguments.").ThrowAsJavaScriptException();
+return env.Null();
+	}
+
 	std::string kstr = info[0].ToString().Utf8Value();
 	const char *k = kstr.c_str();
 
@@ -541,9 +548,6 @@ return env.Null();
 			break;
 		case 1:
 			break;
-		default:
-			Napi::Error::New(env, "Invalid number of arguments.").ThrowAsJavaScriptException();
-return env.Null();
 	}
 
 	switch(CheckKeyCodes(k, &key))
