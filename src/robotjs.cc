@@ -141,14 +141,14 @@ Napi::Value moveMouseSmoothWrapper(const Napi::CallbackInfo& info)
 		Napi::Error::New(env, "Invalid number of arguments.").ThrowAsJavaScriptException();
 return env.Null();
 	}
-	size_t x = static_cast<size_t>(info[0].ToNumber().Int32Value());
-	size_t y = static_cast<size_t>(info[1].ToNumber().Int32Value());
+	int32_t x = info[0].ToNumber().Int32Value();
+	int32_t y = info[1].ToNumber().Int32Value();
 
-	MMPoint point;
-	point = MMPointMake(x, y);
+	MMSignedPoint point;
+	point = MMSignedPointMake(x, y);
 	if (info.Length() == 3)
 	{
-		size_t speed = static_cast<size_t>(info[2].ToNumber().Int32Value());
+		double speed = info[2].ToNumber().DoubleValue();
 		smoothlyMoveMouse(point, speed);
 	}
 	else
@@ -785,6 +785,75 @@ static bool parseSizeT(Napi::Env env, Napi::Value value, const char *name, size_
 	return true;
 }
 
+static bool parseInt32(Napi::Env env, Napi::Value value, const char *name, int32_t *result)
+{
+	if (!value.IsNumber()) {
+		Napi::Error::New(env, std::string(name) + " must be a number.")
+			.ThrowAsJavaScriptException();
+		return false;
+	}
+
+	double number = value.As<Napi::Number>().DoubleValue();
+	if (number < static_cast<double>(INT32_MIN) ||
+	    number > static_cast<double>(INT32_MAX)) {
+		Napi::Error::New(env, std::string(name) + " is outside the supported range.")
+			.ThrowAsJavaScriptException();
+		return false;
+	}
+
+	*result = static_cast<int32_t>(number);
+	return true;
+}
+
+static bool rectFitsOnDisplay(MMDisplay display, int32_t x, int32_t y,
+                              size_t width, size_t height, MMRect *localRect)
+{
+	if (width == 0 || height == 0 ||
+	    width > static_cast<size_t>(INT64_MAX) ||
+	    height > static_cast<size_t>(INT64_MAX)) {
+		return false;
+	}
+
+	const int64_t left = x;
+	const int64_t top = y;
+	const int64_t right = left + static_cast<int64_t>(width);
+	const int64_t bottom = top + static_cast<int64_t>(height);
+	const int64_t displayLeft = display.x;
+	const int64_t displayTop = display.y;
+	const int64_t displayRight = displayLeft + static_cast<int64_t>(display.width);
+	const int64_t displayBottom = displayTop + static_cast<int64_t>(display.height);
+
+	if (left < displayLeft || top < displayTop ||
+	    right > displayRight || bottom > displayBottom) {
+		return false;
+	}
+
+	if (localRect != NULL) {
+		*localRect = MMRectMake(static_cast<size_t>(left - displayLeft),
+		                        static_cast<size_t>(top - displayTop),
+		                        width,
+		                        height);
+	}
+
+	return true;
+}
+
+static bool findDisplayForRect(const MMDisplay *displayList, size_t displayCount,
+                               int32_t x, int32_t y, size_t width, size_t height,
+                               MMDisplay *display, MMRect *localRect)
+{
+	for (size_t index = 0; index < displayCount; ++index) {
+		if (rectFitsOnDisplay(displayList[index], x, y, width, height, localRect)) {
+			if (display != NULL) {
+				*display = displayList[index];
+			}
+			return true;
+		}
+	}
+
+	return false;
+}
+
 static bool parseToleranceOption(Napi::Env env, Napi::Object options, float *tolerance)
 {
 	if (!options.Has("tolerance")) {
@@ -1129,6 +1198,35 @@ Napi::Value getScreenSizeWrapper(const Napi::CallbackInfo& info)
 	return obj;
 }
 
+Napi::Value getDisplaysWrapper(const Napi::CallbackInfo& info)
+{
+	Napi::Env env = info.Env();
+	size_t displayCount = 0;
+	MMDisplay *displayList = getDisplayList(&displayCount);
+
+	if (displayList == NULL || displayCount == 0) {
+		Napi::Error::New(env, "Failed to enumerate active displays.")
+			.ThrowAsJavaScriptException();
+		return env.Null();
+	}
+
+	Napi::Array displays = Napi::Array::New(env, displayCount);
+
+	for (size_t index = 0; index < displayCount; ++index) {
+		Napi::Object display = Napi::Object::New(env);
+		display.Set("id", Napi::Number::New(env, displayList[index].id));
+		display.Set("x", Napi::Number::New(env, displayList[index].x));
+		display.Set("y", Napi::Number::New(env, displayList[index].y));
+		display.Set("width", Napi::Number::New(env, displayList[index].width));
+		display.Set("height", Napi::Number::New(env, displayList[index].height));
+		display.Set("isMain", Napi::Boolean::New(env, displayList[index].isMain));
+		displays.Set(index, display);
+	}
+
+	destroyDisplayList(displayList);
+	return displays;
+}
+
 Napi::Value getXDisplayNameWrapper(const Napi::CallbackInfo& info)
 {
 	Napi::Env env = info.Env();
@@ -1159,17 +1257,18 @@ Napi::Value setXDisplayNameWrapper(const Napi::CallbackInfo& info)
 Napi::Value captureScreenWrapper(const Napi::CallbackInfo& info)
 {
 	Napi::Env env = info.Env();
-	size_t x = 0;
-	size_t y = 0;
+	int32_t x = 0;
+	int32_t y = 0;
 	size_t w;
 	size_t h;
-	MMSize displaySize = getMainDisplaySize();
+	bool hasBounds = false;
 
 	//If user has provided screen coords, use them!
 	if (info.Length() == 4)
 	{
-		if (!parseSizeT(env, info[0], "x", &x) ||
-		    !parseSizeT(env, info[1], "y", &y) ||
+		hasBounds = true;
+		if (!parseInt32(env, info[0], "x", &x) ||
+		    !parseInt32(env, info[1], "y", &y) ||
 		    !parseSizeT(env, info[2], "width", &w) ||
 		    !parseSizeT(env, info[3], "height", &h)) {
 			return env.Null();
@@ -1177,6 +1276,7 @@ Napi::Value captureScreenWrapper(const Napi::CallbackInfo& info)
 	}
 	else if (info.Length() == 0)
 	{
+		MMSize displaySize = getMainDisplaySize();
 		//We're getting the full screen.
 		w = displaySize.width;
 		h = displaySize.height;
@@ -1187,15 +1287,39 @@ Napi::Value captureScreenWrapper(const Napi::CallbackInfo& info)
 		return env.Null();
 	}
 
-	if (w == 0 || h == 0 ||
-	    x > displaySize.width || y > displaySize.height ||
-	    w > displaySize.width - x || h > displaySize.height - y) {
-		Napi::Error::New(env, "Requested capture rect is outside the main screen's dimensions.")
+	if (w == 0 || h == 0) {
+		Napi::Error::New(env, "Requested capture rect is outside the active displays' dimensions.")
 			.ThrowAsJavaScriptException();
 		return env.Null();
 	}
 
-	MMBitmapRef bitmap = copyMMBitmapFromDisplayInRect(MMRectMake(x, y, w, h));
+	MMBitmapRef bitmap = NULL;
+
+	if (hasBounds) {
+		size_t displayCount = 0;
+		MMDisplay *displayList = getDisplayList(&displayCount);
+		MMDisplay display;
+		MMRect localRect;
+
+		if (displayList == NULL || displayCount == 0) {
+			Napi::Error::New(env, "Failed to enumerate active displays.")
+				.ThrowAsJavaScriptException();
+			return env.Null();
+		}
+
+		if (!findDisplayForRect(displayList, displayCount, x, y, w, h, &display, &localRect)) {
+			destroyDisplayList(displayList);
+			Napi::Error::New(env, "Requested capture rect is outside the active displays' dimensions.")
+				.ThrowAsJavaScriptException();
+			return env.Null();
+		}
+
+		bitmap = copyMMBitmapFromDisplayInRectOnDisplay(display, localRect);
+		destroyDisplayList(displayList);
+	} else {
+		bitmap = copyMMBitmapFromDisplayInRect(MMRectMake(0, 0, w, h));
+	}
+
 	if (bitmap == NULL) {
 		Napi::Error::New(env, "Failed to capture the requested screen rect.")
 			.ThrowAsJavaScriptException();
@@ -1653,6 +1777,9 @@ Napi::Object InitAll(Napi::Env env, Napi::Object exports)
 
 	exports.Set(Napi::String::New(env, "getScreenSize"),
 				Napi::Function::New(env, getScreenSizeWrapper));
+
+	exports.Set(Napi::String::New(env, "getDisplays"),
+				Napi::Function::New(env, getDisplaysWrapper));
 
 	exports.Set(Napi::String::New(env, "captureScreen"),
 				Napi::Function::New(env, captureScreenWrapper));

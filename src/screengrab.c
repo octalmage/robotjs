@@ -1,6 +1,7 @@
 #include "screengrab.h"
 #include "bmp_io.h"
 #include "endian.h"
+#include <limits.h>
 #include <stdlib.h> /* malloc() */
 
 #if defined(IS_MACOSX)
@@ -25,7 +26,33 @@ static void destroyMMBitmapWindowsDIB(char *bitmapBuffer, void *hint)
 }
 #endif
 
-MMBitmapRef copyMMBitmapFromDisplayInRect(MMRect rect)
+#if !defined(IS_MACOSX)
+static bool getDisplayCaptureOrigin(MMDisplay display, MMRect rect,
+                                    int32_t *absoluteX, int32_t *absoluteY)
+{
+	int64_t sourceX;
+	int64_t sourceY;
+
+	if (absoluteX == NULL || absoluteY == NULL ||
+	    rect.origin.x > (size_t)INT32_MAX || rect.origin.y > (size_t)INT32_MAX) {
+		return false;
+	}
+
+	sourceX = (int64_t)display.x + (int64_t)rect.origin.x;
+	sourceY = (int64_t)display.y + (int64_t)rect.origin.y;
+
+	if (sourceX < INT32_MIN || sourceX > INT32_MAX ||
+	    sourceY < INT32_MIN || sourceY > INT32_MAX) {
+		return false;
+	}
+
+	*absoluteX = (int32_t)sourceX;
+	*absoluteY = (int32_t)sourceY;
+	return true;
+}
+#endif
+
+MMBitmapRef copyMMBitmapFromDisplayInRectOnDisplay(MMDisplay display, MMRect rect)
 {
 #if defined(IS_MACOSX)
 
@@ -38,7 +65,7 @@ MMBitmapRef copyMMBitmapFromDisplayInRect(MMRect rect)
 	const size_t bytesPerPixel = 4;
 	const size_t bytesPerRow = width * bytesPerPixel;
 
-	CGDirectDisplayID displayID = CGMainDisplayID();
+	CGDirectDisplayID displayID = (CGDirectDisplayID)display.id;
 
 	CGImageRef image = CGDisplayCreateImageForRect(displayID,
 		CGRectMake(rect.origin.x,
@@ -99,16 +126,22 @@ MMBitmapRef copyMMBitmapFromDisplayInRect(MMRect rect)
 
 #elif defined(USE_X11)
 	MMBitmapRef bitmap;
+	int32_t sourceX;
+	int32_t sourceY;
+	Display *xDisplay = XGetMainDisplay();
 
-	Display *display = XOpenDisplay(NULL);
-	XImage *image = XGetImage(display,
-	                          XDefaultRootWindow(display),
-	                          (int)rect.origin.x,
-	                          (int)rect.origin.y,
+	if (xDisplay == NULL ||
+	    !getDisplayCaptureOrigin(display, rect, &sourceX, &sourceY)) {
+		return NULL;
+	}
+
+	XImage *image = XGetImage(xDisplay,
+	                          XDefaultRootWindow(xDisplay),
+	                          sourceX,
+	                          sourceY,
 	                          (unsigned int)rect.size.width,
 	                          (unsigned int)rect.size.height,
 	                          AllPlanes, ZPixmap);
-	XCloseDisplay(display);
 	if (image == NULL) return NULL;
 
 	bitmap = createMMBitmap((uint8_t *)image->data,
@@ -129,6 +162,12 @@ MMBitmapRef copyMMBitmapFromDisplayInRect(MMRect rect)
 	HBITMAP dib;
 	HGDIOBJ previousObject = NULL;
 	BITMAPINFO bi;
+	int32_t sourceX;
+	int32_t sourceY;
+
+	if (!getDisplayCaptureOrigin(display, rect, &sourceX, &sourceY)) {
+		return NULL;
+	}
 
 	/* Initialize bitmap info. */
 	bi.bmiHeader.biSize = sizeof(bi.bmiHeader);
@@ -163,8 +202,8 @@ MMBitmapRef copyMMBitmapFromDisplayInRect(MMRect rect)
 	            (int)rect.size.width,
 	            (int)rect.size.height,
 				screen,
-				rect.origin.x,
-				rect.origin.y,
+				sourceX,
+				sourceY,
 				SRCCOPY)) {
 		
 		/* Error copying data. */
@@ -194,5 +233,34 @@ MMBitmapRef copyMMBitmapFromDisplayInRect(MMRect rect)
 	DeleteDC(screenMem);
 
 	return bitmap;
+#endif
+}
+
+MMBitmapRef copyMMBitmapFromDisplayInRect(MMRect rect)
+{
+#if defined(IS_MACOSX)
+	MMDisplay display;
+	CGDirectDisplayID displayID = CGMainDisplayID();
+
+	display.id = displayID;
+	display.x = 0;
+	display.y = 0;
+	display.width = (size_t)CGDisplayPixelsWide(displayID);
+	display.height = (size_t)CGDisplayPixelsHigh(displayID);
+	display.isMain = true;
+
+	return copyMMBitmapFromDisplayInRectOnDisplay(display, rect);
+#else
+	MMDisplay display;
+	MMSize displaySize = getMainDisplaySize();
+
+	display.id = 0;
+	display.x = 0;
+	display.y = 0;
+	display.width = displaySize.width;
+	display.height = displaySize.height;
+	display.isMain = true;
+
+	return copyMMBitmapFromDisplayInRectOnDisplay(display, rect);
 #endif
 }
