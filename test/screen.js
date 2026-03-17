@@ -1,5 +1,5 @@
 var robot = require('..');
-var pixelColor, screenSize;
+var displays, pixelColor, screenSize;
 
 describe('Screen', () => {
   it('Get pixel color.', function()
@@ -17,7 +17,7 @@ describe('Screen', () => {
     expect(function()
     {
       robot.getPixelColor(-1, -1);
-    }).toThrowError(/outside the main screen/);
+    }).toThrowError(/must be non-negative/);
 
     expect(function()
     {
@@ -35,5 +35,18 @@ describe('Screen', () => {
     expect(screenSize = robot.getScreenSize()).toBeTruthy();
     expect(screenSize.width !== undefined).toBeTruthy();
     expect(screenSize.height !== undefined).toBeTruthy();
+  });
+
+  it('Get displays.', function()
+  {
+    expect(displays = robot.getDisplays()).toBeTruthy();
+    expect(Array.isArray(displays)).toBeTruthy();
+    expect(displays.length > 0).toBeTruthy();
+    expect(displays[0].id !== undefined).toBeTruthy();
+    expect(displays[0].x !== undefined).toBeTruthy();
+    expect(displays[0].y !== undefined).toBeTruthy();
+    expect(displays[0].width !== undefined).toBeTruthy();
+    expect(displays[0].height !== undefined).toBeTruthy();
+    expect(displays[0].isMain !== undefined).toBeTruthy();
   });
 });
