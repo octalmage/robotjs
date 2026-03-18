@@ -20,6 +20,8 @@ struct _MMBitmap {
 	size_t bytewidth;      /* The aligned width (width + padding). */
 	uint8_t bitsPerPixel;  /* Should be either 24 or 32. */
 	uint8_t bytesPerPixel; /* For convenience; should be bitsPerPixel / 8. */
+	void (*bufferDestroy)(char *bitmapBuffer, void *hint);
+	void *bufferDestroyHint;
 };
 
 typedef struct _MMBitmap MMBitmap;
@@ -30,6 +32,17 @@ typedef MMBitmap *MMBitmapRef;
 MMBitmapRef createMMBitmap(uint8_t *buffer, size_t width, size_t height,
                            size_t bytewidth, uint8_t bitsPerPixel,
 						   uint8_t bytesPerPixel);
+
+/* Creates an MMBitmap with a custom buffer destructor. Pass NULL for
+ * |bufferDestroy| to borrow a buffer without taking ownership. */
+MMBitmapRef createMMBitmapWithCleanup(uint8_t *buffer,
+                                      size_t width,
+                                      size_t height,
+                                      size_t bytewidth,
+                                      uint8_t bitsPerPixel,
+                                      uint8_t bytesPerPixel,
+                                      void (*bufferDestroy)(char *, void *),
+                                      void *bufferDestroyHint);
 
 /* Releases memory occupied by MMBitmap. */
 void destroyMMBitmap(MMBitmapRef bitmap);
@@ -55,7 +68,7 @@ MMBitmapRef copyMMBitmapFromPortion(MMBitmapRef source, MMRect rect);
 /* Get pointer to pixel of MMBitmapRef. No bounds checking is performed (check
  * yourself before calling this with MMBitmapPointInBounds(). */
 #define MMRGBColorRefAtPoint(image, x, y) \
-	(MMRGBColor *)(assert(MMBitmapPointInBounds(bitmap, MMPointMake(x, y))), \
+	(MMRGBColor *)(assert(MMBitmapPointInBounds(image, MMPointMake(x, y))), \
 	               ((image)->imageBuffer) + (((image)->bytewidth * (y)) \
 	                                      + ((x) * (image)->bytesPerPixel)))
 
@@ -76,7 +89,7 @@ MMBitmapRef copyMMBitmapFromPortion(MMBitmapRef source, MMRect rect);
 do {                                           \
   if (++(pixel).x >= (width)) {                \
     (pixel).x = start_x;                       \
-    ++(point).y;                               \
+    ++(pixel).y;                               \
   }                                            \
 } while (0);
 

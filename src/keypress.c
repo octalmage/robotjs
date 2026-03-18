@@ -48,6 +48,29 @@ static io_connect_t _getAuxiliaryKeyDriver(void)
 	}
 	return sEventDrvrRef;
 }
+
+static IOOptionBits nxEventFlagsForMMKeyFlags(MMKeyFlags flags)
+{
+	IOOptionBits nxFlags = 0;
+
+	if (flags & MOD_META) nxFlags |= NX_COMMANDMASK;
+	if (flags & MOD_ALT) nxFlags |= NX_ALTERNATEMASK;
+	if (flags & MOD_CONTROL) nxFlags |= NX_CONTROLMASK;
+	if (flags & MOD_SHIFT) nxFlags |= NX_SHIFTMASK;
+
+	return nxFlags;
+}
+
+static IOOptionBits nxEventFlagsForModifierKeyCode(MMKeyCode code)
+{
+	if (code == K_META) return NX_COMMANDMASK;
+	if (code == K_ALT || code == K_RIGHT_ALT) return NX_ALTERNATEMASK;
+	if (code == K_CONTROL || code == K_LEFT_CONTROL || code == K_RIGHT_CONTROL) return NX_CONTROLMASK;
+	if (code == K_SHIFT || code == K_RIGHTSHIFT) return NX_SHIFTMASK;
+	if (code == K_CAPSLOCK) return NX_ALPHASHIFTMASK;
+
+	return 0;
+}
 #endif
 
 #if defined(IS_WINDOWS)
@@ -125,14 +148,33 @@ void toggleKeyCode(MMKeyCode code, const bool down, MMKeyFlags flags)
 		kr = IOHIDPostEvent( _getAuxiliaryKeyDriver(), NX_SYSDEFINED, loc, &event, kNXEventDataVersion, 0, FALSE );
 		assert( KERN_SUCCESS == kr );
 	} else {
-		CGEventRef keyEvent = CGEventCreateKeyboardEvent(NULL,
-		                                                 (CGKeyCode)code, down);
-		assert(keyEvent != NULL);
+		kern_return_t kr;
+		IOGPoint loc = { 0, 0 };
+		NXEventData event;
+		IOOptionBits eventFlags;
 
-		CGEventSetType(keyEvent, down ? kCGEventKeyDown : kCGEventKeyUp);
-		CGEventSetFlags(keyEvent, flags);
-		CGEventPost(kCGSessionEventTap, keyEvent);
-		CFRelease(keyEvent);
+		bzero(&event, sizeof(NXEventData));
+		event.key.repeat = FALSE;
+		event.key.charCode = 0;
+		event.key.charSet = 0;
+		event.key.origCharCode = 0;
+		event.key.origCharSet = 0;
+		event.key.keyboardType = 0;
+		event.key.keyCode = (UInt16)code;
+
+		eventFlags = nxEventFlagsForMMKeyFlags(flags);
+		if (down) {
+			eventFlags |= nxEventFlagsForModifierKeyCode(code);
+		}
+
+		kr = IOHIDPostEvent(_getAuxiliaryKeyDriver(),
+		                    down ? NX_KEYDOWN : NX_KEYUP,
+		                    loc,
+		                    &event,
+		                    kNXEventDataVersion,
+		                    eventFlags,
+		                    kIOHIDSetGlobalEventFlags);
+		assert(KERN_SUCCESS == kr);
 	}
 #elif defined(IS_WINDOWS)
 	const DWORD dwFlags = down ? 0 : KEYEVENTF_KEYUP;
@@ -241,7 +283,7 @@ void toggleUnicode(UniChar ch, const bool down)
 		CGEventKeyboardSetUnicodeString(keyEvent, 1, (UniChar*) &ch);
 	}
 
-	CGEventPost(kCGSessionEventTap, keyEvent);
+	CGEventPost(kCGHIDEventTap, keyEvent);
 	CFRelease(keyEvent);
 }
 #elif defined(USE_X11)
@@ -261,17 +303,20 @@ void unicodeTap(const unsigned value)
 		toggleUnicode(ch, true);
 		toggleUnicode(ch, false);
 	#elif defined(IS_WINDOWS)
-		INPUT ip;
+		INPUT ip[2];
 
-		// Set up a generic keyboard event.
-		ip.type = INPUT_KEYBOARD;
-		ip.ki.wVk = 0; // Virtual-key code
-		ip.ki.wScan = value; // Hardware scan code for key
-		ip.ki.time = 0; // System will provide its own time stamp.
-		ip.ki.dwExtraInfo = 0; // No extra info. Use the GetMessageExtraInfo function to obtain this information if needed.
-		ip.ki.dwFlags = KEYEVENTF_UNICODE; // KEYEVENTF_KEYUP for key release.
+		// Send a complete Unicode key press so repeated characters do not get dropped.
+		ip[0].type = INPUT_KEYBOARD;
+		ip[0].ki.wVk = 0;
+		ip[0].ki.wScan = value;
+		ip[0].ki.time = 0;
+		ip[0].ki.dwExtraInfo = 0;
+		ip[0].ki.dwFlags = KEYEVENTF_UNICODE;
 
-		SendInput(1, &ip, sizeof(INPUT));
+		ip[1] = ip[0];
+		ip[1].ki.dwFlags = KEYEVENTF_UNICODE | KEYEVENTF_KEYUP;
+
+		SendInput(2, ip, sizeof(INPUT));
 	#endif
 }
 

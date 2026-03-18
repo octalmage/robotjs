@@ -3,15 +3,15 @@
 #include <png.h>
 #include <stdio.h> /* fopen() */
 #include <stdlib.h> /* malloc/realloc */
+#include <string.h> /* memcpy() */
 #include <assert.h>
 
 #if defined(_MSC_VER)
-	#include "ms_stdint.h"
 	#include "ms_stdbool.h"
 #else
-	#include <stdint.h>
 	#include <stdbool.h>
 #endif
+#include <stdint.h>
 
 const char *MMPNGReadErrorString(MMIOError error)
 {
@@ -207,7 +207,8 @@ static PNGWriteInfoRef createPNGWriteInfo(MMBitmapRef bitmap)
 	info->row_pointers = png_malloc(info->png_ptr,
 	                                sizeof(png_byte *) * info->row_count);
 
-	if (bitmap->bytesPerPixel == 3) {
+	if (bitmap->bytesPerPixel == 3 &&
+	    bitmap->bytewidth == (bitmap->width * bitmap->bytesPerPixel)) {
 		/* No alpha channel; image data can be copied directly. */
 		for (y = 0; y < info->row_count; ++y) {
 			info->row_pointers[y] = bitmap->imageBuffer + (bitmap->bytewidth * y);
@@ -221,7 +222,7 @@ static PNGWriteInfoRef createPNGWriteInfo(MMBitmapRef bitmap)
 	} else {
 		/* Ignore alpha channel; copy image data row by row. */
 		const size_t bytesPerPixel = 3;
-		const size_t bytewidth = ADD_PADDING(bitmap->width * bytesPerPixel);
+		const size_t bytewidth = bitmap->width * bytesPerPixel;
 
 		for (y = 0; y < info->row_count; ++y) {
 			png_uint_32 x;

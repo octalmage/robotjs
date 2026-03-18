@@ -1,7 +1,13 @@
 #include "io.h"
 #include "os.h"
 #include "bmp_io.h"
+#if !defined(ROBOTJS_HAS_PNG)
+#define ROBOTJS_HAS_PNG 0
+#endif
+
+#if ROBOTJS_HAS_PNG
 #include "png_io.h"
+#endif
 #include <stdio.h> /* For fputs() */
 #include <string.h> /* For strcmp() */
 #include <ctype.h> /* For tolower() */
@@ -45,7 +51,12 @@ MMBitmapRef newMMBitmapFromFile(const char *path,
 		case kBMPImageType:
 			return newMMBitmapFromBMP(path, err);
 		case kPNGImageType:
+#if ROBOTJS_HAS_PNG
 			return newMMBitmapFromPNG(path, err);
+#else
+			if (err != NULL) *err = kMMIOPNGNotSupportedError;
+			return NULL;
+#endif
 		default:
 			if (err != NULL) *err = kMMIOUnsupportedTypeError;
 			return NULL;
@@ -60,7 +71,11 @@ int saveMMBitmapToFile(MMBitmapRef bitmap,
 		case kBMPImageType:
 			return saveMMBitmapAsBMP(bitmap, path);
 		case kPNGImageType:
+#if ROBOTJS_HAS_PNG
 			return saveMMBitmapAsPNG(bitmap, path);
+#else
+			return -1;
+#endif
 		default:
 			return -1;
 	}
@@ -72,8 +87,15 @@ const char *MMIOErrorString(MMImageType type, MMIOError error)
 		case kBMPImageType:
 			return MMBMPReadErrorString(error);
 		case kPNGImageType:
+#if ROBOTJS_HAS_PNG
 			return MMPNGReadErrorString(error);
+#else
+			return "PNG support is not enabled in this build";
+#endif
 		default:
+			if (error == kMMIOPNGNotSupportedError) {
+				return "PNG support is not enabled in this build";
+			}
 			return "Unsupported image type";
 	}
 }
