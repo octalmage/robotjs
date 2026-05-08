@@ -511,8 +511,11 @@ Napi::Value keyTapWrapper(const Napi::CallbackInfo& info)
 	MMKeyCode key;
 	const char *k;
 
-	Napi::String kstr(env, info[0].ToString());
-	k = kstr.Utf8Value().c_str();
+	//Get arguments from JavaScript.
+	std::string kstr = info[0].As<Napi::String>();
+
+	//Convert arguments to chars.
+	k = kstr.c_str();
 
 	switch (info.Length())
 	{
