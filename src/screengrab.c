@@ -136,8 +136,14 @@ MMBitmapRef copyMMBitmapFromDisplayInRect(MMRect rect)
 
 	/* Copy the data to our pixel buffer. */
 	if (bitmap != NULL) {
-		bitmap->imageBuffer = malloc(bitmap->bytewidth * bitmap->height);
-		memcpy(bitmap->imageBuffer, data, bitmap->bytewidth * bitmap->height);
+		size_t imageSize = bitmap->bytewidth * bitmap->height;
+		if (bitmap->bytewidth == 0 || imageSize / bitmap->bytewidth != bitmap->height ||
+		    (bitmap->imageBuffer = malloc(imageSize)) == NULL) {
+			destroyMMBitmap(bitmap);
+			bitmap = NULL;
+		} else {
+			memcpy(bitmap->imageBuffer, data, imageSize);
+		}
 	}
 
 	ReleaseDC(NULL, screen);
