@@ -49,7 +49,10 @@
       }],
 
       ["OS=='win'", {
-        'defines': ['IS_WINDOWS']
+        'defines': ['IS_WINDOWS'],
+        'sources': [
+          'src/screengrab_win_gpu.cc'
+        ]
       }]
     ],
     

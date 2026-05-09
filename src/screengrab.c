@@ -12,15 +12,44 @@
 	#include <X11/Xutil.h>
 	#include "xdisplay.h"
 #elif defined(IS_WINDOWS)
+	#include <stdio.h>
 	#include <string.h>
 #endif
 
-#if defined(IS_MACOSX)
-#elif defined(IS_WINDOWS)
+#if defined(IS_WINDOWS)
+MMBitmapRef copyMMBitmapFromDisplayInRectWindowsGpu(MMRect rect);
+const char *copyMMBitmapFromDisplayInRectWindowsGpuLastError(void);
+
+typedef HANDLE (WINAPI *MMSetThreadDpiAwarenessContextFunc)(HANDLE);
+
+static MMSetThreadDpiAwarenessContextFunc getSetThreadDpiAwarenessContext(void)
+{
+	HMODULE user32 = GetModuleHandleA("user32.dll");
+	if (user32 == NULL) return NULL;
+
+	return (MMSetThreadDpiAwarenessContextFunc)GetProcAddress(user32,
+	                                                         "SetThreadDpiAwarenessContext");
+}
+
 static void destroyMMBitmapWindowsDIB(char *bitmapBuffer, void *hint)
 {
 	if (hint != NULL) {
 		DeleteObject((HGDIOBJ)hint);
+	}
+}
+
+static void logWindowsGpuCaptureFailure(void)
+{
+	static char previousMessage[256];
+	const char *message = copyMMBitmapFromDisplayInRectWindowsGpuLastError();
+	if (message == NULL || message[0] == '\0') {
+		message = "unknown error";
+	}
+	if (strcmp(previousMessage, message) != 0) {
+		fprintf(stderr, "robotjs: Windows GPU screen capture failed (%s); falling back to GDI\n",
+		        message);
+		strncpy(previousMessage, message, sizeof(previousMessage) - 1);
+		previousMessage[sizeof(previousMessage) - 1] = '\0';
 	}
 }
 #endif
@@ -133,11 +162,44 @@ MMBitmapRef copyMMBitmapFromDisplayInRect(MMRect rect)
 	HBITMAP dib;
 	HGDIOBJ previousObject = NULL;
 	BITMAPINFO bi;
+	MMSetThreadDpiAwarenessContextFunc setThreadDpiAwarenessContext;
+	HANDLE previousDpiContext = NULL;
+	const int srcX = 0;
+	const int srcY = 0;
+	int srcWidth;
+	int srcHeight;
+	const int destWidth = (int)rect.size.width;
+	const int destHeight = (int)rect.size.height;
+
+	if (rect.size.width == 0 || rect.size.height == 0) {
+		return NULL;
+	}
+
+	bitmap = copyMMBitmapFromDisplayInRectWindowsGpu(rect);
+	if (bitmap != NULL) {
+		return bitmap;
+	}
+	logWindowsGpuCaptureFailure();
+
+	setThreadDpiAwarenessContext = getSetThreadDpiAwarenessContext();
+	if (setThreadDpiAwarenessContext != NULL) {
+		previousDpiContext = setThreadDpiAwarenessContext((HANDLE)-4);
+	}
+
+	screen = GetDC(NULL); /* Get entire screen */
+	if (screen == NULL) {
+		if (setThreadDpiAwarenessContext != NULL && previousDpiContext != NULL) {
+			setThreadDpiAwarenessContext(previousDpiContext);
+		}
+		return NULL;
+	}
+	srcWidth = GetSystemMetrics(SM_CXSCREEN);
+	srcHeight = GetSystemMetrics(SM_CYSCREEN);
 
 	/* Initialize bitmap info. */
 	bi.bmiHeader.biSize = sizeof(bi.bmiHeader);
-   	bi.bmiHeader.biWidth = (long)rect.size.width;
-   	bi.bmiHeader.biHeight = -(long)rect.size.height; /* Non-cartesian, please */
+	bi.bmiHeader.biWidth = (long)rect.size.width;
+	bi.bmiHeader.biHeight = -(long)rect.size.height; /* Non-cartesian, please */
    	bi.bmiHeader.biPlanes = 1;
    	bi.bmiHeader.biBitCount = 32;
    	bi.bmiHeader.biCompression = BI_RGB;
@@ -147,34 +209,43 @@ MMBitmapRef copyMMBitmapFromDisplayInRect(MMRect rect)
 	bi.bmiHeader.biClrUsed = 0;
 	bi.bmiHeader.biClrImportant = 0;
 
-	screen = GetDC(NULL); /* Get entire screen */
-	if (screen == NULL) return NULL;
-
 	/* Get screen data in display device context. */
-   	dib = CreateDIBSection(screen, &bi, DIB_RGB_COLORS, &data, NULL, 0);
+	dib = CreateDIBSection(screen, &bi, DIB_RGB_COLORS, &data, NULL, 0);
 	if (dib == NULL || data == NULL) {
 		if (dib != NULL) DeleteObject(dib);
 		ReleaseDC(NULL, screen);
+		if (setThreadDpiAwarenessContext != NULL && previousDpiContext != NULL) {
+			setThreadDpiAwarenessContext(previousDpiContext);
+		}
 		return NULL;
 	}
 
-	/* Copy the data into a bitmap struct. */
+	/* Copy the full physical display into the destination-sized bitmap. */
 	if ((screenMem = CreateCompatibleDC(screen)) == NULL ||
 	    (previousObject = SelectObject(screenMem, dib)) == NULL ||
-	    !BitBlt(screenMem,
-	            (int)0,
-	            (int)0,
-	            (int)rect.size.width,
-	            (int)rect.size.height,
+	    SetStretchBltMode(screenMem, COLORONCOLOR) == 0 ||
+	    !StretchBlt(screenMem,
+	            0,
+	            0,
+	            destWidth,
+	            destHeight,
 				screen,
-				rect.origin.x,
-				rect.origin.y,
+				srcX,
+				srcY,
+				srcWidth,
+				srcHeight,
 				SRCCOPY)) {
 		
 		/* Error copying data. */
+		if (previousObject != NULL) {
+			SelectObject(screenMem, previousObject);
+		}
 		ReleaseDC(NULL, screen);
 		DeleteObject(dib);
 		if (screenMem != NULL) DeleteDC(screenMem);
+		if (setThreadDpiAwarenessContext != NULL && previousDpiContext != NULL) {
+			setThreadDpiAwarenessContext(previousDpiContext);
+		}
 
 		return NULL;
 	}
@@ -187,15 +258,18 @@ MMBitmapRef copyMMBitmapFromDisplayInRect(MMRect rect)
 	                                   4,
 	                                   destroyMMBitmapWindowsDIB,
 	                                   dib);
-	if (previousObject != NULL) {
-		SelectObject(screenMem, previousObject);
-	}
 	if (bitmap == NULL) {
 		DeleteObject(dib);
+	}
+	if (previousObject != NULL) {
+		SelectObject(screenMem, previousObject);
 	}
 
 	ReleaseDC(NULL, screen);
 	DeleteDC(screenMem);
+	if (setThreadDpiAwarenessContext != NULL && previousDpiContext != NULL) {
+		setThreadDpiAwarenessContext(previousDpiContext);
+	}
 
 	return bitmap;
 #endif
