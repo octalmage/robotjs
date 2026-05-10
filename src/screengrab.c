@@ -38,6 +38,17 @@ static void destroyMMBitmapWindowsDIB(char *bitmapBuffer, void *hint)
 	}
 }
 
+static void convertBGRAToRGBA(uint8_t *buffer, size_t width, size_t height)
+{
+	size_t pixelCount = width * height;
+	for (size_t i = 0; i < pixelCount; ++i) {
+		uint8_t *pixel = buffer + i * 4;
+		uint8_t blue = pixel[0];
+		pixel[0] = pixel[2];
+		pixel[2] = blue;
+	}
+}
+
 static void logWindowsGpuCaptureFailure(void)
 {
 	static char previousMessage[256];
@@ -264,6 +275,7 @@ MMBitmapRef copyMMBitmapFromDisplayInRect(MMRect rect)
 	if (previousObject != NULL) {
 		SelectObject(screenMem, previousObject);
 	}
+	convertBGRAToRGBA((uint8_t *)data, rect.size.width, rect.size.height);
 
 	ReleaseDC(NULL, screen);
 	DeleteDC(screenMem);

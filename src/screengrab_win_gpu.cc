@@ -120,13 +120,9 @@ static HRESULT createShadersAndSampler(void)
 		"}";
 	static const char *pixelShaderSource =
 		"Texture2D screenTexture : register(t0);"
+		"SamplerState screenSampler : register(s0);"
 		"float4 main(float4 pos : SV_POSITION, float2 uv : TEXCOORD0) : SV_TARGET {"
-		"	uint width;"
-		"	uint height;"
-		"	screenTexture.GetDimensions(width, height);"
-		"	uint x = min((uint)(uv.x * width), width - 1);"
-		"	uint y = min((uint)(uv.y * height), height - 1);"
-		"	return screenTexture.Load(int3(x, y, 0));"
+		"	return screenTexture.Sample(screenSampler, uv);"
 		"}";
 
 	ID3DBlob *vertexShader = NULL;
@@ -306,7 +302,7 @@ static HRESULT ensureDestinationTextures(int width, int height)
 	textureDesc.Height = (UINT)height;
 	textureDesc.MipLevels = 1;
 	textureDesc.ArraySize = 1;
-	textureDesc.Format = DXGI_FORMAT_B8G8R8A8_UNORM;
+	textureDesc.Format = DXGI_FORMAT_R8G8B8A8_UNORM;
 	textureDesc.SampleDesc.Count = 1;
 	textureDesc.Usage = D3D11_USAGE_DEFAULT;
 	textureDesc.BindFlags = D3D11_BIND_RENDER_TARGET;
