@@ -863,6 +863,8 @@ Napi::Value captureScreenWrapper(const Napi::CallbackInfo& info)
 	obj.Set("bytesPerPixel", Napi::Number::New(env, bitmap->bytesPerPixel));
 	obj.Set("image", buffer);
 
+	destroyMMBitmap(bitmap);
+
 	return obj;
 }
 
