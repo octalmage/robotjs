@@ -109,8 +109,10 @@ Image.prototype.click = function(point, target, button, double)
     var screenPoint = this.toScreenPoint(point, target);
 
     module.exports.moveMouse(screenPoint.x, screenPoint.y);
-    if (typeof button === 'undefined') {
+    if (typeof button === 'undefined' && typeof double === 'undefined') {
         module.exports.mouseClick();
+    } else if (typeof button === 'undefined') {
+        module.exports.mouseClick('left', double);
     } else if (typeof double === 'undefined') {
         module.exports.mouseClick(button);
     } else {

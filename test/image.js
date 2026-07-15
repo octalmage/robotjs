@@ -2,9 +2,84 @@ const fs = require('fs');
 const os = require('os');
 const path = require('path');
 const robot = require('..');
-const { create24BitBMP, makeBitmap } = require('./helpers/images');
+const { create24BitBMP, create8BitPNG, makeBitmap } = require('./helpers/images');
 
 describe('Image', function() {
+	const palette = [
+		0xFF, 0x00, 0x00,
+		0x00, 0xFF, 0x00,
+		0x00, 0x00, 0xFF,
+		0xFF, 0xFF, 0x00
+	];
+	const colorRows = [
+		['ff0000', '00ff00'],
+		['0000ff', 'ffff00']
+	];
+	const pngCases = [
+		{
+			name: 'RGB',
+			colorType: 2,
+			rows: [
+				[0xFF, 0x00, 0x00, 0x00, 0xFF, 0x00],
+				[0x00, 0x00, 0xFF, 0xFF, 0xFF, 0x00]
+			],
+			expected: colorRows
+		},
+		{
+			name: 'RGBA',
+			colorType: 6,
+			rows: [
+				[0xFF, 0x00, 0x00, 0x00, 0x00, 0xFF, 0x00, 0x55],
+				[0x00, 0x00, 0xFF, 0xAA, 0xFF, 0xFF, 0x00, 0xFF]
+			],
+			expected: colorRows
+		},
+		{
+			name: 'grayscale',
+			colorType: 0,
+			rows: [
+				[0x10, 0x80],
+				[0xE0, 0x40]
+			],
+			expected: [
+				['101010', '808080'],
+				['e0e0e0', '404040']
+			]
+		},
+		{
+			name: 'grayscale-alpha',
+			colorType: 4,
+			rows: [
+				[0x10, 0x00, 0x80, 0x55],
+				[0xE0, 0xAA, 0x40, 0xFF]
+			],
+			expected: [
+				['101010', '808080'],
+				['e0e0e0', '404040']
+			]
+		},
+		{
+			name: 'palette',
+			colorType: 3,
+			palette: palette,
+			rows: [
+				[0, 1],
+				[2, 3]
+			],
+			expected: colorRows
+		},
+		{
+			name: 'palette with tRNS',
+			colorType: 3,
+			palette: palette,
+			transparency: [0x00, 0x55, 0xAA, 0xFF],
+			rows: [
+				[0, 1],
+				[2, 3]
+			],
+			expected: colorRows
+		}
+	];
 	it('Loads a BMP file and uses it as a search bitmap.', function() {
 		const tmpDir = fs.mkdtempSync(path.join(os.tmpdir(), 'robotjs-image-'));
 		const needlePath = path.join(tmpDir, 'needle.bmp');
@@ -33,9 +108,9 @@ describe('Image', function() {
 		}
 	});
 
-	it('Rejects unsupported image extensions.', function() {
+	it('Rejects unsupported four-character load extensions.', function() {
 		expect(function() {
-			robot.image.load('/tmp/not-an-image.txt');
+			robot.image.load('/tmp/not-an-image.jpeg');
 		}).toThrowError(/Unsupported image type/);
 	});
 
@@ -87,6 +162,31 @@ describe('Image', function() {
 		}
 	});
 
+	pngCases.forEach(function(testCase) {
+		it('Decodes a valid 2x2 ' + testCase.name + ' PNG.', function() {
+			let tmpDir, pngPath, decoded;
+
+			if (!robot.image.supportsPNG) {
+				pending('PNG support is not enabled in this build.');
+			}
+
+			tmpDir = fs.mkdtempSync(path.join(os.tmpdir(), 'robotjs-png-format-'));
+			pngPath = path.join(tmpDir, testCase.name.replace(/[^a-z]+/gi, '-') + '.png');
+
+			try {
+				fs.writeFileSync(pngPath, create8BitPNG(testCase));
+				decoded = robot.image.load(pngPath);
+
+				expect([
+					[decoded.colorAt(0, 0), decoded.colorAt(1, 0)],
+					[decoded.colorAt(0, 1), decoded.colorAt(1, 1)]
+				]).toEqual(testCase.expected);
+			} finally {
+				fs.rmSync(tmpDir, { recursive: true, force: true });
+			}
+		});
+	});
+
 	it('Rejects PNG operations when PNG support is disabled.', function() {
 		const bitmap = makeBitmap([
 			['123456']
@@ -105,13 +205,13 @@ describe('Image', function() {
 		}).toThrowError(/PNG support is not enabled/);
 	});
 
-	it('Rejects unsupported save extensions.', function() {
+	it('Rejects unsupported four-character save extensions.', function() {
 		const bitmap = makeBitmap([
 			['123456']
 		]);
 
 		expect(function() {
-			robot.image.save(bitmap, '/tmp/not-an-image.txt');
+			robot.image.save(bitmap, '/tmp/not-an-image.jpeg');
 		}).toThrowError(/Unsupported image type/);
 	});
 
@@ -131,6 +231,26 @@ describe('Image', function() {
 
 		expect(capture.toScreenPoint({ x: 20, y: 10 })).toEqual({ x: 110, y: 205 });
 		expect(capture.toScreenPoint({ x: 20, y: 10 }, needle)).toEqual({ x: 111, y: 206 });
+	});
+
+	it('Converts target centers from captures with negative origins and non-uniform scaling.', function() {
+		const capture = makeBitmap([
+			['123456']
+		]);
+		const targetDimensions = {
+			width: 48,
+			height: 40
+		};
+
+		capture.screenX = -1440;
+		capture.screenY = -900;
+		capture.scaleX = 1.5;
+		capture.scaleY = 2;
+
+		expect(capture.toScreenPoint({ x: 300, y: 200 }, targetDimensions)).toEqual({
+			x: -1224,
+			y: -790
+		});
 	});
 
 	it('findColors iterates across row boundaries correctly.', function() {
@@ -173,7 +293,27 @@ describe('Image', function() {
 		]);
 	});
 
-	it('Clicks a found image using screen-space coordinates.', function() {
+	it('Defaults an omitted button to left for direct double clicks.', function() {
+		const capture = makeBitmap([['123456']]);
+		const originalMoveMouse = robot.moveMouse;
+		const originalMouseClick = robot.mouseClick;
+		let clickedWith;
+
+		robot.moveMouse = function() {};
+		robot.mouseClick = function(button, double) {
+			clickedWith = { button: button, double: double };
+		};
+
+		try {
+			capture.click({ x: 0, y: 0 }, undefined, undefined, true);
+			expect(clickedWith).toEqual({ button: 'left', double: true });
+		} finally {
+			robot.moveMouse = originalMoveMouse;
+			robot.mouseClick = originalMouseClick;
+		}
+	});
+
+	it('Defaults an omitted button to left when double-clicking a found image.', function() {
 		const capture = makeBitmap([
 			['111111', '111111', '111111', '111111'],
 			['111111', 'ff0000', '0000ff', '111111'],
@@ -202,7 +342,7 @@ describe('Image', function() {
 		};
 
 		try {
-			match = capture.clickImage(needle, { tolerance: 0 }, 'left', true);
+			match = capture.clickImage(needle, { tolerance: 0 }, undefined, true);
 			expect(match).toEqual({ x: 1, y: 1 });
 			expect(movedTo).toEqual({ x: 11, y: 21 });
 			expect(clickedWith).toEqual({ button: 'left', double: true });

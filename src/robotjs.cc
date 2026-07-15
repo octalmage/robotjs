@@ -1,5 +1,7 @@
 #include <napi.h>
 #include <ctype.h>
+#include <cmath>
+#include <limits>
 #include <stdlib.h>
 #include <vector>
 #include "mouse.h"
@@ -763,8 +765,20 @@ static bool parseSizeT(Napi::Env env, Napi::Value value, const char *name, size_
 	}
 
 	double number = value.As<Napi::Number>().DoubleValue();
+	if (!std::isfinite(number) || std::floor(number) != number) {
+		Napi::Error::New(env, std::string(name) + " must be a finite integer.")
+			.ThrowAsJavaScriptException();
+		return false;
+	}
 	if (number < 0) {
 		Napi::Error::New(env, std::string(name) + " must be non-negative.")
+			.ThrowAsJavaScriptException();
+		return false;
+	}
+	const double sizeTLimit =
+		std::ldexp(1.0, std::numeric_limits<size_t>::digits);
+	if (number >= sizeTLimit) {
+		Napi::Error::New(env, std::string(name) + " is outside the supported range.")
 			.ThrowAsJavaScriptException();
 		return false;
 	}
@@ -782,6 +796,11 @@ static bool parseInt32(Napi::Env env, Napi::Value value, const char *name, int32
 	}
 
 	double number = value.As<Napi::Number>().DoubleValue();
+	if (!std::isfinite(number) || std::floor(number) != number) {
+		Napi::Error::New(env, std::string(name) + " must be a finite integer.")
+			.ThrowAsJavaScriptException();
+		return false;
+	}
 	if (number < static_cast<double>(INT32_MIN) ||
 	    number > static_cast<double>(INT32_MAX)) {
 		Napi::Error::New(env, std::string(name) + " is outside the supported range.")
@@ -855,7 +874,7 @@ static bool parseToleranceOption(Napi::Env env, Napi::Object options, float *tol
 	}
 
 	double value = options.Get("tolerance").As<Napi::Number>().DoubleValue();
-	if (value < 0.0 || value > 1.0) {
+	if (!std::isfinite(value) || value < 0.0 || value > 1.0) {
 		Napi::Error::New(env, "tolerance must be between 0.0 and 1.0.")
 			.ThrowAsJavaScriptException();
 		return false;
@@ -889,6 +908,13 @@ static MMBitmapRef createBorrowedBitmap(Napi::Env env, Napi::Object obj)
 	    !parseSizeT(env, obj.Get("byteWidth"), "byteWidth", &byteWidth) ||
 	    !parseSizeT(env, obj.Get("bitsPerPixel"), "bitsPerPixel", &parsedBitsPerPixel) ||
 	    !parseSizeT(env, obj.Get("bytesPerPixel"), "bytesPerPixel", &parsedBytesPerPixel)) {
+		return NULL;
+	}
+
+	const size_t maxUint8 = std::numeric_limits<uint8_t>::max();
+	if (parsedBitsPerPixel > maxUint8 || parsedBytesPerPixel > maxUint8) {
+		Napi::Error::New(env, "Bitmap pixel metadata is outside the supported range.")
+			.ThrowAsJavaScriptException();
 		return NULL;
 	}
 

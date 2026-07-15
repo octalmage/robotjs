@@ -25,12 +25,12 @@ const char *getExtension(const char *fname, size_t len)
 MMImageType imageTypeFromExtension(const char *extension)
 {
 	char ext[4];
-	const size_t maxlen = sizeof(ext) / sizeof(ext[0]);
+	const size_t maxlen = (sizeof(ext) / sizeof(ext[0])) - 1;
 	size_t i;
 
 	for (i = 0; extension[i] != '\0'; ++i) {
 		if (i >= maxlen) return kInvalidImageType;
-		ext[i] = tolower(extension[i]);
+		ext[i] = (char)tolower((unsigned char)extension[i]);
 	}
 	ext[i] = '\0';
 
