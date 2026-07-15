@@ -94,9 +94,14 @@ MMKeyCode keyCodeForChar(const char c)
 	charStr = CFStringCreateWithCharacters(kCFAllocatorDefault, &character, 1);
 
 	/* Our values may be NULL (0), so we need to use this function. */
-	if (!CFDictionaryGetValueIfPresent(charToCodeDict, charStr,
-	                                   (const void **)&code)) {
-		code = UINT16_MAX; /* Error */
+	{
+		const void *charCodeValue = NULL;
+		if (!CFDictionaryGetValueIfPresent(charToCodeDict, charStr,
+		                                   &charCodeValue)) {
+			code = UINT16_MAX; /* Error */
+		} else {
+			code = (CGKeyCode)(uintptr_t)charCodeValue;
+		}
 	}
 
 	CFRelease(charStr);
