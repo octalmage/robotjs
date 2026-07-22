@@ -7,6 +7,24 @@ robot.setMouseDelay(100);
 var target, elements;
 var originalTimeout;
 
+function expectNextTypedText(expected, done, next) {
+	const handleType = element => {
+		if (element.id !== 'input_1') {
+			return;
+		}
+
+		target.removeListener('type', handleType);
+		expect(element.text).toEqual(expected);
+		if (next) {
+			next();
+		} else {
+			done();
+		}
+	};
+
+	target.on('type', handleType);
+}
+
 describe('Integration/Keyboard', () => {
 	beforeAll(() => {
 		originalTimeout = jasmine.DEFAULT_TIMEOUT_INTERVAL;
@@ -32,15 +50,8 @@ describe('Integration/Keyboard', () => {
 
 	it('types', done => {
 		const stringToType = 'hello world';
-		// Currently Target Practice waits for the "user" to finish typing before sending the event.
-		const handleType = element => {
-			expect(element.id).toEqual('input_1');
-			if (element.text === stringToType) {
-				target.removeListener('type', handleType);
-				done();
-			}
-		};
-		target.on('type', handleType);
+		// Target Practice emits after the user has stopped typing.
+		expectNextTypedText(stringToType, done);
 
 		const input_1 = elements.input_1;
 		robot.moveMouse(input_1.x, input_1.y);
@@ -51,19 +62,52 @@ describe('Integration/Keyboard', () => {
 	// Regression for https://github.com/octalmage/robotjs/pull/797
 	it('types shifted symbols', done => {
 		const stringToType = '!@#$%^&*()_+{}|:"<>?';
-		const handleType = element => {
-			expect(element.id).toEqual('input_1');
-			if (element.text === stringToType) {
-				target.removeListener('type', handleType);
-				done();
-			}
-		};
-		target.on('type', handleType);
+		expectNextTypedText(stringToType, done);
 
 		const input_1 = elements.input_1;
 		robot.moveMouse(input_1.x, input_1.y);
 		robot.mouseClick();
 		robot.typeString(stringToType);
+	});
+
+	it('replaces selected input with a command-modified key tap on macOS', done => {
+		if (process.platform !== 'darwin') {
+			pending('macOS only: verifies command-modified keyboard events.');
+			return;
+		}
+
+		const initial = 'initial content';
+		const replacement = 'replacement content';
+		expectNextTypedText(initial, done, () => {
+			expectNextTypedText(replacement, done);
+			robot.keyTap('a', 'command');
+			robot.typeString(replacement);
+		});
+
+		const input_1 = elements.input_1;
+		robot.moveMouse(input_1.x, input_1.y);
+		robot.mouseClick();
+		robot.typeString(initial);
+	});
+
+	it('types a non-ASCII character with unicodeTap on macOS', done => {
+		if (process.platform !== 'darwin') {
+			pending('macOS only: verifies Unicode keyboard events.');
+			return;
+		}
+
+		const marker = 'x';
+		const character = '嗨';
+		expectNextTypedText(marker, done, () => {
+			expectNextTypedText(character, done);
+			robot.keyTap('backspace');
+			robot.unicodeTap(character.charCodeAt(0));
+		});
+
+		const input_1 = elements.input_1;
+		robot.moveMouse(input_1.x, input_1.y);
+		robot.mouseClick();
+		robot.typeString(marker);
 	});
 
 	// Regression for https://github.com/octalmage/robotjs/issues/789
