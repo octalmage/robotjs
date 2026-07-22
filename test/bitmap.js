@@ -106,6 +106,45 @@ describe('Bitmap', () => {
 		expect(haystack.findImage(needle, { x: 0, y: 0, width: 1, height: 4 })).toBeNull();
 	});
 
+	it('Finds overlapping images through the final valid row and column.', function() {
+		const haystack = makeBitmap([
+			['aabbcc', 'aabbcc', 'aabbcc', '101010'],
+			['101010', '101010', 'aabbcc', 'aabbcc']
+		]);
+		const needle = makeBitmap([
+			['aabbcc', 'aabbcc']
+		]);
+
+		expect(haystack.findImages(needle)).toEqual([
+			{ x: 0, y: 0 },
+			{ x: 1, y: 0 },
+			{ x: 2, y: 1 }
+		]);
+		expect(haystack.countImage(needle)).toEqual(3);
+		expect(haystack.findImage(needle, { x: 1, y: 0 })).toEqual({ x: 1, y: 0 });
+	});
+
+	it('Rejects colors and images beyond the configured tolerance.', function() {
+		const first = makeBitmap([['101010']]);
+		const second = makeBitmap([['151010']]);
+
+		expect(first.findColor('151010', { tolerance: 0.01 })).toBeNull();
+		expect(first.findImage(second, { tolerance: 0.01 })).toBeNull();
+		expect(first.findColor('151010', { tolerance: 0.02 })).toEqual({ x: 0, y: 0 });
+		expect(first.findImage(second, { tolerance: 0.02 })).toEqual({ x: 0, y: 0 });
+	});
+
+	it('Accepts hash-prefixed colors and rejects malformed color values.', function() {
+		const bitmap = makeBitmap([['123456']]);
+
+		expect(bitmap.findColor('#123456')).toEqual({ x: 0, y: 0 });
+		['12345', '1234567', 'gggggg', 123456].forEach(function(color) {
+			expect(function() {
+				bitmap.findColor(color);
+			}).toThrowError(/Color must be a 6-digit hex string/);
+		});
+	});
+
 	it('Applies non-zero color tolerance symmetrically for every channel.', function() {
 		const tolerance = 0.01;
 		const channelPairs = [

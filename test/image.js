@@ -293,6 +293,31 @@ describe('Image', function() {
 		]);
 	});
 
+	it('Does not move or click when clickImage cannot find its target.', function() {
+		const capture = makeBitmap([['123456']]);
+		const needle = makeBitmap([['abcdef']]);
+		const originalMoveMouse = robot.moveMouse;
+		const originalMouseClick = robot.mouseClick;
+		let moved = false;
+		let clicked = false;
+
+		robot.moveMouse = function() {
+			moved = true;
+		};
+		robot.mouseClick = function() {
+			clicked = true;
+		};
+
+		try {
+			expect(capture.clickImage(needle)).toBeNull();
+			expect(moved).toBe(false);
+			expect(clicked).toBe(false);
+		} finally {
+			robot.moveMouse = originalMoveMouse;
+			robot.mouseClick = originalMouseClick;
+		}
+	});
+
 	it('Defaults an omitted button to left for direct double clicks.', function() {
 		const capture = makeBitmap([['123456']]);
 		const originalMoveMouse = robot.moveMouse;

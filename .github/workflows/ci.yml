@@ -20,6 +20,8 @@ jobs:
     name: ${{ matrix.name }}
     runs-on: ${{ matrix.os }}
     timeout-minutes: 30
+    env:
+      ROBOTJS_ENABLE_PNG: "1"
     strategy:
       fail-fast: false
       matrix:
@@ -82,9 +84,14 @@ jobs:
             libxrandr2 \
             libxshmfence1 \
             libxtst-dev \
+            pkg-config \
             openbox \
             xauth \
             xvfb
+
+      - name: Install macOS image dependencies
+        if: runner.os == 'macOS'
+        run: brew install libpng pkg-config
 
       - name: Show toolchain versions
         run: |
@@ -94,6 +101,9 @@ jobs:
 
       - name: Install dependencies
         run: npm install
+
+      - name: Verify PNG support
+        run: node -e "if (!require('.').image.supportsPNG) throw new Error('PNG support is disabled')"
 
       - name: Run tests on macOS
         if: runner.os == 'macOS'
