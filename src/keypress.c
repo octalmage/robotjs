@@ -50,11 +50,45 @@ static io_connect_t _getAuxiliaryKeyDriver(void)
 	return sEventDrvrRef;
 }
 
+static CGEventFlags macModifierFlagForKeyCode(MMKeyCode code)
+{
+	if (code == K_META) {
+		return kCGEventFlagMaskCommand;
+	}
+	if (code == K_ALT) {
+		return kCGEventFlagMaskAlternate;
+	}
+	if (code == K_CONTROL || code == K_RIGHT_CONTROL) {
+		return kCGEventFlagMaskControl;
+	}
+	if (code == K_SHIFT || code == K_RIGHTSHIFT) {
+		return kCGEventFlagMaskShift;
+	}
+
+	return 0;
+}
+
+/* Preserve modifiers held through separate keyToggle() calls. Each new
+ * CGEvent is independent, so subsequent key events must receive this state. */
+static CGEventFlags macActiveModifierFlags = 0;
+
 static void postMacKeyEvent(MMKeyCode code, const bool down, CGEventFlags flags)
 {
 	CGEventRef keyEvent = CGEventCreateKeyboardEvent(NULL,
 	                                                 (CGKeyCode)code, down);
 	assert(keyEvent != NULL);
+
+	CGEventFlags modifierFlag = macModifierFlagForKeyCode(code);
+	if (modifierFlag != 0) {
+		if (down) {
+			macActiveModifierFlags |= modifierFlag;
+			flags |= modifierFlag;
+		} else {
+			macActiveModifierFlags &= ~modifierFlag;
+			flags &= ~modifierFlag;
+		}
+	}
+	flags |= macActiveModifierFlags;
 
 	/* Hardware arrow-key events carry this flag. Mission Control ignores
 	 * synthetic Control+Arrow shortcuts without it. */

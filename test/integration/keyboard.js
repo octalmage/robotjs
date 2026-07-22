@@ -90,6 +90,18 @@ describe('Integration/Keyboard', () => {
 		robot.typeString(initial);
 	});
 
+	it('holds and releases a standalone modifier', done => {
+		expectNextTypedText('Aa', done);
+
+		const input_1 = elements.input_1;
+		robot.moveMouse(input_1.x, input_1.y);
+		robot.mouseClick();
+		robot.keyToggle('shift', 'down');
+		robot.keyTap('a');
+		robot.keyToggle('shift', 'up');
+		robot.keyTap('a');
+	});
+
 	it('types a non-ASCII character with unicodeTap on macOS', done => {
 		if (process.platform !== 'darwin') {
 			pending('macOS only: verifies Unicode keyboard events.');
