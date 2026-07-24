@@ -5,6 +5,11 @@
 #include "MMBitmap.h"
 #include "MMPointArray.h"
 
+#ifdef __cplusplus
+extern "C"
+{
+#endif
+
 /* Convenience wrapper around findColorInRect(), where |rect| is the bounds of
  * the image. */
 #define findColorInImage(image, color, pointPtr, tolerance) \
@@ -45,5 +50,9 @@ MMPointArrayRef findAllColorInRect(MMBitmapRef image, MMRGBHex color,
 /* Returns the count of the given color in |rect| inside of |image|. */
 size_t countOfColorsInRect(MMBitmapRef image, MMRGBHex color, MMRect rect,
                            float tolerance);
+
+#ifdef __cplusplus
+}
+#endif
 
 #endif /* COLOR_FIND_H */

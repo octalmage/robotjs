@@ -75,9 +75,9 @@ H_INLINE int MMRGBColorSimilarToColor(MMRGBColor c1, MMRGBColor c2,
 	if (tolerance <= 0.0f) {
 		return MMRGBColorEqualToColor(c1, c2);
 	} else { /* Otherwise, use a Euclidean space to determine similarity */
-		uint8_t d1 = c1.red - c2.red;
-		uint8_t d2 = c1.green - c2.green;
-		uint8_t d3 = c1.blue - c2.blue;
+		int32_t d1 = (int32_t)c1.red - (int32_t)c2.red;
+		int32_t d2 = (int32_t)c1.green - (int32_t)c2.green;
+		int32_t d3 = (int32_t)c1.blue - (int32_t)c2.blue;
 		return sqrt((double)(d1 * d1) +
 		            (d2 * d2) +
 		            (d3 * d3)) <= (tolerance * 442.0f);
@@ -91,9 +91,9 @@ H_INLINE int MMRGBHexSimilarToColor(MMRGBHex h1, MMRGBHex h2, float tolerance)
 	if (tolerance <= 0.0f) {
 		return h1 == h2;
 	} else {
-		uint8_t d1 = RED_FROM_HEX(h1) - RED_FROM_HEX(h2);
-		uint8_t d2 = GREEN_FROM_HEX(h1) - GREEN_FROM_HEX(h2);
-		uint8_t d3 = BLUE_FROM_HEX(h1) - BLUE_FROM_HEX(h2);
+		int32_t d1 = (int32_t)RED_FROM_HEX(h1) - (int32_t)RED_FROM_HEX(h2);
+		int32_t d2 = (int32_t)GREEN_FROM_HEX(h1) - (int32_t)GREEN_FROM_HEX(h2);
+		int32_t d3 = (int32_t)BLUE_FROM_HEX(h1) - (int32_t)BLUE_FROM_HEX(h2);
 		return sqrt((double)(d1 * d1) +
 		            (d2 * d2) +
 		            (d3 * d3)) <= (tolerance * 442.0f);

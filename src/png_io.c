@@ -3,6 +3,7 @@
 #include <png.h>
 #include <stdio.h> /* fopen() */
 #include <stdlib.h> /* malloc/realloc */
+#include <string.h> /* memcpy() */
 #include <assert.h>
 
 #if defined(_MSC_VER)
@@ -29,14 +30,16 @@ const char *MMPNGReadErrorString(MMIOError error)
 MMBitmapRef newMMBitmapFromPNG(const char *path, MMPNGReadError *err)
 {
 	FILE *fp;
-	uint8_t header[8];
+	uint8_t header[8] = {0};
 	png_struct *png_ptr = NULL;
 	png_info *info_ptr = NULL;
 	png_byte bit_depth, color_type;
-	uint8_t *row, *bitmapData;
-	uint8_t bytesPerPixel;
+	png_byte * volatile row = NULL;
+	uint8_t * volatile bitmapData = NULL;
+	const uint8_t bytesPerPixel = 3;
 	png_uint_32 width, height, y;
-	uint32_t bytewidth;
+	png_size_t rowbytes;
+	size_t packedBytewidth, bytewidth;
 
 	if ((fp = fopen(path, "rb")) == NULL) {
 		if (err != NULL) *err = kPNGAccessError;
@@ -73,73 +76,109 @@ MMBitmapRef newMMBitmapFromPNG(const char *path, MMPNGReadError *err)
 
 	png_read_info(png_ptr, info_ptr);
 
-	/* Convert different image types to common type to be read. */
+	/* Convert different image types to 8-bit RGB. */
 	bit_depth = png_get_bit_depth(png_ptr, info_ptr);
 	color_type = png_get_color_type(png_ptr, info_ptr);
 
-	/* Convert color palettes to RGB. */
 	if (color_type == PNG_COLOR_TYPE_PALETTE) {
 		png_set_palette_to_rgb(png_ptr);
 	}
 
-	/* Convert PNG to bit depth of 8. */
 	if (color_type == PNG_COLOR_TYPE_GRAY && bit_depth < 8) {
 		png_set_expand_gray_1_2_4_to_8(png_ptr);
-	} else if (bit_depth == 16) {
+	}
+
+	if (bit_depth == 16) {
 		png_set_strip_16(png_ptr);
 	}
 
-	/* Convert transparency chunk to alpha channel. */
-	if (png_get_valid(png_ptr, info_ptr, PNG_INFO_tRNS))  {
+	if (png_get_valid(png_ptr, info_ptr, PNG_INFO_tRNS)) {
 		png_set_tRNS_to_alpha(png_ptr);
 	}
 
-	/* Convert gray images to RGB. */
 	if (color_type == PNG_COLOR_TYPE_GRAY ||
 	    color_type == PNG_COLOR_TYPE_GRAY_ALPHA) {
 		png_set_gray_to_rgb(png_ptr);
 	}
 
-	/* Ignore alpha for now. */
-	if (color_type & PNG_COLOR_MASK_ALPHA) {
+	/* Strip both native alpha and alpha introduced from a tRNS chunk. */
+	if ((color_type & PNG_COLOR_MASK_ALPHA) ||
+	    png_get_valid(png_ptr, info_ptr, PNG_INFO_tRNS)) {
 		png_set_strip_alpha(png_ptr);
 	}
 
-	/* Get image attributes. */
+	/* Refresh metadata after configuring all read transforms. */
+	png_read_update_info(png_ptr, info_ptr);
+
+	bit_depth = png_get_bit_depth(png_ptr, info_ptr);
+	color_type = png_get_color_type(png_ptr, info_ptr);
 	width = png_get_image_width(png_ptr, info_ptr);
 	height = png_get_image_height(png_ptr, info_ptr);
-	bytesPerPixel = 3; /* All images decompress to this size. */
-	bytewidth = ADD_PADDING(width * bytesPerPixel); /* Align width. */
+	rowbytes = png_get_rowbytes(png_ptr, info_ptr);
+
+	if (bit_depth != 8 ||
+	    color_type != PNG_COLOR_TYPE_RGB ||
+	    png_get_channels(png_ptr, info_ptr) != bytesPerPixel ||
+	    (size_t)width > SIZE_MAX / bytesPerPixel) {
+		goto bail;
+	}
+
+	packedBytewidth = (size_t)width * bytesPerPixel;
+	if (rowbytes != packedBytewidth) goto bail;
+
+	bytewidth = ADD_PADDING(packedBytewidth);
+	if (bytewidth < packedBytewidth ||
+	    (height != 0 && bytewidth > SIZE_MAX / (size_t)height)) {
+		goto bail;
+	}
 
 	/* Decompress the PNG row by row. */
-	bitmapData = calloc(1, bytewidth * height);
-	row = png_malloc(png_ptr, png_get_rowbytes(png_ptr, info_ptr));
+	bitmapData = calloc((size_t)height, bytewidth);
+	row = png_malloc(png_ptr, rowbytes);
 	if (bitmapData == NULL || row == NULL) goto bail;
+
 	for (y = 0; y < height; ++y) {
 		png_uint_32 x;
-		const uint32_t rowOffset = y * bytewidth;
-		uint8_t *rowptr = row;
-		png_read_row(png_ptr, (png_byte *)row, NULL);
+		const size_t rowOffset = (size_t)y * bytewidth;
+		png_bytep rowptr = (png_bytep)row;
+		png_read_row(png_ptr, rowptr, NULL);
 
 		for (x = 0; x < width; ++x) {
-			const uint32_t colOffset = x * bytesPerPixel;
-			MMRGBColor *color = (MMRGBColor *)(bitmapData + rowOffset + colOffset);
+			const size_t colOffset = (size_t)x * bytesPerPixel;
+			MMRGBColor *color =
+				(MMRGBColor *)((uint8_t *)bitmapData + rowOffset + colOffset);
 			color->red = *rowptr++;
 			color->green = *rowptr++;
 			color->blue = *rowptr++;
 		}
 	}
-	free(row);
+
+	png_free(png_ptr, (png_voidp)row);
+	row = NULL;
 
 	/* Finish reading. */
 	png_read_end(png_ptr, NULL);
 	png_destroy_read_struct(&png_ptr, &info_ptr, NULL);
 	fclose(fp);
 
-	return createMMBitmap(bitmapData, width, height,
-	                      bytewidth, bytesPerPixel * 8, bytesPerPixel);
+	{
+		MMBitmapRef bitmap = createMMBitmap((uint8_t *)bitmapData,
+		                                    width,
+		                                    height,
+		                                    bytewidth,
+		                                    bytesPerPixel * 8,
+		                                    bytesPerPixel);
+		if (bitmap == NULL) {
+			free((uint8_t *)bitmapData);
+		}
+		return bitmap;
+	}
 
 bail:
+	if (row != NULL && png_ptr != NULL) {
+		png_free(png_ptr, (png_voidp)row);
+	}
+	free((uint8_t *)bitmapData);
 	png_destroy_read_struct(&png_ptr, &info_ptr, NULL);
 	fclose(fp);
 	return NULL;
@@ -206,7 +245,8 @@ static PNGWriteInfoRef createPNGWriteInfo(MMBitmapRef bitmap)
 	info->row_pointers = png_malloc(info->png_ptr,
 	                                sizeof(png_byte *) * info->row_count);
 
-	if (bitmap->bytesPerPixel == 3) {
+	if (bitmap->bytesPerPixel == 3 &&
+	    bitmap->bytewidth == (bitmap->width * bitmap->bytesPerPixel)) {
 		/* No alpha channel; image data can be copied directly. */
 		for (y = 0; y < info->row_count; ++y) {
 			info->row_pointers[y] = bitmap->imageBuffer + (bitmap->bytewidth * y);
@@ -220,7 +260,7 @@ static PNGWriteInfoRef createPNGWriteInfo(MMBitmapRef bitmap)
 	} else {
 		/* Ignore alpha channel; copy image data row by row. */
 		const size_t bytesPerPixel = 3;
-		const size_t bytewidth = ADD_PADDING(bitmap->width * bytesPerPixel);
+		const size_t bytewidth = bitmap->width * bytesPerPixel;
 
 		for (y = 0; y < info->row_count; ++y) {
 			png_uint_32 x;

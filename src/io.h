@@ -20,7 +20,8 @@ enum _MMImageType {
 typedef uint16_t MMImageType;
 
 enum _MMIOError {
-	kMMIOUnsupportedTypeError = 0
+	kMMIOUnsupportedTypeError = 0,
+	kMMIOPNGNotSupportedError
 };
 
 typedef uint16_t MMIOError;
