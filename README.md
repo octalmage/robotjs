@@ -26,7 +26,6 @@ Install RobotJS using npm:
 ```
 npm install robotjs
 ```
-It's that easy! npm will download one of the prebuilt [binaries](https://github.com/octalmage/robotjs/releases/latest) for your OS.
 
 You can get npm [here](https://nodejs.org/en/download/) if you don't have it installed.
 
@@ -38,30 +37,29 @@ If you need to build RobotJS, see the [building](#building) section. Instruction
 
 <p align="center"><img src="https://cldup.com/lugVjjAkEi.gif"></p>
 
-```JavaScript
+```js
 // Move the mouse across the screen as a sine wave.
-var robot = require("robotjs");
+const robot = require("robotjs");
 
 // Speed up the mouse.
 robot.setMouseDelay(2);
 
-var twoPI = Math.PI * 2.0;
-var screenSize = robot.getScreenSize();
-var height = (screenSize.height / 2) - 10;
-var width = screenSize.width;
+const twoPI = Math.PI * 2;
+const screenSize = robot.getScreenSize();
+const height = (screenSize.height / 2) - 10;
+const width = screenSize.width;
 
-for (var x = 0; x < width; x++)
-{
-	y = height * Math.sin((twoPI * x) / width) + height;
+for (let x = 0; x < width; x++) {
+	const y = height * Math.sin((twoPI * x) / width) + height;
 	robot.moveMouse(x, y);
 }
 ```
 
 ##### [Keyboard](https://github.com/octalmage/robotjs/wiki/Syntax#keyboard)
 
-```JavaScript
+```js
 // Type "Hello World" then press enter.
-var robot = require("robotjs");
+const robot = require("robotjs");
 
 // Type "Hello World".
 robot.typeString("Hello World");
@@ -72,17 +70,36 @@ robot.keyTap("enter");
 
 ##### [Screen](https://github.com/octalmage/robotjs/wiki/Syntax#screen)
 
-```JavaScript
+```js
 // Get pixel color under the mouse.
-var robot = require("robotjs");
+const robot = require("robotjs");
 
 // Get mouse position.
-var mouse = robot.getMousePos();
+const mouse = robot.getMousePos();
 
 // Get pixel color in hex format.
-var hex = robot.getPixelColor(mouse.x, mouse.y);
-console.log("#" + hex + " at x:" + mouse.x + " y:" + mouse.y);
+const hex = robot.getPixelColor(mouse.x, mouse.y);
+console.log(`#${hex} at x:${mouse.x} y:${mouse.y}`);
 ```
+
+##### Image Search
+
+```js
+const robot = require("robotjs");
+
+const screen = robot.screen.capture();
+const target = robot.image.load("./target.bmp");
+const match = screen.findImage(target, { tolerance: 0.1 });
+
+if (match) {
+	screen.click(match, target);
+}
+```
+
+Captured and loaded images also provide `findImages`, `countImage`, `findColor`,
+`findColors`, `countColor`, `colorAt`, and `save`. Image searches return the
+target's top-left capture coordinates. `click` converts those coordinates to
+screen coordinates and clicks the target's center.
 Read the [Wiki](https://github.com/octalmage/robotjs/wiki) for more information!
 
 ## [API](http://robotjs.dev/docs/syntax)
@@ -94,14 +111,18 @@ The RobotJS API is hosted at <https://robotjs.dev/docs/syntax>.
 Please ensure you have the required dependencies before installing:
 
 * Windows
-  * windows-build-tools npm package (`npm install --global --production windows-build-tools` from an elevated PowerShell or CMD.exe)
-* Mac
+  * A supported Visual Studio C++ toolchain.
+* macOS
   * Xcode Command Line Tools.
 * Linux
-  * Python (v2.7 recommended, v3.x.x is not supported).
+  * Python 3.
   * make.
   * A C/C++ compiler like GCC.
-  * libxtst-dev and libpng++-dev (`sudo apt-get install libxtst-dev libpng++-dev`).
+  * libxtst-dev (`sudo apt-get install libxtst-dev`).
+
+BMP image loading and saving is always available. PNG support is optional for
+source builds. Set `ROBOTJS_ENABLE_PNG=1` and install `libpng` and `pkg-config`
+before building on macOS or Linux. Check `robot.image.supportsPNG` at runtime.
 
 Install node-gyp using npm:
 
@@ -122,7 +143,7 @@ See the [node-gyp readme](https://github.com/nodejs/node-gyp#installation) for m
 * √ Control the mouse by changing the mouse position, left/right clicking, and dragging.
 * √ Control the keyboard by pressing keys, holding keys down, and typing words.
 * √ Read pixel color from the screen and capture the screen.
-* Find an image on screen, read pixels from an image.
+* √ Find images and colors in captures, and load or save bitmap files.
 * Possibly include window management?
 
 ## Progress
@@ -131,8 +152,8 @@ See the [node-gyp readme](https://github.com/nodejs/node-gyp#installation) for m
 | ------------- |-------------: | ------- |
 | Mouse         | 100%           | All planned features implemented.       |
 | Keyboard      | 100%           | All planned features implemented.       |
-| Screen        | 85%            | Image search, pixel search. |
-| Bitmap        | 0%             |  Saving/opening, png support.  |
+| Screen        | 100%           | Screen capture, image search, and pixel search. |
+| Bitmap        | 100%           | BMP I/O and optional PNG support. |
 
 ## FAQ
 
@@ -140,9 +161,10 @@ See the [node-gyp readme](https://github.com/nodejs/node-gyp#installation) for m
 
 Not currently, and I don't know if it ever will. I personally use [Electron](http://electron.atom.io/)/[NW.js](http://nwjs.io/) for global hotkeys, and this works well. Later on I might add hotkey support or create a separate module. See [#55](https://github.com/octalmage/robotjs/issues/55) for details. 
 
-#### Can I take a screenshot with RobotJS? 
+#### Can I take a screenshot with RobotJS?
 
-Soon! This is a bit more complicated than the rest of the features, so I saved it for last. Luckily the code is already there, I just need to write the bindings, and I've already started. Subscribe to [#13](https://github.com/octalmage/robotjs/issues/13) for updates. 
+Yes. `robot.screen.capture()` captures the main display. Pass
+`x, y, width, height` to capture a specific rectangle.
 
 #### Why is &#60;insert key&#62; missing from the keyboard functions? 
 
@@ -150,7 +172,9 @@ We've been implementing keys as we need them. Feel free to create an issue or su
 
 #### How about multi-monitor support?
 
-The library doesn't have explicit multi-monitor support, so anything that works is kind of on accident. Subscribe to [#88](https://github.com/octalmage/robotjs/issues/88) for updates.
+Use `robot.getDisplays()` to inspect displays and pass a rectangle from one
+display to `robot.screen.capture(x, y, width, height)`. A capture rectangle
+cannot span multiple displays. Linux reports the current X11 screen.
 
 For any other questions please [submit an issue](https://github.com/octalmage/robotjs/issues/new).
 
