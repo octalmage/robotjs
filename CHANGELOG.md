@@ -1,3 +1,11 @@
+## 0.8.0 (2026-07-19)
+
+* feat: Add image and color search, BMP I/O, optional PNG I/O, and display-aware screen capture. ([baf5616](https://github.com/octalmage/robotjs/commit/baf5616))
+* fix: Auto-detect Shift and AltGr modifiers in Linux `typeString`. ([fec80e5](https://github.com/octalmage/robotjs/commit/fec80e5))
+* fix: Preserve macOS keyboard compatibility and emit complete modifier lifecycles for shortcuts. ([0efcfa2](https://github.com/octalmage/robotjs/commit/0efcfa2), [d064384](https://github.com/octalmage/robotjs/commit/d064384))
+* test: Add integration coverage for Linux modifiers, macOS shortcuts, and repeated Unicode input. ([c2b0ea4](https://github.com/octalmage/robotjs/commit/c2b0ea4), [0d83176](https://github.com/octalmage/robotjs/commit/0d83176))
+
+
 ## 0.7.1 (2026-05-08)
 
 * fix: Add MMBitmap buffer-cleanup callback used by Windows screen capture. ([92504c3](https://github.com/octalmage/robotjs/commit/92504c3))
