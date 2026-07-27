@@ -269,7 +269,7 @@ uint8_t *createBitmapData(MMBitmapRef bitmap, size_t *len)
 	/* Save top header. */
 	fileHeader = (struct BITMAP_FILE_HEADER *)data;
 	fileHeader->magic = BMP_MAGIC;
-	fileHeader->fileSize = (uint32_t)(sizeof(*dibHeader) + imageSize);
+	fileHeader->fileSize = (uint32_t)dataLen;
 	fileHeader->imageOffset = (uint32_t)imageOffset;
 
 	/* BMP files are always stored as little-endian, so we need to convert back

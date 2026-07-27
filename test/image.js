@@ -114,23 +114,45 @@ describe('Image', function() {
 		}).toThrowError(/Unsupported image type/);
 	});
 
-	it('Saves and reloads BMP bitmaps.', function() {
+	it('Saves BMP files with consistent headers and pixels.', function() {
 		const tmpDir = fs.mkdtempSync(path.join(os.tmpdir(), 'robotjs-image-save-'));
 		const bmpPath = path.join(tmpDir, 'saved.bmp');
-		const bitmap = makeBitmap([
-			['112233', '445566'],
-			['778899', 'aabbcc']
-		], { byteWidth: 12, bytesPerPixel: 3 });
+		const rows = [
+			['112233', '445566', '778899'],
+			['aabbcc', 'ddeeff', '123456']
+		];
+		const bitmap = makeBitmap(rows, { byteWidth: 12, bytesPerPixel: 3 });
 		let bmpReloaded;
 
 		try {
 			expect(robot.image.save(bitmap, bmpPath)).toBe(true);
 			expect(fs.existsSync(bmpPath)).toBe(true);
 
-			bmpReloaded = robot.image.load(bmpPath);
+			const buffer = fs.readFileSync(bmpPath);
+			// BMP header layout: https://learn.microsoft.com/en-us/windows/win32/gdi/bitmap-storage
+			const declaredFileSize = buffer.readUInt32LE(2);
+			const pixelOffset = buffer.readUInt32LE(10);
+			const dibHeaderSize = buffer.readUInt32LE(14);
+			const width = buffer.readInt32LE(18);
+			const height = Math.abs(buffer.readInt32LE(22));
+			const bytesPerPixel = buffer.readUInt16LE(28) / 8;
+			const declaredImageSize = buffer.readUInt32LE(34);
+			const rowStride = ((width * bytesPerPixel) + 3) & ~3;
 
-			expect(bmpReloaded.colorAt(0, 0)).toEqual('112233');
-			expect(bmpReloaded.colorAt(1, 1)).toEqual('aabbcc');
+			expect(buffer.length).toEqual(declaredFileSize);
+			expect(pixelOffset).toEqual(14 + dibHeaderSize);
+			expect(pixelOffset).toEqual(54);
+			expect(rowStride).toEqual(12);
+			expect(rowStride).toBeGreaterThan(width * bytesPerPixel);
+			expect(declaredImageSize).toEqual(rowStride * height);
+			expect(declaredFileSize).toEqual(pixelOffset + declaredImageSize);
+
+			bmpReloaded = robot.image.load(bmpPath);
+			rows.forEach(function(row, y) {
+				row.forEach(function(color, x) {
+					expect(bmpReloaded.colorAt(x, y)).toEqual(color);
+				});
+			});
 		} finally {
 			fs.rmSync(tmpDir, { recursive: true, force: true });
 		}

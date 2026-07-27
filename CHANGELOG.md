@@ -1,6 +1,7 @@
 ## Unreleased
 
 * fix: Normalize smooth mouse movement timing on Windows.
+* fix: Write the complete BMP file size in serialized headers.
 
 
 ## 0.8.0 (2026-07-19)
