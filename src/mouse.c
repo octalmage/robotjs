@@ -12,6 +12,8 @@
 	#include <X11/extensions/XTest.h>
 	#include <stdlib.h>
 	#include "xdisplay.h"
+#elif defined(IS_WINDOWS)
+	#include <mmsystem.h>
 #endif
 
 #if !defined(M_SQRT2)
@@ -66,6 +68,27 @@ static int vscreenMinY = 0;
 	                         : ((button) == RIGHT_BUTTON ? MOUSEEVENTF_RIGHTDOWN \
 	                                                     : MOUSEEVENTF_MIDDLEDOWN))
 
+#endif
+
+#if defined(IS_WINDOWS)
+/* Windows' default timer tick makes per-pixel sleeps much slower than on
+ * other platforms, so request finer resolution for the whole movement. */
+static UINT beginMouseTimerResolution(void)
+{
+	TIMECAPS capabilities;
+	UINT period = 1;
+
+	if (timeGetDevCaps(&capabilities, (UINT)sizeof(capabilities)) == TIMERR_NOERROR) {
+		if (period < capabilities.wPeriodMin) {
+			period = capabilities.wPeriodMin;
+		}
+		if (period > capabilities.wPeriodMax) {
+			period = capabilities.wPeriodMax;
+		}
+	}
+
+	return timeBeginPeriod(period) == TIMERR_NOERROR ? period : 0;
+}
 #endif
 
 #if defined(IS_MACOSX)
@@ -376,6 +399,13 @@ bool smoothlyMoveMouse(MMSignedPoint endPoint,double speed)
 	MMSignedPoint pos = getMousePos();
 	double velo_x = 0.0, velo_y = 0.0;
 	double distance;
+#if defined(IS_WINDOWS)
+	UINT timerPeriod;
+#endif
+
+#if defined(IS_WINDOWS)
+	timerPeriod = beginMouseTimerResolution();
+#endif
 
 	while ((distance = crude_hypot((double)pos.x - endPoint.x,
 	                               (double)pos.y - endPoint.y)) > 1.0) {
@@ -397,6 +427,12 @@ bool smoothlyMoveMouse(MMSignedPoint endPoint,double speed)
 		/* Wait 1 - (speed) milliseconds. */
 		microsleep(DEADBEEF_UNIFORM(0.7, speed));
 	}
+
+#if defined(IS_WINDOWS)
+	if (timerPeriod != 0) {
+		timeEndPeriod(timerPeriod);
+	}
+#endif
 
 	return true;
 }

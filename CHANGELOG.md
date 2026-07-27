@@ -1,3 +1,8 @@
+## Unreleased
+
+* fix: Normalize smooth mouse movement timing on Windows.
+
+
 ## 0.8.0 (2026-07-19)
 
 * feat: Add image and color search, BMP I/O, optional PNG I/O, and display-aware screen capture. ([baf5616](https://github.com/octalmage/robotjs/commit/baf5616))

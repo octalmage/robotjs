@@ -50,7 +50,12 @@
       }],
 
       ["OS=='win'", {
-        'defines': ['IS_WINDOWS']
+        'defines': ['IS_WINDOWS'],
+        'link_settings': {
+          'libraries': [
+            'winmm.lib'
+          ]
+        }
       }],
 
       ['robotjs_enable_png==1', {

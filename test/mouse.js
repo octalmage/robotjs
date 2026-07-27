@@ -56,6 +56,26 @@ describe('Mouse', () => {
 
   });
 
+  it('Move the mouse smoothly without timer stalls.', function()
+  {
+    var initialPos;
+    var startedAt;
+    var elapsed;
+
+    initialPos = robot.getMousePos();
+
+    try {
+      robot.moveMouse(0, 100);
+      startedAt = Date.now();
+      robot.moveMouseSmooth(300, 100, 3);
+      elapsed = Date.now() - startedAt;
+    } finally {
+      robot.moveMouse(initialPos.x, initialPos.y);
+    }
+
+    expect(elapsed).toBeLessThan(2000);
+  });
+
   it('Click the mouse.', function()
   {
     expect(robot.mouseClick()).toBeTruthy();
