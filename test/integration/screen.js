@@ -18,16 +18,16 @@ describe('Integration/Screen', () => {
 
 	beforeEach(() => {
 		return targetFixture.start(robot).then(session => {
-			target = session.target;
+			target = session;
 			elements = session.elements;
 		});
 	});
 
 	afterEach(() => {
-		return targetFixture.stop(robot).then(() => {
-			target = null;
-			elements = null;
-		});
+		const currentTarget = target;
+		target = null;
+		elements = null;
+		return currentTarget ? currentTarget.stop() : Promise.resolve();
 	});
 
 	it('reads a pixel color', () => {

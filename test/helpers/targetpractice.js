@@ -1,4 +1,4 @@
-/* jshint esversion: 6 */
+/* jshint esversion: 8 */
 var targetpractice = require('targetpractice/index.js');
 
 const TARGET_COLOR = 'c0ff33';
@@ -6,11 +6,8 @@ const TRANSITION_TIMEOUT_MS = 5000;
 const POLL_INTERVAL_MS = 25;
 const INTERACTION_POLL_INTERVAL_MS = 100;
 
-var activeSession = null;
-
-function waitForMarker(robot, point, visible) {
+function waitForMarker(robot, point) {
 	const deadline = Date.now() + TRANSITION_TIMEOUT_MS;
-	const transition = visible ? 'appear' : 'disappear';
 	let lastColor;
 
 	return new Promise((resolve, reject) => {
@@ -25,7 +22,7 @@ function waitForMarker(robot, point, visible) {
 				return;
 			}
 
-			if ((lastColor === TARGET_COLOR) === visible) {
+			if (lastColor === TARGET_COLOR) {
 				resolve();
 				return;
 			}
@@ -34,7 +31,7 @@ function waitForMarker(robot, point, visible) {
 				reject(new Error(
 					'Timed out after ' + TRANSITION_TIMEOUT_MS +
 					'ms waiting for the Target Practice marker at (' + point.x + ', ' + point.y +
-					') to ' + transition + '; last color was ' + lastColor + '.'
+					') to appear; last color was ' + lastColor + '.'
 				));
 				return;
 			}
@@ -93,106 +90,40 @@ function waitForInteraction(robot, target, point) {
 	});
 }
 
-function start(robot, options) {
+async function start(robot, options) {
 	options = options || {};
-	if (activeSession !== null) {
-		return Promise.reject(new Error('Target Practice is already running.'));
-	}
 
 	let target;
 	try {
-		target = targetpractice.start();
+		target = await targetpractice.start();
+		const elements = target.elements;
+
+		if (!elements.color_1) {
+			throw new Error('Target Practice did not report its color marker.');
+		}
+		if (options.interactive && !elements.button_1) {
+			throw new Error('Target Practice did not report its interaction probe.');
+		}
+
+		await waitForMarker(robot, elements.color_1);
+		if (options.interactive) {
+			await waitForInteraction(robot, target, elements.button_1);
+		}
+
+		return target;
 	} catch (error) {
-		return Promise.reject(error);
-	}
-
-	const session = {
-		elements: null,
-		target: target
-	};
-	activeSession = session;
-
-	return new Promise((resolve, reject) => {
-		const elementsTimer = setTimeout(() => {
-			cleanup();
-			reject(new Error(
-				'Timed out after ' + TRANSITION_TIMEOUT_MS +
-				'ms waiting for Target Practice to report its elements.'
-			));
-		}, TRANSITION_TIMEOUT_MS);
-
-		function cleanup() {
-			clearTimeout(elementsTimer);
-			target.removeListener('elements', handleElements);
-			target.removeListener('error', handleError);
-		}
-
-		function handleError(error) {
-			cleanup();
-			reject(error);
-		}
-
-		function handleElements(elements) {
-			clearTimeout(elementsTimer);
-			target.removeListener('elements', handleElements);
-			session.elements = elements;
-
-			if (!elements.color_1) {
-				cleanup();
-				reject(new Error('Target Practice did not report its color marker.'));
-				return;
+		if (target) {
+			try {
+				await target.stop();
+			} catch (stopError) {
+				error.message += '\nshutdown error: ' + stopError.message;
 			}
-			if (options.interactive && !elements.button_1) {
-				cleanup();
-				reject(new Error('Target Practice did not report its interaction probe.'));
-				return;
-			}
-
-			let ready = waitForMarker(robot, elements.color_1, true);
-			if (options.interactive) {
-				ready = ready.then(() => waitForInteraction(robot, target, elements.button_1));
-			}
-
-			ready.then(() => {
-				cleanup();
-				resolve(session);
-			}, error => {
-				cleanup();
-				reject(error);
-			});
 		}
-
-		target.once('elements', handleElements);
-		target.once('error', handleError);
-	});
-}
-
-function stop(robot) {
-	if (activeSession === null) {
-		return Promise.resolve();
-	}
-
-	const session = activeSession;
-	const marker = session.elements && session.elements.color_1;
-
-	try {
-		targetpractice.stop();
-	} catch (error) {
-		activeSession = null;
-		return Promise.reject(error);
-	}
-
-	const closed = marker ? waitForMarker(robot, marker, false) : Promise.resolve();
-	return closed.then(() => {
-		activeSession = null;
-	}, error => {
-		activeSession = null;
 		throw error;
-	});
+	}
 }
 
 module.exports = {
 	TARGET_COLOR: TARGET_COLOR,
-	start: start,
-	stop: stop
+	start: start
 };

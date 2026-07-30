@@ -54,21 +54,21 @@ describe('Integration/Keyboard', () => {
 
 	beforeEach(() => {
 		return targetFixture.start(robot, { interactive: true }).then(session => {
-			target = session.target;
+			target = session;
 			elements = session.elements;
 		});
 	});
 
 	afterEach(() => {
-		return targetFixture.stop(robot).then(() => {
-			target = null;
-			elements = null;
-		});
+		const currentTarget = target;
+		target = null;
+		elements = null;
+		return currentTarget ? currentTarget.stop() : Promise.resolve();
 	});
 
 	it('types', done => {
 		const stringToType = 'hello world';
-		// Target Practice emits after the user has stopped typing.
+		// Target Practice emits every input state; wait for the final value.
 		expectNextTypedText(stringToType, done);
 
 		const input_1 = elements.input_1;

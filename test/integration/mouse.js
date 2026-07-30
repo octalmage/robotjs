@@ -19,16 +19,16 @@ describe('Integration/Mouse', () => {
 
 	beforeEach(() => {
 		return targetFixture.start(robot, { interactive: true }).then(session => {
-			target = session.target;
+			target = session;
 			elements = session.elements;
 		});
 	});
 
 	afterEach(() => {
-		return targetFixture.stop(robot).then(() => {
-			target = null;
-			elements = null;
-		});
+		const currentTarget = target;
+		target = null;
+		elements = null;
+		return currentTarget ? currentTarget.stop() : Promise.resolve();
 	});
 
 	it('clicks', done => {
