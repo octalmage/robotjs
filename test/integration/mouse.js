@@ -1,6 +1,6 @@
 /* jshint esversion: 6 */
 var robot = require('../..');
-var targetpractice = require('targetpractice/index.js');
+var targetFixture = require('../helpers/targetpractice');
 
 robot.setMouseDelay(100);
 
@@ -17,17 +17,18 @@ describe('Integration/Mouse', () => {
 		jasmine.DEFAULT_TIMEOUT_INTERVAL = originalTimeout;
 	});
 
-	beforeEach(done => {
-		target = targetpractice.start();
-		target.once('elements', message => {
-			elements = message;
-			done();
+	beforeEach(() => {
+		return targetFixture.start(robot, { interactive: true }).then(session => {
+			target = session.target;
+			elements = session.elements;
 		});
 	});
 
 	afterEach(() => {
-		targetpractice.stop();
-		target = null;
+		return targetFixture.stop(robot).then(() => {
+			target = null;
+			elements = null;
+		});
 	});
 
 	it('clicks', done => {

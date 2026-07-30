@@ -1,47 +1,10 @@
 /* jshint esversion: 6 */
 var robot = require('../..');
-var targetpractice = require('targetpractice/index.js');
-var elements, target, readinessTimer;
+var targetFixture = require('../helpers/targetpractice');
+var elements, target;
 var originalTimeout;
-const TARGET_COLOR = 'c0ff33';
+const TARGET_COLOR = targetFixture.TARGET_COLOR;
 const TARGET_LOGICAL_SIZE = 50;
-const TARGET_READY_TIMEOUT_MS = 5000;
-const TARGET_POLL_INTERVAL_MS = 25;
-
-function waitForTargetPixel(done) {
-	const point = elements.color_1;
-	const deadline = Date.now() + TARGET_READY_TIMEOUT_MS;
-	let lastColor;
-
-	function poll() {
-		readinessTimer = null;
-
-		try {
-			lastColor = robot.getPixelColor(point.x, point.y);
-		} catch (error) {
-			done.fail(error);
-			return;
-		}
-
-		if (lastColor === TARGET_COLOR) {
-			done();
-			return;
-		}
-
-		if (Date.now() >= deadline) {
-			done.fail(new Error(
-				'Timed out after ' + TARGET_READY_TIMEOUT_MS +
-				'ms waiting for Target Practice pixel at (' + point.x + ', ' + point.y +
-				') to be painted ' + TARGET_COLOR + '; last color was ' + lastColor + '.'
-			));
-			return;
-		}
-
-		readinessTimer = setTimeout(poll, TARGET_POLL_INTERVAL_MS);
-	}
-
-	poll();
-}
 
 describe('Integration/Screen', () => {
 	beforeAll(() => {
@@ -53,23 +16,18 @@ describe('Integration/Screen', () => {
 		jasmine.DEFAULT_TIMEOUT_INTERVAL = originalTimeout;
 	});
 
-	beforeEach(done => {
-		readinessTimer = null;
-		target = targetpractice.start();
-		target.once('elements', message => {
-			elements = message;
-			waitForTargetPixel(done);
+	beforeEach(() => {
+		return targetFixture.start(robot).then(session => {
+			target = session.target;
+			elements = session.elements;
 		});
 	});
 
 	afterEach(() => {
-		if (readinessTimer !== null) {
-			clearTimeout(readinessTimer);
-			readinessTimer = null;
-		}
-		targetpractice.stop();
-		target = null;
-		elements = null;
+		return targetFixture.stop(robot).then(() => {
+			target = null;
+			elements = null;
+		});
 	});
 
 	it('reads a pixel color', () => {
