@@ -2,6 +2,7 @@
 
 * fix: Normalize smooth mouse movement timing on Windows.
 * fix: Write the complete BMP file size in serialized headers.
+* test: Adopt Target Practice 0.0.8 lifecycle and verify fixture visibility and interactivity.
 
 
 ## 0.8.0 (2026-07-19)

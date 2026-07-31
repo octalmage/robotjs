@@ -1,20 +1,30 @@
 /* jshint esversion: 6 */
 var robot = require('../..');
-var targetpractice = require('targetpractice/index.js');
+var targetFixture = require('../helpers/targetpractice');
 
 robot.setMouseDelay(100);
+robot.setKeyboardDelay(100);
 
 var target, elements;
 var originalTimeout;
+const macOSIt = process.platform === 'darwin' ? it : xit;
+const TYPING_TIMEOUT_MS = 5000;
 
 function expectNextTypedText(expected, done, next) {
+	let lastText;
+	let timer;
 	const handleType = element => {
 		if (element.id !== 'input_1') {
 			return;
 		}
 
+		lastText = element.text;
+		if (lastText !== expected) {
+			return;
+		}
+
+		clearTimeout(timer);
 		target.removeListener('type', handleType);
-		expect(element.text).toEqual(expected);
 		if (next) {
 			next();
 		} else {
@@ -22,6 +32,13 @@ function expectNextTypedText(expected, done, next) {
 		}
 	};
 
+	timer = setTimeout(() => {
+		target.removeListener('type', handleType);
+		done.fail(new Error(
+			'Timed out after ' + TYPING_TIMEOUT_MS + 'ms waiting for input_1 to contain ' +
+			JSON.stringify(expected) + '; last text was ' + JSON.stringify(lastText) + '.'
+		));
+	}, TYPING_TIMEOUT_MS);
 	target.on('type', handleType);
 }
 
@@ -35,22 +52,23 @@ describe('Integration/Keyboard', () => {
 		jasmine.DEFAULT_TIMEOUT_INTERVAL = originalTimeout;
 	});
 
-	beforeEach(done => {
-		target = targetpractice.start();
-		target.once('elements', message => {
-			elements = message;
-			done();
+	beforeEach(() => {
+		return targetFixture.start(robot, { interactive: true }).then(session => {
+			target = session;
+			elements = session.elements;
 		});
 	});
 
 	afterEach(() => {
-		targetpractice.stop();
+		const currentTarget = target;
 		target = null;
+		elements = null;
+		return currentTarget ? currentTarget.stop() : Promise.resolve();
 	});
 
 	it('types', done => {
 		const stringToType = 'hello world';
-		// Target Practice emits after the user has stopped typing.
+		// Target Practice emits every input state; wait for the final value.
 		expectNextTypedText(stringToType, done);
 
 		const input_1 = elements.input_1;
@@ -70,18 +88,16 @@ describe('Integration/Keyboard', () => {
 		robot.typeString(stringToType);
 	});
 
-	it('replaces selected input with a command-modified key tap on macOS', done => {
-		if (process.platform !== 'darwin') {
-			pending('macOS only: verifies command-modified keyboard events.');
-			return;
-		}
+	macOSIt('replaces selected input with a command-modified key tap on macOS', done => {
 
 		const initial = 'initial content';
 		const replacement = 'replacement content';
 		expectNextTypedText(initial, done, () => {
 			expectNextTypedText(replacement, done);
 			robot.keyTap('a', 'command');
-			robot.typeString(replacement);
+			// This test covers the shortcut; pace the replacement so a busy macOS
+			// runner does not drop queued text events.
+			robot.typeStringDelayed(replacement, 600);
 		});
 
 		const input_1 = elements.input_1;
@@ -90,11 +106,7 @@ describe('Integration/Keyboard', () => {
 		robot.typeString(initial);
 	});
 
-	it('types a non-ASCII character with unicodeTap on macOS', done => {
-		if (process.platform !== 'darwin') {
-			pending('macOS only: verifies Unicode keyboard events.');
-			return;
-		}
+	macOSIt('types a non-ASCII character with unicodeTap on macOS', done => {
 
 		const marker = 'x';
 		const character = '嗨';
