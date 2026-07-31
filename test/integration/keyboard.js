@@ -95,7 +95,9 @@ describe('Integration/Keyboard', () => {
 		expectNextTypedText(initial, done, () => {
 			expectNextTypedText(replacement, done);
 			robot.keyTap('a', 'command');
-			robot.typeString(replacement);
+			// This test covers the shortcut; pace the replacement so a busy macOS
+			// runner does not drop queued text events.
+			robot.typeStringDelayed(replacement, 600);
 		});
 
 		const input_1 = elements.input_1;
