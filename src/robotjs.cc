@@ -680,7 +680,11 @@ Napi::Value typeStringWrapper(const Napi::CallbackInfo& info)
 
 		s = str.c_str();
 
-		typeStringDelayed(s, 0);
+		size_t cpm = keyboardDelay > 0 ? 60000 / keyboardDelay : 0;
+		if (keyboardDelay > 0 && cpm == 0) {
+			cpm = 1;
+		}
+		typeStringDelayed(s, cpm);
 
 		return Napi::Number::New(env, 1);
 	} else {

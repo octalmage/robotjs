@@ -26,6 +26,7 @@
 		 XFlush(display))
 	#define X_KEY_EVENT_WAIT(display, key, is_press) \
 		(X_KEY_EVENT(display, key, is_press))
+	#define X_UNICODE_MAPPING_WAIT_MS 25
 #endif
 
 #if defined(IS_MACOSX)
@@ -331,13 +332,122 @@ void toggleUnicode(UniChar ch, const bool down)
 	#define toggleUniKey(c, down) toggleKey(c, down, MOD_NONE)
 #endif
 
+#if defined(USE_X11)
+
+static bool isModifierKeyCode(const XModifierKeymap *modifierMap,
+	                          const KeyCode keyCode)
+{
+	int index;
+
+	if (modifierMap == NULL) {
+		return false;
+	}
+
+	for (index = 0; index < 8 * modifierMap->max_keypermod; ++index) {
+		if (modifierMap->modifiermap[index] == keyCode) {
+			return true;
+		}
+	}
+
+	return false;
+}
+
+static void tapUnicodeKey(const unsigned value)
+{
+	Display *display;
+	XModifierKeymap *modifierMap;
+	KeySym *mapping;
+	KeySym *scratchMapping = NULL;
+	KeyCode scratchKeyCode = 0;
+	char pressedKeys[32];
+	int minKeyCode;
+	int maxKeyCode;
+	int symbolsPerKeyCode;
+	int code;
+
+	if (value > 0x10FFFF || (value >= 0xD800 && value <= 0xDFFF)) {
+		return;
+	}
+
+	display = XGetMainDisplay();
+	XDisplayKeycodes(display, &minKeyCode, &maxKeyCode);
+	mapping = XGetKeyboardMapping(display, minKeyCode,
+	                              maxKeyCode - minKeyCode + 1,
+	                              &symbolsPerKeyCode);
+	if (mapping == NULL) {
+		return;
+	}
+	if (symbolsPerKeyCode <= 0) {
+		XFree(mapping);
+		return;
+	}
+
+	modifierMap = XGetModifierMapping(display);
+	XQueryKeymap(display, pressedKeys);
+
+	for (code = minKeyCode; code <= maxKeyCode; ++code) {
+		const int offset = (code - minKeyCode) * symbolsPerKeyCode;
+		int slot;
+
+		if (isModifierKeyCode(modifierMap, (KeyCode)code) ||
+		    ((unsigned char)pressedKeys[code / 8] & (1U << (code % 8)))) {
+			continue;
+		}
+
+		for (slot = 0; slot < symbolsPerKeyCode; ++slot) {
+			if (mapping[offset + slot] != NoSymbol) {
+				break;
+			}
+		}
+
+		if (slot == symbolsPerKeyCode) {
+			scratchKeyCode = (KeyCode)code;
+			scratchMapping = mapping + offset;
+			break;
+		}
+	}
+
+	if (modifierMap != NULL) {
+		XFreeModifiermap(modifierMap);
+	}
+	if (scratchKeyCode == 0) {
+		XFree(mapping);
+		return;
+	}
+
+	scratchMapping[0] = value >= 0x100
+		? (KeySym)(0x01000000U | value)
+		: (KeySym)value;
+	XChangeKeyboardMapping(display, scratchKeyCode, 1,
+	                       scratchMapping, 1);
+	XSync(display, False);
+
+	XTestFakeKeyEvent(display, scratchKeyCode, True, CurrentTime);
+	XTestFakeKeyEvent(display, scratchKeyCode, False, CurrentTime);
+	XSync(display, False);
+	/* Clients translate keycodes asynchronously. Keep the temporary mapping
+	 * available until they have consumed both key events. */
+	microsleep(X_UNICODE_MAPPING_WAIT_MS);
+
+	scratchMapping[0] = NoSymbol;
+	XChangeKeyboardMapping(display, scratchKeyCode, 1,
+	                       scratchMapping, 1);
+	XSync(display, False);
+	XFree(mapping);
+}
+#endif
+
 void unicodeTap(const unsigned value)
 {
 	#if defined(USE_X11)
-		char ch = (char)value;
+		if (value <= 0x7F) {
+			char ch = (char)value;
 
-		toggleUniKey(ch, true);
-		toggleUniKey(ch, false);
+			toggleUniKey(ch, true);
+			toggleUniKey(ch, false);
+		} else {
+			tapUnicodeKey(value);
+		}
 	#elif defined(IS_MACOSX)
 		UniChar ch = (UniChar)value; // Convert to unsigned char
 

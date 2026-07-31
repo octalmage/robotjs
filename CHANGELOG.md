@@ -3,6 +3,8 @@
 * fix: Normalize smooth mouse movement timing on Windows.
 * fix: Write the complete BMP file size in serialized headers.
 * test: Adopt Target Practice 0.0.8 lifecycle and verify fixture visibility and interactivity.
+* fix: Pace `typeString` with the configured keyboard delay and inject Unicode through scoped X11 keycode mappings.
+* test: Exercise select-all shortcuts and Unicode keyboard input across platforms.
 
 
 ## 0.8.0 (2026-07-19)

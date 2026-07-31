@@ -7,8 +7,9 @@ robot.setKeyboardDelay(100);
 
 var target, elements;
 var originalTimeout;
-const macOSIt = process.platform === 'darwin' ? it : xit;
+const selectAllModifier = process.platform === 'darwin' ? 'command' : 'control';
 const TYPING_TIMEOUT_MS = 5000;
+const KEY_SEQUENCE_SETTLE_MS = 100;
 
 function expectNextTypedText(expected, done, next) {
 	let lastText;
@@ -88,15 +89,15 @@ describe('Integration/Keyboard', () => {
 		robot.typeString(stringToType);
 	});
 
-	macOSIt('replaces selected input with a command-modified key tap on macOS', done => {
+	it('replaces selected input with the platform select-all shortcut', done => {
 
 		const initial = 'initial content';
 		const replacement = 'replacement content';
 		expectNextTypedText(initial, done, () => {
 			expectNextTypedText(replacement, done);
-			robot.keyTap('a', 'command');
-			// This test covers the shortcut; pace the replacement so a busy macOS
-			// runner does not drop queued text events.
+			robot.keyTap('a', selectAllModifier);
+			// Pace the replacement so a busy runner does not drop queued text
+			// events while processing the shortcut.
 			robot.typeStringDelayed(replacement, 600);
 		});
 
@@ -106,12 +107,16 @@ describe('Integration/Keyboard', () => {
 		robot.typeString(initial);
 	});
 
-	macOSIt('types a non-ASCII character with unicodeTap on macOS', done => {
+	it('types a non-ASCII character with unicodeTap without changing the layout', done => {
 
 		const marker = 'x';
 		const character = '嗨';
+		const shiftedSymbols = '!@#$%^&*()_+{}|:"<>?';
 		expectNextTypedText(marker, done, () => {
-			expectNextTypedText(character, done);
+			expectNextTypedText(character, done, () => {
+				expectNextTypedText(character + shiftedSymbols, done);
+				setTimeout(() => robot.typeString(shiftedSymbols), KEY_SEQUENCE_SETTLE_MS);
+			});
 			robot.keyTap('backspace');
 			robot.unicodeTap(character.charCodeAt(0));
 		});
