@@ -1,5 +1,5 @@
 /* jshint esversion: 8 */
-var targetpractice = require('targetpractice/index.js');
+var targetpractice = require('targetpractice');
 
 const TARGET_COLOR = 'c0ff33';
 const TRANSITION_TIMEOUT_MS = 5000;

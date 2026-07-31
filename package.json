@@ -59,6 +59,6 @@
     "jasmine": "^2.99.0",
     "node-gyp": "^12.2.0",
     "prebuild": "^13",
-    "targetpractice": "github:octalmage/targetpractice#2944cdf"
+    "targetpractice": "github:octalmage/targetpractice#91436489083ec93cb1438fcc8943dd23c762850b"
   }
 }
