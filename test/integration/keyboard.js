@@ -8,6 +8,7 @@ robot.setKeyboardDelay(100);
 var target, elements;
 var originalTimeout;
 const macOSIt = process.platform === 'darwin' ? it : xit;
+const selectAllModifier = process.platform === 'darwin' ? 'command' : 'control';
 const TYPING_TIMEOUT_MS = 5000;
 
 function expectNextTypedText(expected, done, next) {
@@ -88,15 +89,15 @@ describe('Integration/Keyboard', () => {
 		robot.typeString(stringToType);
 	});
 
-	macOSIt('replaces selected input with a command-modified key tap on macOS', done => {
+	it('replaces selected input with the platform select-all shortcut', done => {
 
 		const initial = 'initial content';
 		const replacement = 'replacement content';
 		expectNextTypedText(initial, done, () => {
 			expectNextTypedText(replacement, done);
-			robot.keyTap('a', 'command');
-			// This test covers the shortcut; pace the replacement so a busy macOS
-			// runner does not drop queued text events.
+			robot.keyTap('a', selectAllModifier);
+			// Pace the replacement so a busy runner does not drop queued text
+			// events while processing the shortcut.
 			robot.typeStringDelayed(replacement, 600);
 		});
 
