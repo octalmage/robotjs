@@ -681,6 +681,7 @@ Napi::Value typeStringWrapper(const Napi::CallbackInfo& info)
 		s = str.c_str();
 
 		size_t cpm = keyboardDelay > 0 ? 60000 / keyboardDelay : 0;
+		// Don't let a positive keyboard delay round down to 0 CPM.
 		if (keyboardDelay > 0 && cpm == 0) {
 			cpm = 1;
 		}
