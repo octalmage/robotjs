@@ -106,6 +106,16 @@ Read the [Wiki](https://github.com/octalmage/robotjs/wiki) for more information!
 
 The RobotJS API is hosted at <https://robotjs.dev/docs/syntax>.
 
+### macOS permissions
+
+`getAccessibilityPermission()` and `getScreenCapturePermission()` report the
+current grants. `requestAccessibilityPermission()` and
+`requestScreenCapturePermission()` trigger the corresponding macOS system
+prompts. macOS still requires the user to approve each request.
+The Accessibility prompt is asynchronous, so `requestAccessibilityPermission()`
+returns the current grant. Check `getAccessibilityPermission()` again after the
+user responds.
+
 ## Building
 
 Please ensure you have the required dependencies before installing:

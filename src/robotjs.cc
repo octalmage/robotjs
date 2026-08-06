@@ -15,6 +15,9 @@
 #include "io.h"
 #include "snprintf.h"
 #include "microsleep.h"
+#if defined(__APPLE__)
+	#include <ApplicationServices/ApplicationServices.h>
+#endif
 #if defined(USE_X11)
 	#include "xdisplay.h"
 #endif
@@ -1747,6 +1750,62 @@ Napi::Value saveImageWrapper(const Napi::CallbackInfo& info)
 	return Napi::Boolean::New(env, true);
 }
 
+Napi::Value getAccessibilityPermissionWrapper(const Napi::CallbackInfo& info)
+{
+	Napi::Env env = info.Env();
+
+#if defined(__APPLE__)
+	return Napi::Boolean::New(env, AXIsProcessTrusted());
+#else
+	return env.Null();
+#endif
+}
+
+Napi::Value requestAccessibilityPermissionWrapper(const Napi::CallbackInfo& info)
+{
+	Napi::Env env = info.Env();
+
+#if defined(__APPLE__)
+	const void *keys[] = { kAXTrustedCheckOptionPrompt };
+	const void *values[] = { kCFBooleanTrue };
+	CFDictionaryRef options = CFDictionaryCreate(
+		kCFAllocatorDefault,
+		keys,
+		values,
+		1,
+		&kCFTypeDictionaryKeyCallBacks,
+		&kCFTypeDictionaryValueCallBacks
+	);
+	const bool trusted = AXIsProcessTrustedWithOptions(options);
+	CFRelease(options);
+	return Napi::Boolean::New(env, trusted);
+#else
+	return env.Null();
+#endif
+}
+
+Napi::Value getScreenCapturePermissionWrapper(const Napi::CallbackInfo& info)
+{
+	Napi::Env env = info.Env();
+
+#if defined(__APPLE__)
+	return Napi::Boolean::New(env, CGPreflightScreenCaptureAccess());
+#else
+	return env.Null();
+#endif
+}
+
+Napi::Value requestScreenCapturePermissionWrapper(const Napi::CallbackInfo& info)
+{
+	Napi::Env env = info.Env();
+
+#if defined(__APPLE__)
+	return Napi::Boolean::New(env, CGRequestScreenCaptureAccess());
+#else
+	return env.Null();
+#endif
+}
+
 Napi::Object InitAll(Napi::Env env, Napi::Object exports)
 {
 	exports.Set(Napi::String::New(env, "dragMouse"),
@@ -1841,6 +1900,18 @@ Napi::Object InitAll(Napi::Env env, Napi::Object exports)
 
 	exports.Set(Napi::String::New(env, "setXDisplayName"),
 				Napi::Function::New(env, setXDisplayNameWrapper));
+
+	exports.Set(Napi::String::New(env, "getAccessibilityPermission"),
+				Napi::Function::New(env, getAccessibilityPermissionWrapper));
+
+	exports.Set(Napi::String::New(env, "requestAccessibilityPermission"),
+				Napi::Function::New(env, requestAccessibilityPermissionWrapper));
+
+	exports.Set(Napi::String::New(env, "getScreenCapturePermission"),
+				Napi::Function::New(env, getScreenCapturePermissionWrapper));
+
+	exports.Set(Napi::String::New(env, "requestScreenCapturePermission"),
+				Napi::Function::New(env, requestScreenCapturePermissionWrapper));
 
 	return exports;
 }
