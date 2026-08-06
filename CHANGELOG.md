@@ -1,4 +1,4 @@
-## Unreleased
+## 0.9.0 (2026-08-01)
 
 * feat: Add macOS Accessibility and Screen Recording permission APIs.
 * fix: Normalize smooth mouse movement timing on Windows.
