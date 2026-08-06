@@ -95,6 +95,10 @@ export function getMousePos(): { x: number, y: number }
 export function getPixelColor(x: number, y: number): string
 export function getScreenSize(): { width: number, height: number }
 export function getDisplays(): Display[]
+export function getAccessibilityPermission(): boolean | null
+export function requestAccessibilityPermission(): boolean | null
+export function getScreenCapturePermission(): boolean | null
+export function requestScreenCapturePermission(): boolean | null
 
 export var screen: Screen
 export var image: ImageModule

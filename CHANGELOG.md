@@ -1,5 +1,6 @@
 ## Unreleased
 
+* feat: Add macOS Accessibility and Screen Recording permission APIs.
 * fix: Normalize smooth mouse movement timing on Windows.
 * fix: Write the complete BMP file size in serialized headers.
 * test: Adopt Target Practice 0.0.8 lifecycle and verify fixture visibility and interactivity.
