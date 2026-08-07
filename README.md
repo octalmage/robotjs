@@ -29,6 +29,9 @@ npm install robotjs
 
 You can get npm [here](https://nodejs.org/en/download/) if you don't have it installed.
 
+Published packages include Node-API prebuilds for Linux, macOS, and Windows on
+x64 and arm64. Other targets fall back to a source build.
+
 If you need to build RobotJS, see the [building](#building) section. Instructions for [Electron](https://github.com/octalmage/robotjs/wiki/Electron).
 
 ## Examples
@@ -130,9 +133,12 @@ Please ensure you have the required dependencies before installing:
   * A C/C++ compiler like GCC.
   * libxtst-dev (`sudo apt-get install libxtst-dev`).
 
-BMP image loading and saving is always available. PNG support is optional for
-source builds. Set `ROBOTJS_ENABLE_PNG=1` and install `libpng` and `pkg-config`
-before building on macOS or Linux. Check `robot.image.supportsPNG` at runtime.
+BMP image loading and saving is always available. PNG is enabled in all
+published prebuilds: Windows uses Windows Imaging Component, while macOS and
+Linux include statically linked libpng. PNG remains optional for macOS and
+Linux source builds. To enable it, install `libpng` and `pkg-config`, then force
+a source build with `ROBOTJS_ENABLE_PNG=1`. Check
+`robot.image.supportsPNG` at runtime.
 
 Install node-gyp using npm:
 
@@ -147,6 +153,16 @@ node-gyp rebuild
 ```
 
 See the [node-gyp readme](https://github.com/nodejs/node-gyp#installation) for more details.
+
+### Packaging prebuilds
+
+The [Prebuilds workflow](https://github.com/octalmage/robotjs/actions/workflows/prebuilds.yml)
+builds the release binaries and uploads a complete `npm-package` artifact. It
+does not publish to npm. Download the artifact, then publish it manually:
+
+```
+npm publish ./robotjs-<version>.tgz
+```
 
 ## Plans
 

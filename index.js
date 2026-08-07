@@ -1,4 +1,4 @@
-const robotjs = require('./build/Release/robotjs.node');
+const robotjs = require('node-gyp-build')(__dirname);
 
 module.exports = robotjs;
 

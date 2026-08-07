@@ -1,9 +1,11 @@
 {
   'variables': {
-    'robotjs_enable_png%': '<!(node -p "process.env.ROBOTJS_ENABLE_PNG === \'1\' ? 1 : 0")'
+    'robotjs_enable_png%': '<!(node -p "process.platform === \'win32\' || process.env.ROBOTJS_ENABLE_PNG === \'1\' ? 1 : 0")',
+    'robotjs_png_static%': '<!(node -p "process.env.ROBOTJS_PNG_STATIC === \'1\' ? 1 : 0")'
   },
   'targets': [{
     'target_name': 'robotjs',
+    'defines': [ 'NAPI_VERSION=3' ],
       'cflags!': [ '-fno-exceptions' ],
       'cflags_cc!': [ '-fno-exceptions' ],
       'xcode_settings': { 'GCC_ENABLE_CPP_EXCEPTIONS': 'YES',
@@ -60,31 +62,67 @@
 
       ['robotjs_enable_png==1', {
         'defines': ['ROBOTJS_HAS_PNG=1'],
-        'sources': [
-          'src/png_io.c'
-        ],
         'conditions': [
-          ['OS == "mac"', {
-            'include_dirs': [
-              '<!@(sh -c "pkg-config --cflags-only-I libpng | sed s/-I//g")'
+          ['OS == "win"', {
+            'sources': [
+              'src/png_io_win.c'
             ],
             'link_settings': {
               'libraries': [
-                '<!@(pkg-config --libs libpng)',
-                '-lz'
+                'windowscodecs.lib',
+                'ole32.lib'
               ]
             }
           }],
-          ['OS == "linux"', {
+          ['OS == "mac"', {
+            'sources': [
+              'src/png_io.c'
+            ],
             'include_dirs': [
               '<!@(sh -c "pkg-config --cflags-only-I libpng | sed s/-I//g")'
             ],
-            'link_settings': {
-              'libraries': [
-                '<!@(pkg-config --libs libpng)',
-                '-lz'
-              ]
-            }
+            'conditions': [
+              ['robotjs_png_static==1', {
+                'link_settings': {
+                  'libraries': [
+                    '<!(pkg-config --variable=libdir libpng)/libpng16.a',
+                    '-lz'
+                  ]
+                }
+              }, {
+                'link_settings': {
+                  'libraries': [
+                    '<!@(pkg-config --libs libpng)',
+                    '-lz'
+                  ]
+                }
+              }]
+            ]
+          }],
+          ['OS == "linux"', {
+            'sources': [
+              'src/png_io.c'
+            ],
+            'include_dirs': [
+              '<!@(sh -c "pkg-config --cflags-only-I libpng | sed s/-I//g")'
+            ],
+            'conditions': [
+              ['robotjs_png_static==1', {
+                'link_settings': {
+                  'libraries': [
+                    '<!(pkg-config --variable=libdir libpng)/libpng16.a',
+                    '-lz'
+                  ]
+                }
+              }, {
+                'link_settings': {
+                  'libraries': [
+                    '<!@(pkg-config --libs libpng)',
+                    '-lz'
+                  ]
+                }
+              }]
+            ]
           }]
         ]
       }, {

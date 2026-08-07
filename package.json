@@ -1,6 +1,6 @@
 {
   "name": "robotjs",
-  "version": "0.9.0",
+  "version": "0.9.1",
   "description": "Node.js Desktop Automation.",
   "main": "index.js",
   "typings": "index.d.ts",
@@ -9,18 +9,22 @@
     "CHANGELOG.md",
     "index.js",
     "index.d.ts",
-    "src/"
+    "src/",
+    "scripts/verify-prebuilds.js",
+    "LICENSES/",
+    "prebuilds/"
   ],
   "scripts": {
     "test": "jasmine \"test/**/*.js\"",
-    "install": "prebuild-install --runtime napi || node-gyp rebuild",
-    "install-debug": "prebuild-install --runtime napi || node-gyp rebuild --debug",
-    "prebuild": "prebuild --all --runtime napi",
+    "install": "node-gyp-build",
+    "build:prebuild": "prebuildify --napi --name node.napi --strip",
+    "verify-prebuilds": "node scripts/verify-prebuilds.js",
+    "prepack": "npm run verify-prebuilds",
     "build": "node-gyp rebuild"
   },
   "repository": {
     "type": "git",
-    "url": "https://github.com/octalmage/robotjs.git"
+    "url": "git+https://github.com/octalmage/robotjs.git"
   },
   "keywords": [
     "Automation",
@@ -42,23 +46,18 @@
   "author": "Jason Stallings",
   "license": "MIT",
   "gypfile": true,
-  "binary": {
-    "napi_versions": [
-      3
-    ]
-  },
   "bugs": {
     "url": "https://github.com/octalmage/robotjs/issues"
   },
   "homepage": "https://github.com/octalmage/robotjs",
   "dependencies": {
     "node-addon-api": "^4.2.0",
-    "prebuild-install": "^5.3.3"
+    "node-gyp-build": "^4.8.4"
   },
   "devDependencies": {
     "jasmine": "^2.99.0",
     "node-gyp": "^12.2.0",
-    "prebuild": "^13",
+    "prebuildify": "^6.0.1",
     "targetpractice": "github:octalmage/targetpractice#413a2dfbd7898ce8c53dce5fb9b0fbbf68f37f32"
   }
 }

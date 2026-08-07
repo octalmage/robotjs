@@ -1,0 +1,234 @@
+name: Prebuilds
+
+on:
+  push:
+    tags:
+      - "v*"
+  workflow_dispatch:
+
+env:
+  FORCE_JAVASCRIPT_ACTIONS_TO_NODE24: "true"
+  LIBPNG_VERSION: "1.6.58"
+  LIBPNG_URL: https://downloads.sourceforge.net/project/libpng/libpng16/1.6.58/libpng-1.6.58.tar.xz
+  LIBPNG_SHA256: 28eb403f51f0f7405249132cecfe82ea5c0ef97f1b32c5a65828814ae0d34775
+
+permissions:
+  contents: read
+
+jobs:
+  build-linux:
+    name: ${{ matrix.name }}
+    runs-on: ${{ matrix.os }}
+    container: node:24-bullseye
+    timeout-minutes: 30
+    env:
+      ROBOTJS_ENABLE_PNG: "1"
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - name: Linux x64
+            artifact: linux-x64
+            os: ubuntu-24.04
+            architecture: x64
+          - name: Linux arm64
+            artifact: linux-arm64
+            os: ubuntu-24.04-arm
+            architecture: arm64
+
+    steps:
+      - name: Check out repository
+        uses: actions/checkout@v6
+
+      - name: Install build dependencies
+        run: |
+          apt-get update
+          apt-get install -y curl xz-utils pkg-config python3 make g++ zlib1g-dev libx11-dev libxtst-dev
+
+      - name: Build static libpng
+        shell: bash
+        run: |
+          archive="$RUNNER_TEMP/libpng-$LIBPNG_VERSION.tar.xz"
+          prefix="$RUNNER_TEMP/libpng"
+          curl --fail --location --retry 3 "$LIBPNG_URL" --output "$archive"
+          echo "$LIBPNG_SHA256  $archive" | sha256sum --check -
+          tar -xf "$archive" -C "$RUNNER_TEMP"
+          cd "$RUNNER_TEMP/libpng-$LIBPNG_VERSION"
+          CFLAGS="-O2 -fPIC" ./configure --prefix="$prefix" --disable-shared --enable-static
+          make -j"$(nproc)"
+          make install
+          echo "PKG_CONFIG_PATH=$prefix/lib/pkgconfig" >> "$GITHUB_ENV"
+          echo "ROBOTJS_PNG_STATIC=1" >> "$GITHUB_ENV"
+
+      - name: Install package dependencies
+        run: npm ci --ignore-scripts
+
+      - name: Build glibc N-API prebuild
+        run: npm run build:prebuild -- --tag-libc
+
+      - name: Test prebuild on Node.js 24
+        env:
+          PREBUILDS_ONLY: "1"
+        run: npx jasmine test/image.js
+
+      - name: Set up Node.js 25
+        uses: actions/setup-node@v6
+        with:
+          node-version: "25"
+          architecture: ${{ matrix.architecture }}
+
+      - name: Load prebuild on Node.js 25
+        env:
+          PREBUILDS_ONLY: "1"
+        run: node -e "const robot = require('.'); if (!robot.image.supportsPNG) throw new Error('PNG support is disabled')"
+
+      - name: Upload prebuild
+        uses: actions/upload-artifact@v6
+        with:
+          name: ${{ matrix.artifact }}
+          path: prebuilds/${{ matrix.artifact }}/
+          if-no-files-found: error
+          retention-days: 1
+
+  build-native:
+    name: ${{ matrix.name }}
+    runs-on: ${{ matrix.os }}
+    timeout-minutes: 30
+    env:
+      ROBOTJS_ENABLE_PNG: "1"
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - name: macOS x64
+            artifact: darwin-x64
+            os: macos-15-intel
+            architecture: x64
+            deployment-target: "10.15"
+          - name: macOS arm64
+            artifact: darwin-arm64
+            os: macos-15
+            architecture: arm64
+            deployment-target: "11.0"
+          - name: Windows x64
+            artifact: win32-x64
+            os: windows-2022
+            architecture: x64
+          - name: Windows arm64
+            artifact: win32-arm64
+            os: windows-11-arm
+            architecture: arm64
+
+    steps:
+      - name: Check out repository
+        uses: actions/checkout@v6
+
+      - name: Set up Node.js
+        uses: actions/setup-node@v6
+        with:
+          node-version: "24"
+          architecture: ${{ matrix.architecture }}
+          cache: npm
+
+      - name: Set up Python
+        uses: actions/setup-python@v6
+        with:
+          python-version: "3.x"
+
+      - name: Install macOS build dependencies
+        if: runner.os == 'macOS'
+        run: brew install pkg-config
+
+      - name: Build static libpng on macOS
+        if: runner.os == 'macOS'
+        shell: bash
+        run: |
+          archive="$RUNNER_TEMP/libpng-$LIBPNG_VERSION.tar.xz"
+          prefix="$RUNNER_TEMP/libpng"
+          curl --fail --location --retry 3 "$LIBPNG_URL" --output "$archive"
+          echo "$LIBPNG_SHA256  $archive" | shasum -a 256 --check -
+          tar -xf "$archive" -C "$RUNNER_TEMP"
+          cd "$RUNNER_TEMP/libpng-$LIBPNG_VERSION"
+          export MACOSX_DEPLOYMENT_TARGET="${{ matrix.deployment-target }}"
+          ./configure --prefix="$prefix" --disable-shared --enable-static
+          make -j"$(sysctl -n hw.ncpu)"
+          make install
+          echo "PKG_CONFIG_PATH=$prefix/lib/pkgconfig" >> "$GITHUB_ENV"
+          echo "ROBOTJS_PNG_STATIC=1" >> "$GITHUB_ENV"
+
+      - name: Install package dependencies
+        run: npm ci --ignore-scripts
+
+      - name: Build N-API prebuild
+        run: npm run build:prebuild
+
+      - name: Test prebuild on Node.js 24
+        env:
+          PREBUILDS_ONLY: "1"
+        run: npx jasmine test/image.js
+
+      - name: Set up Node.js 25
+        uses: actions/setup-node@v6
+        with:
+          node-version: "25"
+          architecture: ${{ matrix.architecture }}
+
+      - name: Load prebuild on Node.js 25
+        env:
+          PREBUILDS_ONLY: "1"
+        run: node -e "const robot = require('.'); if (!robot.image.supportsPNG) throw new Error('PNG support is disabled')"
+
+      - name: Upload prebuild
+        uses: actions/upload-artifact@v6
+        with:
+          name: ${{ matrix.artifact }}
+          path: prebuilds/${{ matrix.artifact }}/
+          if-no-files-found: error
+          retention-days: 1
+
+  package:
+    name: Package
+    needs: [build-linux, build-native]
+    runs-on: ubuntu-24.04
+    timeout-minutes: 15
+
+    steps:
+      - name: Check out repository
+        uses: actions/checkout@v6
+
+      - name: Set up Node.js
+        uses: actions/setup-node@v6
+        with:
+          node-version: "24"
+          cache: npm
+
+      - name: Install package dependencies
+        run: npm ci --ignore-scripts
+
+      - name: Download prebuilds
+        uses: actions/download-artifact@v7
+        with:
+          path: prebuilds
+
+      - name: Verify release tag
+        if: startsWith(github.ref, 'refs/tags/v')
+        run: node -e "const pkg = require('./package.json'); if ('v' + pkg.version !== process.env.GITHUB_REF_NAME) throw new Error('Tag does not match package version')"
+
+      - name: Pack npm artifact
+        run: npm pack
+
+      - name: Verify install without lifecycle scripts
+        shell: bash
+        run: |
+          mkdir package-smoke
+          cd package-smoke
+          npm init --yes
+          npm install --ignore-scripts ../robotjs-*.tgz
+          PREBUILDS_ONLY=1 node -e "const robot = require('robotjs'); if (!robot.image.supportsPNG) throw new Error('PNG support is disabled')"
+
+      - name: Upload npm artifact
+        uses: actions/upload-artifact@v6
+        with:
+          name: npm-package
+          path: robotjs-*.tgz
+          if-no-files-found: error

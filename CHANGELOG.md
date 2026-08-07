@@ -1,3 +1,9 @@
+## 0.9.1 (2026-08-01)
+
+* feat: Enable PNG image I/O on Windows.
+* build: Package PNG-enabled Node-API prebuilds with GitHub Actions.
+
+
 ## 0.9.0 (2026-08-01)
 
 * feat: Add macOS Accessibility and Screen Recording permission APIs.
