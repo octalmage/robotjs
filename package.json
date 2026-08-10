@@ -18,6 +18,7 @@
     "test": "jasmine \"test/**/*.js\"",
     "install": "node-gyp-build",
     "build:prebuild": "prebuildify --napi --name node.napi --strip",
+    "build:prebuild-universal": "prebuildify --napi --name node.napi --strip --arch x64+arm64",
     "verify-prebuilds": "node scripts/verify-prebuilds.js",
     "prepack": "npm run verify-prebuilds",
     "build": "node-gyp rebuild"

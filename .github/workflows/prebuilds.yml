@@ -100,13 +100,8 @@ jobs:
       fail-fast: false
       matrix:
         include:
-          - name: macOS x64
-            artifact: darwin-x64
-            os: macos-15-intel
-            architecture: x64
-            deployment-target: "10.15"
           - name: macOS arm64
-            artifact: darwin-arm64
+            artifact: darwin-x64+arm64
             os: macos-15
             architecture: arm64
             deployment-target: "11.0"
@@ -150,7 +145,7 @@ jobs:
           tar -xf "$archive" -C "$RUNNER_TEMP"
           cd "$RUNNER_TEMP/libpng-$LIBPNG_VERSION"
           export MACOSX_DEPLOYMENT_TARGET="${{ matrix.deployment-target }}"
-          ./configure --prefix="$prefix" --disable-shared --enable-static
+          ./configure --prefix="$prefix" --disable-shared --enable-static CFLAGS="-arch x86_64 -arch arm64"
           make -j"$(sysctl -n hw.ncpu)"
           make install
           echo "PKG_CONFIG_PATH=$prefix/lib/pkgconfig" >> "$GITHUB_ENV"
@@ -160,7 +155,12 @@ jobs:
         run: npm ci --ignore-scripts
 
       - name: Build N-API prebuild
+        if: runner.os != 'macOS'
         run: npm run build:prebuild
+
+      - name: Build N-API prebuild
+        if: runner.os == 'macOS'
+        run: npm run build:prebuild-universal
 
       - name: Test prebuild on Node.js 24
         env:
