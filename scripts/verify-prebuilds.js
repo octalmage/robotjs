@@ -4,8 +4,7 @@ const fs = require('fs');
 const path = require('path');
 
 const expected = [
-    'darwin-arm64/node.napi.node',
-    'darwin-x64/node.napi.node',
+    'darwin-x64+arm64/node.napi.node',
     'linux-arm64/node.napi.glibc.node',
     'linux-x64/node.napi.glibc.node',
     'win32-arm64/node.napi.node',
